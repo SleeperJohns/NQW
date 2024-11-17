@@ -1,0 +1,156 @@
+./progs.dat
+
+#pragma flag enable lax // Remove this line once you've fixed up any decompiler bugs...
+#pragma warning disable F314
+#pragma warning disable F326
+// #pragma target fte
+
+// Enables experimental coop respawn behaviour: items respawn <num_players> times so all players have a chance to pick them up
+#define COOP_RESPAWN_ITEMS_FOR_PLAYERS
+#define MONSTERS_AWARE_OF_CONTENTS // Enables monsters being aware of being in dangerous liquids
+#define ALLOW_DELAYED_THINK_CANCEL // Makes it so that killing an entity that has a delayed trigger behaviour while the delay is pending also cancels the delayed trigger
+#define RANDOMCUSTOMCOOPMAPS
+#pragma warning disable F301
+#pragma warning disable F312
+#define SSQC
+// #define CSQC
+
+sysdefs.qc
+nqw_fteextensions.qc
+hipdefs.qc   			// Hipnotic: JIM
+defs.qc
+nqwdefs.qc			// NQW
+nqw_rulesets.qc
+teamplay.qc			// ROGUE: ZOID - teamplay stuff
+runes.qc
+maparrays.qc
+// fteextensions.qc		// Sleeper: Replaced with nqw_fteextensions. I'm only taking what I need.
+vote.qc				// NQW
+math.qc
+subs.qc
+frametick.qc
+aliases.qc
+motd.qc
+fight.qc
+ai.qc
+combat.qc
+items.qc
+items_runes.qc 
+grapple.qc			// NQW: Not yet (This is from ROGUE, need to make a new weapons field to get up to 24 weapons working)
+// hook.qc
+nqw_qstats.qc
+/* frik0.qc */ 			// NQW: Replaced by nqw_qstats.qc
+weapons.qc
+fog.qc // Fog controls
+config.qc
+world.qc
+nqw_sleepermustdie.qc
+nqwcharcs.qc
+nqw_dm_enhancements.qc
+client.qc
+nqwranger.qc
+nqwvenom.qc
+nqwdoom.qc
+nqwsleeper.qc
+nqwscalebearer.qc
+nqwsorlag.qc
+player.qc
+nqwcaleb.qc
+nqwduke.qc
+nqwduskdude.qc
+monsters.qc
+doors.qc
+buttons.qc
+triggers.qc
+plats.qc
+misc.qc
+func_bob.qc
+lights.qc
+rotate.qc
+func_toss.qc
+
+cutmonsterstuff.qc 		// NQW: Cut monster content
+
+ogre.qc
+demon.qc
+shambler.qc
+knight.qc
+soldier.qc
+wizard.qc
+dog.qc
+zombie.qc
+boss.qc
+
+tarbaby.qc			// Registered
+hknight.qc			// Registered
+fish.qc				// Registered
+shalrath.qc			// Registered
+enforcer.qc			// Registered
+shub.qc				// Registered
+
+vomitus.qc			// NQW: Restored cut enemy (As vanilla as possible)
+
+
+// Hipnotic Quake additions ======================================
+hipsubs.qc
+hip_brk.qc
+hiptrain.qc
+hip_expl.qc
+hipquake.qc
+hipcount.qc
+hipitems.qc
+hiprubbl.qc
+hip_push.qc
+hip_part.qc
+hipspawn.qc
+hipgrem.qc			// Scourge Of Armagon monster
+hiparma.qc			// Scourge Of Armagon monster
+hipspike.qc			// Scourge Of Armagon monster
+hiprot.qc
+hipscrge.qc			// Scourge Of Armagon monster
+hipholes.qc
+/* hipspr.qc */			// Scourge Of Armagon sprites
+hipclock.qc
+hiptrig.qc
+hipmisc.qc
+hipwater.qc
+hipdecoy.qc			// Scourge Of Armagon dummy
+// Rogue Quake additions =========================================
+new_ai.qc
+eel.qc				// Dissolution Of Eternity monster
+invis_sw.qc			// Dissolution Of Eternity monster
+newitems.qc
+newplats.qc
+newmisc.qc
+elevatr.qc
+pendulum.qc
+lightnin.qc
+wrath.qc			// Dissolution Of Eternity monster
+shield.qc
+lava_wpn.qc
+mult_wpn.qc
+dragon.qc			// Dissolution Of Eternity monster
+s_wrath.qc
+random.qc
+earthq.qc
+lavaman.qc			// Dissolution Of Eternity monster
+sphere.qc
+buzzsaw.qc
+// dmatch.qc
+morph.qc			// Dissolution Of Eternity monster
+
+ending.qc
+mummy.qc			// Dissolution Of Eternity monster	
+timemach.qc
+// ===============================================================
+
+misc_corpses.qc // Corpses yay
+misc_fx.qc // Adds screenshake
+misc_model.qc // Generic static and animated model
+
+// Map specific code? Why not..
+mge2m2.qc
+hub.qc
+
+horde.qc // Yoder readded Sept 24, 2021
+nqwannouncer.qc
