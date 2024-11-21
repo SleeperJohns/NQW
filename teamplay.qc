@@ -117,7 +117,7 @@ string(float Team) GetTeamColor =
 
 string(float Team) GetCTFTeam =
 {
-	if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF) // Playing with Teammates
+	if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop")) // Playing with Teammates
 	{
 		     if (Team == TEAM1) return "RED";
 		else if (Team == TEAM2) return "BLUE";
@@ -370,7 +370,7 @@ Return TRUE if the indicated color is legal
 float(float color) TeamColorIsLegal =
 {
 	// All colors are legal if deathmatch is not team based
-	if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF)
+	if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop"))
 	{
 		if (color == TEAM1 || color == TEAM2) return TRUE;
 		else return FALSE;
@@ -415,7 +415,7 @@ float(float color) TeamColorIsLegal =
 */
 void() TeamSetSkin =
 {
-	if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF)
+	if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop"))
 	{
 		if (self.team == TEAM1)
 		{
@@ -455,7 +455,7 @@ void() TeamCheckTeam =
 	local float t;
 	local string n; 
 
-	if ((cvar("coop") && !cvar("deathmatch")) || (self.steam >= 0) || (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF)) 
+	if ((cvar("coop") && !cvar("deathmatch")) || (self.steam >= 0) || (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)) 
 	{
 		if (TeamColorIsLegal(self.steam)) 
 		{
@@ -475,7 +475,7 @@ void() TeamCheckTeam =
 	{
 		if (p != self) 
 		{
-			if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF)
+			if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop"))
 			{
 				     if (p.steam == TEAM1) team1count += 1;
 				else if (p.steam == TEAM2) team2count += 1;
@@ -496,7 +496,7 @@ void() TeamCheckTeam =
 		t = teamcoopcount;
 	}
 		
-	if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF)
+	if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop"))
 	{
 		// Find the team with the least players.
 		newcolor = TEAM1;
@@ -527,7 +527,7 @@ void() TeamCheckTeam =
 		self.team = newcolor;
 	}	
 		
-	if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF)
+	if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop"))
 	{
 		self.ctf_flags |= CTF_FLAG_STUFF_COLOR;
 		n = GetCTFTeam (newcolor);	
@@ -589,7 +589,7 @@ void() TeamCheckLock =
 				// changing teams sucks, warning him
 				// if he has tried to change teams several
 				// times, kick him off the server.
-				if ((cvar("coop") && !cvar("deathmatch")) || (cvar("deathmatch") == DM_DUEL || cvar("deathmatch") == DM_FFA))
+				if ((cvar("coop")) || (cvar("deathmatch") == DM_DUEL || cvar("deathmatch") == DM_FFA))
 				{
 					stuffcmd (self, "color 1 6\n");		
 					self.steam = self.team; // Sleeper: Not sure why flipping it this way prevents a spam in developer mode, but okay.
@@ -633,7 +633,7 @@ void() TeamCheckLock =
 			if (self.ctf_killed != 1) self.ctf_killed = 2;
 			T_Damage(self, self, self, 1000);  // Kill the player
 		}
-		if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF) self.frags = 0;                 // Zero out frags
+		if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop")) self.frags = 0;                 // Zero out frags
 		TeamCheckTeam(); // Re-assignment
 	}
 };
@@ -1113,7 +1113,7 @@ void() Team_weapon_touch =
 	if (!(other.flags & FL_CLIENT)) return;
 	
 	// Don't let the owner pick up his own weapon for a second.
-	if ((cvar("deathmatch") && !cvar("coop")) || (cvar("coop") != CLASSIC_COOP && !cvar("deathmatch")))
+	if ((cvar("deathmatch")) || (cvar("coop") != CLASSIC_COOP))
 	{
 		if ((other == self.owner) && ((self.nextthink - time) > 19)) return;
 	}
@@ -1482,6 +1482,7 @@ void() TeamFlagTouch =
 
 	if (other.classname != "player") return;
 	if (other.health <= 0) return;
+	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;	
 
 //	if (other.team != other.steam) return; // something is fishy, somebody is playing with colors
 
@@ -2369,7 +2370,7 @@ Only appears in CTF teamplay
 */
 void() func_ctf_wall =
 {
-	if (deathmatch == DM_TDM || deathmatch == DM_CTF || deathmatch == DM_OneFlagCTF) 
+	if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF && !coop)
 	{
 		self.angles = '0 0 0';
 		self.movetype = MOVETYPE_PUSH;	// So it doesn't get pushed by anything.

@@ -59,16 +59,18 @@ just constant angles.
 */
 void() SetMovedir =
 {			  		  
-	// MG1 -----------------------
+	// MG1 ---------------------
 	if (self.movedir)
 	{
 		self.angles = '0 0 0';
 		return;
 	}
-	// ---------------------------
+	// -------------------------
 
-	if (self.angles == '0 -1 0') self.movedir = '0 0 1';
-	else if (self.angles == '0 -2 0') self.movedir = '0 0 -1';
+	if (self.angles == '0 -1 0')
+		self.movedir = '0 0 1';
+	else if (self.angles == '0 -2 0')
+		self.movedir = '0 0 -1';
 	else
 	{
 		makevectors (self.angles);
@@ -85,16 +87,15 @@ Removes self if COOP_ONLY spawnflag is set and we're not in coop.
 Returns TRUE if it was removed.
 ================
 */
-float() RemovedOutsideCoop =
+float RemovedOutsideCoop()
 {
 	if (!coop && (self.spawnflags & COOP_ONLY))
 	{
-		remove (self);
+		remove(self);
 		return TRUE;
 	}
-	
 	return FALSE;
-};
+}
 
 /*
 ================
@@ -107,8 +108,8 @@ void() InitTrigger =
 // to mean no restrictions, so use a yaw of 360 instead.
 	if (RemovedOutsideCoop()) return; // MG1
 	
-	if (self.angles != '0 0 0') SetMovedir ();
-		
+	if (self.angles != '0 0 0')
+		SetMovedir ();
 	self.solid = SOLID_TRIGGER;
 	setmodel (self, self.model);	// set size and link into world
 	self.movetype = MOVETYPE_NONE;
@@ -184,11 +185,11 @@ After moving, set origin to exact final destination
 */
 void()  SUB_CalcMoveDone =
 {
-	setorigin (self, self.finaldest);
+	setorigin(self, self.finaldest);
 	self.velocity = '0 0 0';
 	self.nextthink = -1;
-	
-	if (self.think1) self.think1 ();
+	if (self.think1)
+		self.think1();
 };
 
 
@@ -406,7 +407,8 @@ void() SUB_UseTargets =
 		if (!self.noise) sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);	
 		if (self.special_noise) // NQW
 		{
-			if (self.special_spawned_pickup_sound == 1) sound (activator, CHAN_VOICE, "misc/secret.wav", 1, ATTN_NORM);
+			if (self.special_spawned_pickup_sound == 1) 
+				sound (activator, CHAN_VOICE, "misc/secret.wav", 1, ATTN_NORM);
 			else sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);					
 		}					
 	}

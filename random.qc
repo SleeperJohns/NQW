@@ -92,10 +92,11 @@ The Random Box!
 Contains a random powerup.
 */
 void() item_random_powerup =
-{	
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL || deathmatch == DM_DISABLED)
+{
+	// Duels normally don't have powerups	
+	if (cvar("instagib") || deathmatch == DM_DUEL || deathmatch == DM_DISABLED)
 	{
-		remove (self);
+		remove(self);
 		return;
 	}
 	

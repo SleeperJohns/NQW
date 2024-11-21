@@ -29,7 +29,6 @@ void (entity targ, entity inflictor, entity attacker, float damage) T_Damage;
 void () player_run;
 // void(entity bomb, entity attacker, float rad, entity ignore) T_RadiusDamage;
 void(entity inflictor, entity attacker, float damage, entity ignore, string dtype) T_RadiusDamage;
-
 void(vector org, vector vel, float damage) SpawnBlood;
 void() SuperDamageSound;
 
@@ -96,8 +95,8 @@ void() HIP_LaserTouch =
 		r = random ();
 		sound (self, CHAN_WEAPON, "hipweap/laserric.wav", 1, ATTN_STATIC);
 /*
-		if (r < 0.33) sound (self, CHAN_WEAPON, "weapons/ric1.wav", 1, ATTN_STATIC);
-		else if (r < 0.66) sound (self, CHAN_WEAPON, "weapons/ric2.wav", 1, ATTN_STATIC);
+		if (r<0.33) sound (self, CHAN_WEAPON, "weapons/ric1.wav", 1, ATTN_STATIC);
+		else if (r<0.66) sound (self, CHAN_WEAPON, "weapons/ric2.wav", 1, ATTN_STATIC);
 		else sound (self, CHAN_WEAPON, "weapons/ric3.wav", 1, ATTN_STATIC);
 */
 		return;
@@ -540,7 +539,7 @@ void() HIP_FireMjolnirLightning =
 		UpdateAmmoCounts(self);
 		discharged = 1;
 //		T_RadiusDamage (self, self, 35*cells, world);
-		T_RadiusDamage (self, self, 35*cells, world, "");
+		T_RadiusDamage (self, self, 35 * cells, world, "");
 		// Sleeper: Emulate self discharge in co-op even if we've completely disabled friendly fire and self-damage.
 		if (teamplay == 1 && coop == 1)
 		{
@@ -757,10 +756,10 @@ void() W_FireAxe =
 
 	makevectors (self.v_angle);
 	source = self.origin + '0 0 16';
-	traceline (source, source + v_forward * 64, FALSE, self);
+	traceline (source, source + v_forward*64, FALSE, self);
 	if (trace_fraction == 1.0) return;
 
-	org = trace_endpos - v_forward * 4;
+	org = trace_endpos - v_forward*4;
 
 	if (trace_ent.takedamage)
 	{
@@ -857,7 +856,7 @@ spawn_touchblood
 */
 void(float damage) spawn_touchblood =
 {
-	local vector vel = wall_velocity() * 0.2;
+	local vector vel = wall_velocity () * 0.2;
 	SpawnBlood (self.origin + vel * 0.01, vel, damage);
 };
 
@@ -879,8 +878,8 @@ Collects multiple small damages into a single damage
 ==============================================================================
 */
 
-entity multi_ent;
-float  multi_damage;
+entity	multi_ent;
+float	multi_damage;
 
 void() ClearMultiDamage =
 {
@@ -904,7 +903,7 @@ void(entity hit, float damage) AddMultiDamage =
 		multi_damage = damage;
 		multi_ent = hit;
 	}
-	else multi_damage += damage;
+	else multi_damage = multi_damage + damage;
 };
 
 /*
@@ -922,11 +921,11 @@ TraceAttack
 */
 void(float damage, vector dir) TraceAttack =
 {
-	local vector vel, org;
+	local	vector	vel, org;
 
-	vel = normalize(dir + v_up * crandom() + v_right * crandom());
-	vel += 2 * trace_plane_normal;
-	vel *= 200;
+	vel = normalize (dir + v_up * crandom() + v_right * crandom());
+	vel = vel + 2 * trace_plane_normal;
+	vel = vel * 200;
 
 	org = trace_endpos - dir * 4;
 
@@ -966,7 +965,6 @@ void(float damage, vector dir) TraceAttack =
 	}
 };
 
-/*
 void() FireSlug =
 {
 	makevectors(self.v_angle);
@@ -993,8 +991,8 @@ void() FireSlug =
 		if (trace_ent.classname == "player") damg = 80;
 		else damg = 125 + random() * 25;
 
-//		if (!cvar("instagib"))
-//		{
+		if (!cvar("instagib"))
+		{
 			if (trace_ent.classname == "trap_spike_mine")
 			{
 				if (cvar("skill") == 5) T_Damage (victim, self, self, damg * 0.25); // ~75% immunity to Slugs (Emulate 800 health)
@@ -1003,8 +1001,8 @@ void() FireSlug =
 			}
 			else if (trace_ent.classname == "monster_shambler") T_Damage (victim, self, self, damg * 0.5);
 			else T_Damage (victim, self, self, damg);
-//		}
-//		else T_Damage (victim, self, self, 50000);
+		}
+		else T_Damage (victim, self, self, 50000);
 		SpawnBlood (endpos, pl_v_forward * 300, 80);
 
 		// Sleeper: Don't pierce through secret doors.
@@ -1043,7 +1041,6 @@ void() W_FireCoilgun =
 	dir = aim (self, 100000);
 	FireSlug ();
 };
-*/
 
 /*
 ================
@@ -1055,8 +1052,8 @@ Go to the trouble of combining multiple pellets into a single damage call.
 */
 void(float shotcount, vector dir, vector spread) FireBullets =
 {
-	local vector direction;
-	local vector src;
+	local	vector direction;
+	local	vector	src;
 	//JIM
 	local float bullet = 0;
 
@@ -1077,7 +1074,9 @@ void(float shotcount, vector dir, vector spread) FireBullets =
 			TraceAttack (4, direction);
 			
 			// Sleeper: Only make bullet hole sprites on walls if game world is hipnotic
-			if (gameworld == HIPNOTIC)
+			if (mapname == "hipstart" || mapname == "hip1m1" || mapname == "hip1m2" || mapname == "hip1m3" || mapname == "hip1m4" || mapname == "hip1m5" ||
+			mapname == "hip2m1" || mapname == "hip2m2" || mapname == "hip2m3" || mapname == "hip2m4" || mapname == "hip2m5" || mapname == "hip2m6" ||
+			mapname == "hip3m1" || mapname == "hip3m2" || mapname == "hip3m3" || mapname == "hip3m4" || mapname == "hipend" || mapname == "hipdm1")
 			{	
 				if ((!bullet) && (trace_ent == world))
 				{
@@ -1086,7 +1085,7 @@ void(float shotcount, vector dir, vector spread) FireBullets =
 				}
 			}
 		}
-		shotcount -= 1;
+		shotcount = shotcount - 1;
 	}
 	ApplyMultiDamage ();	
 };
@@ -1109,6 +1108,7 @@ void() W_FireShotgun =
 	dir = aim (self, 100000);
 	FireBullets (6, dir, '0.04 0.04 0');
 };
+
 
 /*
 ================
@@ -1349,32 +1349,29 @@ void(vector p1, vector p2, entity from, float damage) LightningDamage =
 		{
 			if (cvar("skill") == 5)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage * 4);
+				particle (trace_endpos, '0 0 100', 225, damage*4);
 				T_Damage (trace_ent, from, from, damage * 0.25); // ~75% immunity to the Lightning Gun (Emulate 800 Health)
 			}
 			else if (cvar("skill") >= 1 && cvar("skill") <= 4)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage * 4);
+				particle (trace_endpos, '0 0 100', 225, damage*4);
 				T_Damage (trace_ent, from, from, damage * 0.5); // ~50% immunity to the Lightning Gun (Emulate 400 Health)
 			}
 			else if (cvar("skill") == 0)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage * 4);
+				particle (trace_endpos, '0 0 100', 225, damage*4);
 				T_Damage (trace_ent, from, from, damage); // 0% immunity to the Lightning Gun (Emulate 200 Health)
 			}
 		}
 		else
 		{
-			particle (trace_endpos, '0 0 100', 225, damage * 4);
+			particle (trace_endpos, '0 0 100', 225, damage*4);
 			T_Damage (trace_ent, from, from, damage);
 		}
-		
-		/*
 		if (self.classname == "player")
 		{
-			if (other.classname == "player") trace_ent.velocity_z += 400;
-		}	
-		*/	
+			if (other.classname == "player") trace_ent.velocity_z = trace_ent.velocity_z + 400;
+		}
 	}
 	e1 = trace_ent;
 
@@ -1389,9 +1386,9 @@ void(vector p1, vector p2, entity from, float damage) LightningDamage =
 
 	traceline (p1 - f, p2 - f, FALSE, self);
 //JIM
-	if (trace_ent != e1 && trace_ent != e2 && trace_ent.takedamage && !trace_ent.wetsuit_finished)
+	if (trace_ent != e1 && trace_ent != e2 && trace_ent.takedamage && !trace_ent.wetsuit_finished )
 	{
-		particle (trace_endpos, '0 0 100', 225, damage * 4);
+		particle (trace_endpos, '0 0 100', 225, damage*4);
 		T_Damage (trace_ent, from, from, damage);
 	}
 };
@@ -1707,7 +1704,7 @@ void() W_FireGrenade =
 
 void() ProximityExplode =
 {
-//	T_RadiusDamage (self, self.owner, 95, world);
+ //  T_RadiusDamage (self, self.owner, 95, world);
 	T_RadiusDamage (self, self.owner, 95, world, "prox_mine");	// QIP
 
 	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
@@ -1924,7 +1921,7 @@ void(vector org, vector dir) launch_spike =
 	newmis.solid = SOLID_BBOX;
 
 	newmis.angles = vectoangles(dir);
-	
+
 	newmis.touch = spike_touch;
 	newmis.classname = "spike";
 	newmis.think = SUB_Remove;
@@ -1965,7 +1962,7 @@ void() W_FireSuperSpikes =
 	self.currentammo = self.ammo_nails1 = self.ammo_nails1 - 2;
 	UpdateAmmoCounts(self);
 	dir = aim (self, 1000);
-	launch_super_spike (self.origin + '0 0 16', dir);
+	launch_spike (self.origin + '0 0 16', dir);
 	newmis.touch = superspike_touch;
 	setmodel (newmis, "progs/s_spike.mdl");
 	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);
@@ -2120,6 +2117,7 @@ void() superspike_touch =
 
 };
 
+
 /*
 ===============================================================================
 
@@ -2134,7 +2132,7 @@ void() W_SetCurrentAmmo =
 	player_run ();		// get out of any weapon firing states
 
 	self.items -= self.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS);
-	self.expansionitems -= self.expansionitems & (DOE_LAVA_NAILS | DOE_PLASMA_AMMO | DOE_MULTI_ROCKETS/* | NQW_IT_SLUGS*/);	
+	self.expansionitems -= self.expansionitems & (DOE_LAVA_NAILS | DOE_PLASMA_AMMO | DOE_MULTI_ROCKETS | NQW_IT_SLUGS);	
 
 	if (self.weapon == IT_AXE)
 	{
@@ -2215,7 +2213,7 @@ void() W_SetCurrentAmmo =
 		self.weaponframe = 0;
 		self.items |= IT_NAILS;
 	}
-// MED  // HIPNOTIC ------------------------------------
+// MED   // HIPNOTIC ------------------------------------
 	else if (self.weapon == IT_LASER_CANNON)
 	{
 		self.currentammo = self.ammo_cells1;
@@ -2253,6 +2251,7 @@ void() W_SetCurrentAmmo =
 		self.weaponframe = 0;
 		self.items |= IT_CELLS;
 	}
+// MED
 	else if (self.weapon == IT_PROXIMITY_GUN)
 	{
 		self.currentammo = self.ammo_rockets1;
@@ -2261,15 +2260,13 @@ void() W_SetCurrentAmmo =
 		self.items |= IT_ROCKETS;
 	}
 	// -------------------------------------------
-	/*
 	else if (self.weapon == NQW_IT_COILGUN)
 	{
 		self.currentammo = self.ammo_slugs;
 		self.weaponmodel = "progs/v_coilgun.mdl";
 		self.weaponframe = 0;
 		self.expansionitems |= NQW_IT_SLUGS;
-	}
-	*/
+	}	
 	else
 	{
 		self.currentammo = 0;
@@ -2292,7 +2289,7 @@ float() W_BestWeapon =
 //	if (self.waterlevel <= 1 && self.ammo_plasma >= 1 && (it & IT_PLASMA_GUN))
 //		return IT_PLASMA_GUN;
 //	else 
-	if (self.waterlevel <= 1 && self.ammo_cells1 >= 1 && (it & IT_LIGHTNING)) return IT_LIGHTNING;
+	if (self.waterlevel <=1 && self.ammo_cells1>=1 && (it & IT_LIGHTNING)) return IT_LIGHTNING;
 	else if (self.ammo_cells1 >= 1 && (it & IT_LASER_CANNON)) return IT_LASER_CANNON;			
 	else if (self.ammo_lava_nails >= 2 && (it & DOE_LAVA_SUPER_NAILGUN)) return DOE_LAVA_SUPER_NAILGUN;
 	else if (self.ammo_nails1 >= 2 && (it & IT_SUPER_NAILGUN)) return IT_SUPER_NAILGUN;
@@ -2301,7 +2298,7 @@ float() W_BestWeapon =
 	else if (self.ammo_shells1 >= 2 && (it & IT_SUPER_SHOTGUN)) return IT_SUPER_SHOTGUN;
 	else if (self.ammo_shells1 >= 1 && (it & IT_SHOTGUN)) return IT_SHOTGUN;
 	else if (it & IT_MJOLNIR) return IT_MJOLNIR;
-//	else if (self.ammo_slugs >= 1 && (it & NQW_IT_SLUGS)) return NQW_IT_COILGUN;
+	else if (self.ammo_slugs >= 1 && (it & NQW_IT_SLUGS)) return NQW_IT_COILGUN;
 			
 	return IT_AXE;
 };
@@ -2460,14 +2457,13 @@ void() W_Attack =
 		W_FireProximityGrenade ();
 		self.attack_finished = time + RuneApplyHell(0.6, self);
 	}
-	/*else if (self.weapon == NQW_IT_COILGUN)
+	else if (self.weapon == NQW_IT_COILGUN)
 	{
 		player_rocket1();
 		W_FireCoilgun ();
 		if (cvar("instagib") == 2) self.attack_finished = time + RuneApplyHell(1.1, self);
 		else self.attack_finished = time + RuneApplyHell(2, self);
-	}*/
-	
+	}	
 	else return;
 };
 
@@ -2753,13 +2749,12 @@ void() W_ChangeWeapon =
 	{
 		new = IT_GRENADE_LAUNCHER;
 		if (self.ammo_cells1 < 1) noammo = 1;
-	}/*
+	}
 	else if (self.impulse == 229)
 	{
 		new = NQW_IT_COILGUN;
 		if (self.ammo_slugs < 1) noammo = 1;
-	}*/
-	
+	}	
 	
 	self.impulse = 0;
 	
@@ -2823,12 +2818,11 @@ void() CheatCommand =
 	self.ammo_lava_nails    = 200;
 	self.ammo_multi_rockets = 100;
 	self.ammo_plasma 	= 100;	
-	self.ammo_slugs		= 100;
-	
+	self.ammo_slugs	        = 100;
 //	self.armorvalue 	= 200;		
 //	self.items   |= HUD_WEAPONS | IT_ARMOR3 | IT_KEY1 | IT_KEY2 | IT_INVULNERABILITY | IT_QUAD | IT_SUIT | IT_INVISIBILITY;
 	self.items   |= HUD_WEAPONS;			
-	self.weapons |= ALL_WEAPONS;				
+	self.weapons |= ALL_WEAPONS | NQW_IT_COILGUN;				
 	self.weapon   = IT_ROCKET_LAUNCHER;		       
 	self.impulse  = 0;
 	W_SetCurrentAmmo ();
@@ -2939,18 +2933,16 @@ void() CycleWeaponCommand =
 			self.weapon = IT_MJOLNIR;
 			if (self.ammo_cells1 < 1) noammo = TRUE;			
 		}		
-		else if (self.weapon == IT_MJOLNIR) self.weapon = IT_AXE;
-/*		else if (self.weapon == IT_MJOLNIR) 
+//		else if (self.weapon == IT_MJOLNIR) self.weapon = IT_AXE;
+		else if (self.weapon == IT_MJOLNIR) 
 		{	
 			self.weapon = NQW_IT_COILGUN;
 			if (self.ammo_slugs < 1) noammo = TRUE;
 		}
 		else if (self.weapon == NQW_IT_COILGUN) self.weapon = IT_AXE;
-		*/
-			
 		
-//		if ((weaps & self.weapon && !noammo) || loop > 18)
-		if ((weaps & self.weapon && !noammo) || loop > 17)
+		if ((weaps & self.weapon && !noammo) || loop > 18)		
+//		if ((weaps & self.weapon && !noammo) || loop > 17)
 		{
 			W_SetCurrentAmmo();			
 			return;
@@ -2983,7 +2975,7 @@ void() CycleWeaponReverseCommand =
 	while (TRUE)
 	{
 		noammo = FALSE;
-			
+		
 		if (self.weapon == IT_MJOLNIR)
 		{
 			self.weapon = IT_LASER_CANNON;
@@ -3056,13 +3048,13 @@ void() CycleWeaponReverseCommand =
 		}
 		else if (self.weapon == IT_SHOTGUN) self.weapon = DOE_GRAPPLE;
 		else if (self.weapon == DOE_GRAPPLE) self.weapon = IT_AXE;
-		else if (self.weapon == IT_AXE) self.weapon = IT_MJOLNIR;
+//		else if (self.weapon == IT_AXE) self.weapon = IT_MJOLNIR;
 
-/*		else if (self.weapon == IT_AXE) self.weapon = NQW_IT_COILGUN;
-		else if (self.weapon == NQW_IT_COILGUN) self.weapon = IT_MJOLNIR;*/
+		else if (self.weapon == IT_AXE) self.weapon = NQW_IT_COILGUN;
+		else if (self.weapon == NQW_IT_COILGUN) self.weapon = IT_MJOLNIR;
 				
-//		if ((weaps & self.weapon && !noammo) || loop > 18)
-		if ((weaps & self.weapon && !noammo) || loop > 17)
+		if ((weaps & self.weapon && !noammo) || loop > 18)
+//		if ((weaps & self.weapon && !noammo) || loop > 17)
 		{
 			W_SetCurrentAmmo();
 			return;
@@ -4541,11 +4533,11 @@ void() ImpulseCommands =
 	if (self.impulse >= 60 && self.impulse <= 68) W_ChangeWeapon ();
 	if (self.impulse == 22) W_ChangeWeapon (); // Sleeper: Grappling Hook (independant from the Axe)
 	if (self.impulse == 23) W_ChangeWeapon (); // Sleeper: Axe (independant from the grappling hook)					
-	// --------------------------------------------		
-	// Net QuakeWorld Weapons
-//	if (self.impulse == 229) W_ChangeWeapon ();
 	// --------------------------------------------	
-		
+	// Net QuakeWorld Weapons
+	if (self.impulse == 229) W_ChangeWeapon ();
+	// --------------------------------------------			
+	
 	if (self.impulse == 9) CheatCommand ();
 	if (self.impulse == 10) CycleWeaponCommand ();
 	if (self.impulse == 11) ServerflagsCommand ();
@@ -4618,7 +4610,7 @@ void() W_WeaponFrame =
 		self.lavaGunFired = 0;
 	}		
 
-	if (self.impulse) ImpulseCommands ();
+	ImpulseCommands ();
 
 // check for attack
 	if (self.button0)

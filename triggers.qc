@@ -66,15 +66,13 @@ void() multi_trigger =
 		msg_entity = self.enemy;
 	}
 
-	if (self.enemy.classname == "player" && world.model == "maps/hip3m1.bsp" && self.message == "YOU'RE NOT SUPPOSE TO BE HERE!") msg_entity = self.enemy;
-	
-	if (self.enemy.classname == "player" && self.message == "netname") 
+	if (self.enemy.classname == "player" && world.model == "maps/hip3m1.bsp" && self.message == "YOU'RE NOT SUPPOSE TO BE HERE!")
 	{
-		if (other.netname == "Sleeper" || other.netname == "sleeper" || other.netname == "Sleeper, Son Of Spyro" || other.netname == "sleeper, son of spyro" || other.netname == "Gold Reaper") self.message = "Sleeper, Son Of Spyro";
-		else self.message = other.netname;
+		msg_entity = self.enemy;
 	}
 
-	if (self.noise) sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+	if (self.noise)
+		sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 
 // don't trigger again until reset
 	self.takedamage = DAMAGE_NO;
@@ -95,17 +93,17 @@ void() multi_trigger =
 		self.nextthink = time + 0.1;
 		self.think = SUB_Remove;
 	}
-	//MED 12/01/96 added cnt stuff
-	if (self.cnt > 0)
-	{
-		self.cnt = self.cnt - 1;
-		if (self.cnt == 0)
-		{
-			self.touch = SUB_Null;
-			self.nextthink = time + 0.1;
-			self.think = SUB_Remove;
-		}
-	}
+//MED 12/01/96 added cnt stuff
+   if (self.cnt > 0)
+      {
+      self.cnt = self.cnt - 1;
+      if (self.cnt == 0)
+         {
+         self.touch = SUB_Null;
+         self.nextthink = time + 0.1;
+         self.think = SUB_Remove;
+         }
+      }
 };
 
 void() multi_killed =
@@ -183,7 +181,7 @@ void() trigger_multiple =
 	if (!self.wait)
 		self.wait = 0.2;
 	self.use = multi_use;
-	
+
 	InitTrigger ();
 
 	if (self.health)
@@ -222,7 +220,7 @@ set "message" to text string
 */
 void() trigger_once =
 {
-	self.wait = -1;	
+	self.wait = -1;
 	trigger_multiple();
 };
 
@@ -806,8 +804,6 @@ void() hurt_touch =
 		// allows for monster-only hurt volumes
 		if ((self.spawnflags & MONSTER_ONLY) && !(other.flags & FL_MONSTER))
 			return;
-			
-		if (gameworld == APOTHEOSIS && other.flags & FL_MONSTER) return;
 				
 		self.solid = SOLID_NOT;
 		T_Damage (other, self, self, self.dmg);

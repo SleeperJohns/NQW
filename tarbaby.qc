@@ -450,7 +450,7 @@ void() tbaby_birth =[ $fly1,  tbaby_fly2  ] {
 
 //=============================================================================
 void() tbaby_mitosis;
-entity() HordeFindTarget;
+
 void() tbaby_checknew =
 {
 	if (!walkmove(0,0))
@@ -459,8 +459,7 @@ void() tbaby_checknew =
 		return;
 	}
 	
-	if (cvar("horde")) self.enemy = HordeFindTarget ();
-	else self.enemy = self.enemy;
+	self.enemy = self.enemy;
 	self.th_stand = tbaby_stand1;
 	self.th_walk = tbaby_walk1;
 	self.th_run = tbaby_run1;
@@ -485,7 +484,7 @@ void() tbaby_checknew =
 	self.flags |= FL_MONSTER;
 	self.pausetime = 99999999;
 	self.th_stand ();
-	self.nextthink += random() * 0.5;
+	self.nextthink += random()*0.5;
 
 	total_monsters += 1;
   
@@ -509,17 +508,17 @@ void() tbaby_mitosis =
 		newSpawn.health = 80;	
 		if (self.skin == 1) newSpawn.health = 60;
 		else if (self.skin == 2) newSpawn.health = 100;
-		
+
 		newSpawn.owner = self;
 		self.th_pain = SUB_Null;		
 		setmodel (newSpawn, "progs/rogue_tarbaby.mdl");
 		newSpawn.solid = SOLID_SLIDEBOX;
 		newSpawn.skin = self.skin;
 		
-		setorigin (newSpawn, self.origin);           
+		setorigin (newSpawn, self.origin);              
 		newSpawn.think = tbaby_checknew;
 		newSpawn.nextthink = time + 0.5;
-	
+
 		sound (newSpawn, CHAN_VOICE, "blob/mytosis.wav", 1, ATTN_NORM);
 	}
 };
@@ -527,7 +526,12 @@ void() tbaby_mitosis =
 void() rogue_monster_tarbaby;
 
 void() monster_tarbaby =
-{					  
+{
+	
+	local float Rogue_GameWorld    = (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+					  mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+					  mapname == "ctf1");
+					  
 	local float     myRand;		// ROGUE; used for hellspawn chance
 	local float     skillLevel;
 	
@@ -563,7 +567,7 @@ void() monster_tarbaby =
 	}
 	else
 	{
-		if (gameworld == ROGUE)
+		if (Rogue_GameWorld)
 			rogue_monster_tarbaby();
 		else
 		{	
@@ -597,14 +601,16 @@ void() monster_tarbaby =
 			self.combat_style = CS_MELEE;
 
 			// ROGUE -------------------------------
-			if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+			if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+			mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "r2m8" || 
+			mapname == "ctf1")
 			{	
 				if (self.spawnflags & 8) 
 				{
 					self.th_pain = tbaby_mitosis;
 					self.skin = 2;
 					self.health = 100;
-					self.netname = "Death Spawn";
+					self.netname = "Hell Spawn";
 				}
 				else if (self.spawnflags & 4) 
 				{
@@ -629,7 +635,7 @@ void() monster_tarbaby =
 						self.th_pain = tbaby_mitosis;
 						self.skin = 2;
 						self.health = 100;
-						self.netname = "Death Spawn";
+						self.netname = "Hell Spawn";
 					}
 					else if (myRand > 0.5) 
 					{
@@ -648,7 +654,9 @@ void() monster_tarbaby =
 			self.max_health = self.health;
 			// -------------------------------------
 			
-			if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+			if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+			mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "r2m8" || 
+			mapname == "ctf1")
 				InitMonster("progs/rogue_tarbaby.mdl", MONSTER_TYPE_WALK, MONSTER_SIZE_SMALL);
 			else
 				InitMonster("progs/tarbaby.mdl", MONSTER_TYPE_WALK, MONSTER_SIZE_SMALL);
@@ -677,7 +685,9 @@ void() rogue_monster_tarbaby =
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 	
-	if (gameworld == ROGUE)
+	if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+	mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "r2m8" || 
+	mapname == "ctf1")
 		setmodel(self, "progs/rogue_tarbaby.mdl");
 	else
 		setmodel(self, "progs/tarbaby.mdl");
@@ -692,14 +702,16 @@ void() rogue_monster_tarbaby =
 	self.th_melee = tbaby_jump1;
 	self.th_die = tbaby_die1;
 	
-	if (gameworld == ROGUE)
+	if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+	mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "r2m8" || 
+	mapname == "ctf1")
 	{
 		if (self.spawnflags & 8)
 		{
 			self.th_pain = tbaby_mitosis;
 			self.skin = 2;
 			self.health = 100;
-			self.netname = "Death Spawn";
+			self.netname = "Hell Spawn";
 		}
 		else if (self.spawnflags & 4)
 		{
@@ -725,7 +737,7 @@ void() rogue_monster_tarbaby =
 			self.th_pain = tbaby_mitosis;
 			self.skin = 2;
 			self.health = 100;
-			self.netname = "Death Spawn";
+			self.netname = "Hell Spawn";
 		}
 		else if (myRand > 0.5)
 		{

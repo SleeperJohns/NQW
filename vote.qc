@@ -60,12 +60,14 @@ void() voteyes =
 			themap = "Capture The Flag";
 		else if (themap == "Gametype: One Flag CTF")
 			themap = "One Flag CTF";
-		/*else if (themap == "Gametype: Instagib Duel")
-			themap = "Instagib Duel";
 		else if (themap == "Gametype: Instagib Free For All")
 			themap = "Instagib Free For All";
 		else if (themap == "Gametype: Railwarz Free For All")
-			themap = "Railwarz Free For All";*/
+			themap = "Railwarz Free For All";
+		else if (themap	== "Gametype: Railwarz Capture The Flag")
+			themap = "Railwarz Capture The Flag";
+		else if (themap == "Gametype: Railwarz One Flag CTF")
+			themap = "Railwarz One Flag CTF";
 					
 		self.has_voted = 1;
 				
@@ -76,10 +78,11 @@ void() voteyes =
 			 themap == "Free For All" || 
 			 themap == "Team Deathmatch" || 
 			 themap == "Capture The Flag" || 
-			 themap == "One Flag CTF" /*||
-			 themap == "Instagib Duel" || 
+			 themap == "One Flag CTF" ||
 			 themap == "Instagib Free For All" || 
-			 themap == "Railwarz Free For All"*/)
+			 themap == "Railwarz Free For All" ||
+			 themap == "Railwarz Capture The Flag" ||
+			 themap == "Railwarz One Flag CTF")
 			bprint ("the Gametype ");
 		else bprint ("the Map ");	
 		bprint ("Vote\n");
@@ -107,12 +110,14 @@ void() voteyes =
 				Gametype_CTF_Settings ();
 			else if (themap == "One Flag CTF")
 				Gametype_OneFlagCTF_Settings ();
-//			else if (themap == "Instagib Duel")
-//				Gametype_Instagib_Duel_Settings ();
-//			else if (themap == "Instagib Free For All")
-//				Gametype_Instagib_FFA_Settings ();
-//			else if (themap == "Railwarz Free For All")
-//				Gametype_Railwarz_FFA_Settings ();
+			else if (themap == "Instagib Free For All")
+				Gametype_Instagib_FFA_Settings ();
+			else if (themap == "Railwarz Free For All")
+				Gametype_Railwarz_FFA_Settings ();
+			else if (themap == "Railwarz Capture The Flag")
+				Gametype_Railwarz_CTF_Settings ();
+			else if (themap == "Railwarz One Flag CTF")
+				Gametype_Railwarz_OneFlagCTF_Settings ();
 			else if (themap == "Quake: The Offering Campaign" ||
 			    themap == "Quake: Mission Pack #1: Scourge of Armagon Campaign" ||
 			    themap == "Quake: Mission Pack #2: Dissolution of Eternity Campaign" || 
@@ -130,10 +135,10 @@ void() voteyes =
 				 themap == "Free For All" ||
 				 themap == "Team Deathmatch" ||
 				 themap == "Capture The Flag" ||
-				 themap == "One Flag CTF" /* ||
-				 themap == "Instagib Duel" ||
+				 themap == "One Flag CTF" ||
 				 themap == "Instagib Free For All" ||
-				 themap == "Railwarz Free For All"*/)
+				 themap == "Railwarz Free For All" ||
+				 themap == "Railwarz Capture The Flag")
 				 bprint ("Gametype Vote Successful ");
 			
 			else bprint ("\nMap Vote Successful ");
@@ -150,10 +155,9 @@ void() voteyes =
 				 themap == "Free For All" ||
 				 themap == "Team Deathmatch" ||
 				 themap == "Capture The Flag" ||
-				 themap == "One Flag CTF" /* ||
-				 themap == "Instagib Duel" ||
+				 themap == "One Flag CTF" ||
 				 themap == "Instagib Free For All" ||
-				 themap == "Railwarz Free For All"*/) bprint ("Changing Gametype to ", themap, "...\n");
+				 themap == "Railwarz Free For All") bprint ("Changing Gametype to ", themap, "...\n");
 						
 			else bprint ("Changing map to ", themap, "...\n");
 			bprint ("\n");
@@ -170,9 +174,10 @@ void() voteyes =
 			else if (themap == "Team Deathmatch") themap = "dm2";
 			else if (themap == "Capture The Flag") themap = "ctf1";
 			else if (themap == "One Flag CTF") themap = "ctf1";
-			/*else if (themap == "Instagib Duel") themap = "dm4";
 			else if (themap == "Instagib Free For All") themap = "dm7";
-			else if (themap == "Railwarz Free For All") themap = "dm7";*/
+			else if (themap == "Railwarz Free For All") themap = "dm7";
+			else if (themap == "Railwarz Capture The Flag") themap = "ctf1";
+			else if (themap == "Railwarz One Flag CTF") themap = "ctf1";		
 				
 //			changelevel (themap); // Changed for map error compatability reasons
 			
@@ -316,13 +321,15 @@ void(string put) main_vote_start =
 		else if (put == horde) localcmd ("\"Horde Mode\"");
 		
 		else if (put == "duel" || put == "1v1" || put == "tourney" || put == "tournament") localcmd ("\"Gametype: Duel\"");
-		else if (put == "ffa" || put == "dm" || put == "deathmatch" || put == "free for all") localcmd ("\"Gametype: Free For All\"");
+		else if (put == "ffa" || put == "dm" || put == "deathmatch") localcmd ("\"Gametype: Free For All\"");
 		else if (put == "tdm" || put == "team deathmatch") localcmd ("\"Gametype: Team Deathmatch\"");
 		else if (put == "ctf" || put == "capture the flag") localcmd ("\"Gametype: Capture The Flag\"");
 		else if (put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf") localcmd ("\"Gametype: One Flag CTF\"");
-		/*else if (put == "iduel" || put == "instagib duel" || put == "duel instagib" || put == "1v1 instagib" || put == "instagib 1v1" || put == "instagib tourney" || put == "tourney instagib" || put == "instagib tournament" || put == "tournament instagib") localcmd ("\"Gametype: Instagib Duel\"");
 		else if (put == "iffa" || put == "instagib free for all" || put == "free for all instagib" || put == "idm" || put == "instagib deathmatch" || put == "deathmatch instagib") localcmd ("\"Gametype: Instagib Free For All\"");
-		else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz") localcmd ("\"Gametype: Railwarz Free For All\"");*/
+		else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz") localcmd ("\"Gametype: Railwarz Free For All\"");
+		else if (put == "rwzctf" || put == "railwarz capture the flag" || put == "capture the flag railwarz") localcmd ("\"Gametype: Railwarz Capture The Flag\"");
+		else if (put == "oneflagrwzctf" || put == "one flag rwzctf" || put == "railwarz one flag ctf" || put == "one flag ctf railwarz" || put == "railwarz one flag capture the flag" || put == "one flag capture the flag railwarz" || put == "railwarz 1 flag capture the flag" || put == "1 flag capture the flag instagib" || put == "1flagrwzctf" || put == "1frwzctf")
+			localcmd ("\"Gametype: One Flag CTF\"");
 		
 		else localcmd (put);		
 		localcmd ("\n");
@@ -330,13 +337,14 @@ void(string put) main_vote_start =
 		if (put == id1 || put == hipnotic || put == rogue || put == dopa || put == mg1) bprint ("\n", self.netname, " casted a Campaign Vote to launch the ");
 		else if (put == horde) bprint ("\n", self.netname, " casted a vote to start ");
 		else if (put == "duel" || put == "1v1" || put == "tourney" || put == "tournament" ||
-			 put == "ffa" || put == "dm" || put == "deathmatch" || put == "free for all" ||
+			 put == "ffa" || put == "dm" || put == "deathmatch" || 
 			 put == "tdm" || put == "team deathmatch" || 
 			 put == "ctf" || put == "capture the flag" ||
-			 put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf" /*||
-			 put == "iduel" || put == "instagib duel" || put == "duel instagib" || put == "1v1 instagib" || put == "instagib 1v1" || put == "instagib tourney" || put == "tourney instagib" || put == "instagib tournament" || put == "tournament instagib" ||
+			 put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf" ||
 			 put == "iffa" || put == "instagib free for all" || put == "free for all instagib" || put == "idm" || put == "instagib deathmatch" || put == "deathmatch instagib" ||
-			 put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz"*/)
+			 put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz" ||
+			 put == "rwzctf" || put == "railwarz capture the flag" || put == "capture the flag railwarz" ||
+			 put == "oneflagrwzctf" || put == "one flag rwzctf" || put == "railwarz one flag ctf" || put == "one flag ctf railwarz" || put == "railwarz one flag capture the flag" || put == "one flag capture the flag railwarz" || put == "railwarz 1 flag capture the flag" || put == "1 flag capture the flag instagib" || put == "1flagrwzctf" || put == "1frwzctf")
 			 bprint ("\n", self.netname, " casted a vote to play ");
 	
 		else bprint ("\n", self.netname, " casted a Map Vote for ");	
@@ -349,13 +357,15 @@ void(string put) main_vote_start =
 		else if (put == horde) bprint ("Horde Mode");
 		
 		else if (put == "duel" || put == "1v1" || put == "tourney" || put == "tournament") bprint ("Duel");
-		else if (put == "ffa" || put == "dm" || put == "deathmatch" || put == "free for all") bprint ("Free For All");
+		else if (put == "ffa" || put == "dm" || put == "deathmatch") bprint ("Free For All");
 		else if (put == "tdm" || put == "team deathmatch") bprint ("Team Deathmatch");
 		else if (put == "ctf" || put == "capture the flag") bprint ("Capture The Flag");
 		else if (put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf") bprint ("One Flag CTF");
-		/*else if (put == "iduel" || put == "instagib duel" || put == "duel instagib" || put == "1v1 instagib" || put == "instagib 1v1" || put == "instagib tourney" || put == "tourney instagib" || put == "instagib tournament" || put == "tournament instagib") bprint ("Instagib Duel");
 		else if (put == "iffa" || put == "instagib free for all" || put == "free for all instagib" || put == "idm" || put == "instagib deathmatch" || put == "deathmatch instagib") bprint ("Instagib Free For All");
-		else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz") bprint ("Railwarz Free For All");*/
+		else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz") bprint ("Railwarz Free For All");
+		else if (put == "rwzctf" || put == "railwarz capture the flag" || put == "capture the flag railwarz") bprint ("Railwarz Capture The Flag");
+		else if (put == "oneflagrwzctf" || put == "one flag rwzctf" || put == "railwarz one flag ctf" || put == "one flag ctf railwarz" || put == "railwarz one flag capture the flag" || put == "one flag capture the flag railwarz" || put == "railwarz 1 flag capture the flag" || put == "1 flag capture the flag instagib" || put == "1flagrwzctf" || put == "1frwzctf")
+			bprint ("Railwarz One Flag CTF");
 			
 		else bprint (put);
 			
@@ -367,13 +377,14 @@ void(string put) main_vote_start =
 		else if (put == horde) mapdispfix = "horde1";
 		
 		else if (put == "duel" || put == "1v1" || put == "tourney" || put == "tournament") mapdispfix = "dm4";
-		else if (put == "ffa" || put == "dm" || put == "deathmatch" || put == "free for all") mapdispfix = "dm2";
+		else if (put == "ffa" || put == "dm" || put == "deathmatch") mapdispfix = "dm2";
 		else if (put == "tdm" || put == "team deathmatch") mapdispfix = "dm2";
 		else if (put == "ctf" || put == "capture the flag") mapdispfix = "ctf1";
 		else if (put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf") mapdispfix = "ctf1";
-		/*else if (put == "iduel" || put == "instagib duel" || put == "duel instagib" || put == "1v1 instagib" || put == "instagib 1v1" || put == "instagib tourney" || put == "tourney instagib" || put == "instagib tournament" || put == "tournament instagib") mapdispfix = "dm4";
 		else if (put == "iffa" || put == "instagib free for all" || put == "free for all instagib" || put == "idm" || put == "instagib deathmatch" || put == "deathmatch instagib") mapdispfix = "dm7";
-		else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz") mapdispfix = "dm7";*/
+		else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz") mapdispfix = "dm7";
+		else if (put == "rwzctf" || put == "railwarz capture the flag" || put == "capture the flag railwarz") mapdispfix = "ctf1";
+		else if (put == "oneflagrwzctf" || put == "one flag rwzctf" || put == "railwarz one flag ctf" || put == "one flag ctf railwarz" || put == "railwarz one flag capture the flag" || put == "one flag capture the flag railwarz" || put == "railwarz 1 flag capture the flag" || put == "1 flag capture the flag instagib" || put == "1flagrwzctf" || put == "1frwzctf") mapdispfix = "ctf1";
 		 
 		else mapdispfix = put;
 			
@@ -398,20 +409,22 @@ void(string put) main_vote_start =
 			
 			if (put == "duel" || put == "1v1" || put == "tourney" || put == "tournament")
 				Gametype_Duel_Settings ();
-			else if (put == "ffa" || put == "dm" || put == "deathmatch" || put == "free for all")
+			else if (put == "ffa" || put == "dm" || put == "deathmatch")
 				Gametype_FFA_Settings ();
 			else if (put == "tdm" || put == "team deathmatch")
 				Gametype_TDM_Settings ();
 			else if (put == "ctf" || put == "capture the flag")
-				Gametype_Duel_Settings ();
+				Gametype_CTF_Settings ();
 			else if (put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf")
 				Gametype_OneFlagCTF_Settings ();
-			/*else if (put == "iduel" || put == "instagib duel" || put == "duel instagib" || put == "1v1 instagib" || put == "instagib 1v1" || put == "instagib tourney" || put == "tourney instagib" || put == "instagib tournament" || put == "tournament instagib")
-				Gametype_Instagib_Duel_Settings ();
 			else if (put == "iffa" || put == "instagib free for all" || put == "free for all instagib" || put == "idm" || put == "instagib deathmatch" || put == "deathmatch instagib")
 				Gametype_Instagib_FFA_Settings ();
 			else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz")
-				Gametype_Railwarz_FFA_Settings ();*/
+				Gametype_Railwarz_FFA_Settings ();	
+			else if (put == "rwzctf" || put == "railwarz capture the flag" || put == "capture the flag railwarz")
+				Gametype_Railwarz_CTF_Settings ();
+			else if (put == "oneflagrwzctf" || put == "one flag rwzctf" || put == "railwarz one flag ctf" || put == "one flag ctf railwarz" || put == "railwarz one flag capture the flag" || put == "one flag capture the flag railwarz" || put == "railwarz 1 flag capture the flag" || put == "1 flag capture the flag instagib" || put == "1flagrwzctf" || put == "1frwzctf")
+				Gametype_Railwarz_OneFlagCTF_Settings ();
 			else if (put == id1 || put == hipnotic || put == rogue || put == dopa || put == mg1 || put == horde) Gametype_Reignited_Coop_Settings ();
 						
 			bprint ("\n");
@@ -423,11 +436,12 @@ void(string put) main_vote_start =
 				 put == "ffa" || put == "dm" || put == "deathmatch" || put == "free for fall" || 
 				 put == "tdm" || put == "team deathmatch" || 
 				 put == "ctf" || put == "capture the flag" || 
-				 put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf" /* || 
-				 put == "iduel" || put == "instagib duel" || put == "duel instagib" || put == "1v1 instagib" || put == "instagib 1v1" || put == "instagib tourney" || put == "tourney instagib" || put == "instagib tournament" || put == "tournament instagib" || 
+				 put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf" ||
 				 put == "iffa" || put == "instagib free for all" || put == "free for all instagib" || put == "idm" || put == "instagib deathmatch" || put == "deathmatch instagib" || 
-				 put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz"*/)
-				bprint ("\nGametype Vote Successful ");
+				 put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz" ||
+				 put == "rwzctf" || put == "railwarz capture the flag" || put == "capture the flag railwarz" ||
+				 put == "oneflagrwzctf" || put == "one flag rwzctf" || put == "railwarz one flag ctf" || put == "one flag ctf railwarz" || put == "railwarz one flag capture the flag" || put == "one flag capture the flag railwarz" || put == "railwarz 1 flag capture the flag" || put == "1 flag capture the flag instagib" || put == "1flagrwzctf" || put == "1frwzctf")
+				bprint ("\nGametype Vote Successful ");				
 			else bprint ("\nMap Vote Successful ");
 			
 			if (put == id1) 
@@ -444,13 +458,14 @@ void(string put) main_vote_start =
 				bprint ("\nStarting ", put, "...\n");
 			
 			else if (put == "duel" || put == "1v1" || put == "tourney" || put == "tournament" ||
-				 put == "ffa" || put == "dm" || put == "deathmatch" || put == "free for all" ||
+				 put == "ffa" || put == "dm" || put == "deathmatch" || 
 				 put == "tdm" || put == "team deathmatch" || 
 				 put == "ctf" || put == "capture the flag" ||
-				 put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf" /* || 
-				 put == "iduel" || put == "instagib duel" || put == "duel instagib" || put == "1v1 instagib" || put == "instagib 1v1" || put == "instagib tourney" || put == "tourney instagib" || put == "instagib tournament" || put == "tournament instagib" || 
+				 put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf" ||
 				 put == "iffa" || put == "instagib free for all" || put == "free for all instagib" || put == "idm" || put == "instagib deathmatch" || put == "deathmatch instagib" ||
-				 put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz"*/)
+				 put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz" ||
+				 put == "rwzctf" || put == "railwarz capture the flag" || put == "capture the flag railwarz" ||
+				 put == "oneflagrwzctf" || put == "one flag rwzctf" || put == "railwarz one flag ctf" || put == "one flag ctf railwarz" || put == "railwarz one flag capture the flag" || put == "one flag capture the flag railwarz" || put == "railwarz 1 flag capture the flag" || put == "1 flag capture the flag instagib" || put == "1flagrwzctf" || put == "1frwzctf")
 				bprint ("Changing Gametype to ", put, "...\n");
 							
 			else bprint ("Changing map to ", put, "...\n");
@@ -469,13 +484,14 @@ void(string put) main_vote_start =
 			else if (put == horde) localcmd ("horde1");
 			
 			else if (put == "duel" || put == "1v1" || put == "tourney" || put == "tournament") localcmd ("dm4");
-			else if (put == "ffa" || put == "dm" || put == "deathmatch" || put == "free for all") localcmd ("dm2");
+			else if (put == "ffa" || put == "dm" || put == "deathmatch") localcmd ("dm2");
 			else if (put == "tdm" || put == "team deathmatch") localcmd ("dm2");
 			else if (put == "ctf" || put == "capture the flag") localcmd ("ctf1");
 			else if	(put == "oneflagctf" || put == "one flag ctf" || put == "one flag capture the flag" || put == "1 flag capture the flag" || put == "1flagctf" || put == "1fctf") localcmd ("ctf1");
-			/*else if (put == "iduel" || put == "instagib duel" || put == "duel instagib" || put == "1v1 instagib" || put == "instagib 1v1" || put == "instagib tourney" || put == "tourney instagib" || put == "instagib tournament" ||  put == "tournament instagib") localcmd ("dm4");
 			else if (put == "iffa" || put == "instagib free for all" || put == "free for all instagib" || put == "idm" || put == "instagib deathmatch" || put == "deathmatch instagib") localcmd ("dm7");
-			else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz") localcmd ("dm7");*/
+			else if (put == "rwzffa" || put == "railwarz free for all" || put == "free for all railwarz" || put == "rwzdm" || put == "railwarz deathmatch" || put == "deathmatch railwarz") localcmd ("dm7");
+			else if (put == "rwzctf" || put == "railwarz capture the flag" || put == "capture the flag railwarz") localcmd ("ctf1");
+			else if (put == "oneflagrwzctf" || put == "one flag rwzctf" || put == "railwarz one flag ctf" || put == "one flag ctf railwarz" || put == "railwarz one flag capture the flag" || put == "one flag capture the flag railwarz" || put == "railwarz 1 flag capture the flag" || put == "1 flag capture the flag instagib" || put == "1flagrwzctf" || put == "1frwzctf") localcmd ("ctf1");
 			
 			else localcmd (put);
 			localcmd ("\n");
@@ -643,7 +659,7 @@ void(string cmd) SV_ParseClientCommand =
 		{
 			if (argument2 == "duel" || argument2 == "1v1" || argument2 == "tournament" || argument2 == "tourney")
 				Main_Vote_System (argument2, cmd);
-			else if (argument2 == "ffa" || argument2 == "dm" || argument2 == "deathmatch" || argument2 == "free for all")	
+			else if (argument2 == "ffa" || argument2 == "dm" || argument2 == "deathmatch")	
 				Main_Vote_System (argument2, cmd);
 			else if (argument2 == "tdm" || argument2 == "team deathmatch")	
 				Main_Vote_System (argument2, cmd);
@@ -651,26 +667,22 @@ void(string cmd) SV_ParseClientCommand =
 				Main_Vote_System (argument2, cmd);
 			else if (argument2 == "oneflagctf" || argument2 == "one flag ctf" || argument2 == "one flag capture the flag" || argument2 == "1 flag capture the flag" || argument2 == "1flagctf" || argument2 == "1fctf")
 				Main_Vote_System (argument2, cmd);
-			/*else if (argument2 == "iduel" || argument2 == "instagib duel" || argument2 == "duel instagib" || argument2 == "1v1 instagib" || argument2 == "instagib 1v1" || argument2 == "instagib tourney" || argument2 == "tourney instagib" || argument2 == "instagib tournament" ||  argument2 == "tournament instagib")     
-				Main_Vote_System (argument2, cmd);
 			else if (argument2 == "iffa" || argument2 == "instagib free for all" || argument2 == "free for all instagib" || argument2 == "idm" || argument2 == "instagib deathmatch" || argument2 == "deathmatch instagib")
 				Main_Vote_System (argument2, cmd);
-			else if (argument2 == "itdm" || argument2 == "instagib team deathmatch" || argument2 == "team deathmatch instagib")	
-				Main_Vote_System (argument2, cmd);	
+//			else if (argument2 == "itdm" || argument2 == "instagib team deathmatch" || argument2 == "team deathmatch instagib")	
+//				Main_Vote_System (argument2, cmd);	
 			else if (argument2 == "ictf" || argument2 == "instagib capture the flag" || argument2 == "capture the flag instagib")	
 				Main_Vote_System (argument2, cmd);
 			else if (argument2 == "oneflagictf" || argument2 == "one flag ictf" || argument2 == "instagib one flag ctf" || argument2 == "one flag ctf instagib" || argument2 == "instagib one flag capture the flag" || argument2 == "one flag capture the flag instagib" || argument2 == "instagib 1 flag capture the flag" || argument2 == "1 flag capture the flag instagib" || argument2 == "1flagictf" || argument2 == "1fictf")
 				Main_Vote_System (argument2, cmd);
-			else if (argument2 == "rwzduel" || argument2 == "railwarz duel" || argument2 == "duel railwarz" || argument2 == "1v1 railwarz" || argument2 == "railwarz 1v1" || argument2 == "railwarz tourney" || argument2 == "tourney railwarz" || argument2 == "railwarz tournament" ||  argument2 == "tournament railwarz")     
-				Main_Vote_System (argument2, cmd);
 			else if (argument2 == "rwzffa" || argument2 == "railwarz free for all" || argument2 == "free for all railwarz" || argument2 == "rwzdm" || argument2 == "railwarz deathmatch" || argument2 == "deathmatch railwarz")
 				Main_Vote_System (argument2, cmd);
-			else if (argument2 == "rwztdm" || argument2 == "railwarz team deathmatch" || argument2 == "team deathmatch railwarz")	
-				Main_Vote_System (argument2, cmd);	
+//			else if (argument2 == "rwztdm" || argument2 == "railwarz team deathmatch" || argument2 == "team deathmatch railwarz")	
+//				Main_Vote_System (argument2, cmd);	
 			else if (argument2 == "rwzctf" || argument2 == "railwarz capture the flag" || argument2 == "capture the flag railwarz")	
 				Main_Vote_System (argument2, cmd);
 			else if (argument2 == "oneflagrwzctf" || argument2 == "one flag rwzctf" || argument2 == "railwarz one flag ctf" || argument2 == "one flag ctf railwarz" || argument2 == "railwarz one flag capture the flag" || argument2 == "one flag capture the flag railwarz" || argument2 == "railwarz 1 flag capture the flag" || argument2 == "1 flag capture the flag instagib" || argument2 == "1flagrwzctf" || argument2 == "1frwzctf")
-				Main_Vote_System (argument2, cmd);*/														
+				Main_Vote_System (argument2, cmd);				
 			else sprint (self, "Invalid Gametype.\n");									
 		}			
 		else if (!argument1) // Missing arguments to a command

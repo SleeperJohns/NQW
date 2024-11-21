@@ -152,9 +152,9 @@ The $qc_vengeance_sphere. DEATHMATCH ONLY.
 */
 void() item_sphere =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL || deathmatch == DM_DISABLED)
+	if (cvar("instagib") || deathmatch == DM_DISABLED)
 	{
-		remove (self);
+		remove(self);
 		return;
 	}
 

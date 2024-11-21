@@ -152,7 +152,9 @@ void() OgreFireGrenade =
 		makevectors(self.angles);
 		if (self.spawnflags & OGRE_BOSS)
 		{
-			if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+			if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+			    mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+			    mapname == "ctf1")
 				local entity missile_sk5_rogue = FireProjectileAtEnemy(self.origin+v_forward*27-v_right*10+'0 0 16', '0 0 16', 512, 2.5, "progs/mervup.mdl", cvar("skill") == 5, TRUE);
 		}
 		else
@@ -160,7 +162,9 @@ void() OgreFireGrenade =
 			
 		missile_sk5.movetype = MOVETYPE_BOUNCE;
 		missile_sk5.avelocity = '304 304 304';
-		if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+		if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+		mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+		mapname == "ctf1")
 		{
 			if (self.spawnflags & OGRE_BOSS)
 			{
@@ -202,7 +206,9 @@ void() OgreFireGrenade =
 		missile.angles = vectoangles(missile.velocity);
 		
 		// set missile duration
-		if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+		if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+		mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+		mapname == "ctf1")
 		{
 			if (self.spawnflags & OGRE_BOSS)
 			{
@@ -545,7 +551,9 @@ void()	ogre_die2	=[	$death2,	ogre_die3	] {};
 void()	ogre_die3	=[	$death3,	ogre_die4	]
 {
 	self.solid = SOLID_NOT;
-	if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+	if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+	mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+	mapname == "ctf1")
 	{
 		if (cvar("skill") <= 4)
 		{
@@ -595,7 +603,9 @@ void()	ogre_bdie2	=[	$bdeath2,	ogre_bdie3	] {ai_forward(5);};
 void()	ogre_bdie3	=[	$bdeath3,	ogre_bdie4	]
 {
 	self.solid = SOLID_NOT;
-	if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+	if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+	mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+	mapname == "ctf1")
 	{
 		if (cvar("skill") <= 4)
 		{
@@ -643,7 +653,9 @@ void() ogre_die =
 	{
 		sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
 		
-		if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+		if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+		mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "r2m8" || 
+		mapname == "ctf1")
 			ThrowHead ("progs/h_rogue_ogre.mdl", self.health);
 		else
 			ThrowHead ("progs/h_ogre.mdl", self.health);
@@ -685,8 +697,13 @@ Normal: use the original skin and fire normal grenades.
 void() rogue_monster_ogre;
 
 void() monster_ogre =
-{				  
-	if (gameworld == ROGUE)
+{
+	local float Rogue_GameWorld    = (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+					  mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+					  mapname == "ctf1");
+		
+	self.netname = "Ogre";				  
+	if (Rogue_GameWorld)
 		rogue_monster_ogre();
 	else if (cvar("customcoop"))
 	{
@@ -700,7 +717,6 @@ void() monster_ogre =
 		precache_sound ("ogre/ogpain1.wav");
 		precache_sound ("ogre/ogsawatk.wav");
 		precache_sound ("ogre/ogwake.wav");
-		self.netname = "Ogre";
 		self.solid = SOLID_SLIDEBOX;
 		self.movetype = MOVETYPE_STEP;
 		setmodel (self, "progs/ogre.mdl");
@@ -735,10 +751,6 @@ void() monster_ogre =
 		precache_sound ("ogre/ogwake.wav");
 					
 		self.health = 200;
-		if (self.spawnflags & OGRE_BOSS)
-			self.netname = "Multi-Grenade Ogre";
-		else 
-			self.netname = "Ogre";
 
 		self.th_stand = ogre_stand1;
 		self.th_walk = ogre_walk1;
@@ -750,13 +762,17 @@ void() monster_ogre =
 		self.allowPathFind = TRUE;
 		self.combat_style = CS_MIXED;
 		
-		if (gameworld == ROGUE || gameworld == APOTHEOSIS)	
+		if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+		mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+		mapname == "ctf1")	
 			InitMonster("progs/rogue_ogre.mdl", MONSTER_TYPE_WALK, MONSTER_SIZE_LARGE);
 		else
 			InitMonster("progs/ogre.mdl", MONSTER_TYPE_WALK, MONSTER_SIZE_LARGE);	
 			
 		// ROGUE -----------------------------------------	
-		if (gameworld == ROGUE || gameworld == APOTHEOSIS)
+		if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+		mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+		mapname == "ctf1")
 		{
 			// none specified - choose random. 25% boss on normal, hard, bloodbath
 			// Sleeper: I'm sadistic, so, 66.6% change of an ogre being a boss type on skill 5.
@@ -815,12 +831,16 @@ void() rogue_monster_ogre =
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 
-	if (gameworld == ROGUE)
+	if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+	mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+	mapname == "ctf1")
 		setmodel (self, "progs/rogue_ogre.mdl");
 	else
 		setmodel (self, "progs/ogre.mdl");
 
-	if (gameworld == ROGUE)
+	if (mapname == "rstart" || mapname == "r1m1" || mapname == "r1m2" || mapname == "r1m3" || mapname == "r1m4" || mapname == "r1m5" || mapname == "r1m6" || mapname == "r1m7" || 
+	mapname == "r2m1" || mapname == "r2m2" || mapname == "r2m3" || mapname == "r2m4" || mapname == "r2m5" || mapname == "r2m6" || mapname == "r2m7" || mapname == "rend" || 
+	mapname == "ctf1")
 	{
 		// none specified - choose random. 25% boss on normal, hard, bloodbath
 		// Sleeper: I'm sadistic, so, 66.6% change of an ogre being a boss type on skill 5.

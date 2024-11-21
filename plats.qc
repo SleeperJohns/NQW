@@ -128,7 +128,8 @@ void() plat_trigger_use =
 
 void() plat_crush =
 {
-// 	dprint ("plat_crush\n");
+//dprint ("plat_crush\n");
+
 	other.deathtype = "squish";	// QIP
 	T_Damage (other, self, self, 1);
 	

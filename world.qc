@@ -447,7 +447,8 @@ void() worldspawn =
 	
 	local float apotheosis_map_pool  = (world.model == "maps/apotheosis_sleeper.bsp");
 	
-//	local string custom_maps_pool = RandomHordeMode_MapsList_World[HordeMaps()];
+//	local float custom_maps_pool;
+
 	
 	precache_sound ("misc/runekey.wav"); // Latched sound for voting
 	precache_sound ("misc/sleepermustdie.wav"); // Sleeper Must Die! Skill Sound
@@ -462,7 +463,7 @@ void() worldspawn =
 	NQW_SleeperMustDie();
 	
 	// Keep deathmatch separated from Cooperative and Single Player
-	if (cvar("deathmatch")) cvar_set("skill", "0"); // Sleeper: This was *realnull*. ._. It's a joke.
+	if (cvar("deathmatch")) cvar_set("skill", ""); // Sleeper: This was *realnull*. ._. It's a joke.
 	
 	mlstage = 0;
 	InitBodyQue ();
@@ -475,6 +476,7 @@ void() worldspawn =
 	else if (rogue_maps_pool) gameworld = ROGUE;
 	else if (dopa_maps_pool) gameworld = DOPA;
 	else if (mg1_main_maps_pool || world.model == RandomHordeMode_MapsList_World[HordeMaps()]) gameworld = MG1;
+//	else if (mg1_main_maps_pool || mg1_horde_maps_pool) gameworld = MG1;
 	else if (apotheosis_map_pool) gameworld = APOTHEOSIS;
 //	else if (custom_maps_pool) gameworld = CUSTOM;
 //	else gameworld = UNKNOWN;
@@ -489,7 +491,7 @@ void() worldspawn =
 // player precaches	
 	W_Precache ();			// get weapon precaches
 	// ROGUE =======================================================
-//	RunePrecache ();		// precache the runes
+//	RunePrecache ();			// precache the runes
 	// Net QuakeWorld PRECACHES ====================================
 	NQW_Precaches ();
 	// =============================================================	
@@ -598,7 +600,7 @@ void() worldspawn =
 	precache_sound ("misc/foot6.wav");
 	precache_sound ("misc/foot7.wav");
 	
-//	precache_sound ("weapons/coilgun.wav");
+	precache_sound ("weapons/coilgun.wav");
 
 	precache_model ("progs/player.mdl");
 	precache_model ("progs/eyes.mdl");
@@ -623,7 +625,7 @@ void() worldspawn =
 	precache_model ("progs/v_nail2.mdl");
 	precache_model ("progs/v_rock2.mdl");
 	
-//	precache_model ("progs/v_coilgun.mdl");
+	precache_model ("progs/v_coilgun.mdl");
 	
 	// Sleeper: Precache world weapons to drop them.
 	precache_model ("progs/g_shot.mdl");
@@ -713,7 +715,6 @@ void() worldspawn =
 
 void() LoadGame;
 void() CheckRules;
-void() SuddenDeath_Rules;
 
 float LastTime;
 float idk;
@@ -721,8 +722,6 @@ float idk;
 void() StartFrame =
 {
 	local float mg1_horde_maps_pool  = (world.model == "maps/horde1.bsp" || world.model == "maps/horde2.bsp" || world.model == "maps/horde3.bsp" || world.model == "maps/horde4.bsp" || world.model == "maps/horde5.bsp" || world.model == "maps/horde6.bsp" || world.model == "maps/horde7.bsp");
-
-	local float apotheosis_map_pool  = (world.model == "maps/apotheosis_sleeper.bsp");
 			                    
 //	local float custom_story_maps_pool; // This is for community maps that deserve to be played as a campaign. There are no stories yet to be told.
 			                                 			                   	
@@ -734,45 +733,16 @@ void() StartFrame =
 	// Restart the server every 6 hours when there's no players in the server. This helps with floating point issues.
         if (time >= (60 * 60) * 6)
         {
-		dprint ("!ROUTINE 6-HOUR SERVER RESTART INITIATED!\n");
                 local entity server_inactive = find (world, classname, "player");
-                if (server_inactive == world)
+                if (server_inactive == world) 
                 {
-			if (cvar("coop") && !cvar("deathmatch") && !cvar("customcoop")) // Sleeper: If the server is hosted in the middle or late in an episode, restart the episode from the beginning.
-			{
-				if (world.model == "maps/e1m2.bsp" || world.model == "maps/e1m3.bsp" || world.model == "maps/e1m4.bsp" || world.model == "maps/e1m5.bsp" || world.model == "maps/e1m6.bsp" || world.model == "maps/e1m7.bsp" || world.model == "maps/e1m8.bsp")
-					localcmd ("changelevel e1m1\n");	
-				else if (world.model == "maps/e2m2.bsp" || world.model == "maps/e2m3.bsp" || world.model == "maps/e2m4.bsp" || world.model == "maps/e2m5.bsp" || world.model == "maps/e2m6.bsp" || world.model == "maps/e2m6_qe.bsp" || world.model == "maps/e2m7.bsp")
-					localcmd ("changelevel e2m1\n");
-				else if (world.model == "maps/e3m2.bsp" || world.model == "maps/e3m3.bsp" || world.model == "maps/e3m4.bsp" || world.model == "maps/e3m5.bsp" || world.model == "maps/e3m6.bsp" || world.model == "maps/e3m7.bsp")
-					localcmd ("changelevel e3m1\n");	
-				else if (world.model == "maps/e4m2.bsp" || world.model == "maps/e4m3.bsp" || world.model == "maps/e4m4.bsp" || world.model == "maps/e4m5.bsp" || world.model == "maps/e4m6.bsp" || world.model == "maps/e4m7.bsp" || world.model == "maps/e4m8.bsp")
-					localcmd ("changelevel e4m1\n");
-				else if (world.model == "maps/hip1m2.bsp" || world.model == "maps/hip1m3.bsp" || world.model == "maps/hip1m4.bsp" || world.model == "maps/hip1m5.bsp")
-					localcmd ("changelevel hip1m1\n");
-				else if (world.model == "maps/hip2m2.bsp" || world.model == "maps/hip2m3.bsp" || world.model == "maps/hip2m4.bsp" || world.model == "maps/hip2m5.bsp" || world.model == "maps/hip2m6.bsp")
-					localcmd ("changelevel hip2m1\n");
-				else if (world.model == "maps/hip3m2.bsp" || world.model == "maps/hip3m3.bsp" || world.model == "maps/hip3m4.bsp" || world.model == "maps/hipdm1.bsp" || world.model == "maps/hipend.bsp")
-					localcmd ("changelevel hip3m1\n");	
-				else if (world.model == "maps/r1m2.bsp" || world.model == "maps/r1m3.bsp" || world.model == "maps/r1m4.bsp" || world.model == "maps/r1m5.bsp" || world.model == "maps/r1m6.bsp" || world.model == "maps/r1m7.bsp")
-					localcmd ("changelevel r1m1\n");
-				else if (world.model == "maps/r2m2.bsp" || world.model == "maps/r2m3.bsp" || world.model == "maps/r2m4.bsp" || world.model == "maps/r2m5.bsp" || world.model == "maps/r2m6.bsp" || world.model == "maps/r2m7.bsp" || world.model == "maps/rend.bsp")
-					localcmd ("changelevel r2m1\n");
-				else if (world.model == "maps/e5m2.bsp" || world.model == "maps/e5m3.bsp" || world.model == "maps/e5m4.bsp" || world.model == "maps/e5m5.bsp" || world.model == "maps/e5m6.bsp" || world.model == "maps/e5m7.bsp" || world.model == "maps/e5end.bsp" || world.model == "maps/e5sm1.bsp" || world.model == "maps/e5sm2.bsp")
-					localcmd ("changelevel e5m1\n");	
-				else if (world.model == "maps/mge1m2.bsp" || world.model == "maps/mge1m3.bsp") localcmd ("changelevel mge1m1\n");
-				else if (world.model == "maps/mge2m2.bsp") localcmd ("changelevel mge2m1\n");
-				else if (world.model == "maps/mge3m2.bsp") localcmd ("changelevel mge3m1\n");
-				else if (world.model == "maps/mge4m2.bsp") localcmd ("changelevel mge4m1\n");
-				else if (world.model == "maps/mge5m2.bsp") localcmd ("changelevel mge5m1\n");
-				else localcmd ("restart\n"); // Sleeper: Custom maps or Horde maps can just restart plainly.
-			}
-			else localcmd ("restart\n"); // Sleeper: Because we still want deathmatch and custom coop to receive the routine restart.
+			dprint ("!ROUTINE 6-HOUR SERVER RESTART INITIATED!\n");
+			localcmd ("restart\n");	
 		}
 	}
 				
 	// Disable Horde Mode when not playing horde mode maps.
-	if (!mg1_horde_maps_pool && !apotheosis_map_pool) cvar_set("horde", "0");
+	if (!mg1_horde_maps_pool) cvar_set("horde", "0");
 	
 	if (cvar("deathmatch"))
 	{
@@ -792,11 +762,11 @@ void() StartFrame =
 	}
 		
 	// Determine if we're playing custom maps, horde mode or the campaign maps.
-	if (gameworld >= ID1 && gameworld <= APOTHEOSIS/* && !custom_story_maps_pool*/)
+	if (gameworld >= ID1 && gameworld <= MG1/* && !custom_story_maps_pool*/)
 	{
 		cvar_set("customcoop", "0");
 	}
-	else if (gameworld == CUSTOM && !cvar("deathmatch"))
+	else if (gameworld == CUSTOM)
 	{
 		cvar_set("customcoop", "1");
 	}
