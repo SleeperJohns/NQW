@@ -67,10 +67,10 @@ float(entity targ) HasInvisible =
 	return TRUE;
 }
 
-void(vector ang) makevectorsfixed =
+void makevectorsfixed(vector ang) 
 {
 	ang_x *= -1;
-	makevectors(ang);
+	makevectors (ang);
 };
 
 float(float v) anglemod =

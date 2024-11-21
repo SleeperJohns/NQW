@@ -1,4 +1,4 @@
- /*  Copyright (C) 1996-2022 id Software LLC
+/*  Copyright (C) 1996-2022 id Software LLC
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,8 +26,6 @@ const float STAT_WEAPONS = 37;
 // const float STAT_SERVERFLAGS = 38;
 const float STAT_CTF_CAPTURES = 39;
 const float STAT_RUNE = 40;
-const float STAT_TOTAL_TEAMSCORE_RED = 41;
-const float STAT_TOTAL_TEAMSCORE_BLUE = 42;
 // .float playerrunes;
 // .float itemscopy;
 // .float expansionitemscopy;
@@ -50,8 +48,6 @@ void() send_ssqc_to_csqc =
 	clientstat (STAT_PLASMAAMMO, EV_FLOAT, ammo_plasma); // [ROGUE] Plasma Ammo
 	clientstat (STAT_WEAPONS, EV_FLOAT, weapons); // Sleeper: Bypasses the bitflag restrictions on .items for weapons.
 	clientstat (STAT_CTF_CAPTURES, EV_FLOAT, captures); // Sleeper: Captures Stats for CTF.
-	clientstat (STAT_CTF_CAPTURES, EV_FLOAT, total_teamscore_red); // Sleeper: Team Captures Stats for CTF.
-	clientstat (STAT_CTF_CAPTURES, EV_FLOAT, total_teamscore_blue); // Sleeper: Team Captures Stats for CTF.
 	clientstat (STAT_RUNE, EV_FLOAT, rune); // Sleeper: Shows the runes separately for each player and doesn't require serverflags. Mainly for deathmatch.
 //	clientstat (STAT_SERVERFLAGS, EV_FLOAT, playerrunes);
 };
@@ -59,6 +55,53 @@ void() send_ssqc_to_csqc =
 void() W_SetCurrentAmmo;
 /* ALL LIGHTS SHOULD BE 0 1 0 IN COLOR ALL OTHER ITEMS SHOULD
 BE .8 .3 .4 IN COLOR */
+
+/*
+void(float thiskey) respawn_key =
+{
+	local entity key;
+	
+	if (num_players >= 1) return; // Sleeper: Don't respawn any keys until no one is in the server.	
+		
+	key = find (world, classname, "silver key");
+	while (key)
+	{	
+		if (key.items == IT_KEY1)
+		{			
+			if (key.coop_key_pickup == TRUE)
+			{
+				key.coop_key_pickup = FALSE;
+				if (world.worldtype == 0) key.model = "progs/w_s_key.mdl";
+				if (world.worldtype == 1) key.model = "progs/m_s_key.mdl";
+				if (world.worldtype == 2) key.model = "progs/b_s_key.mdl";				
+				key.solid = SOLID_TRIGGER;	// Allow it to be touched again	
+				sound (key, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);	
+				setorigin (key, key.origin);			
+			}
+		}
+		key = find (key, classname, "silver key");
+	}
+		
+	key = find (world, classname, "gold key");
+	while (key)
+	{	
+		if (key.items == IT_KEY2)
+		{
+			if (key.coop_key_pickup == TRUE)
+			{
+				key.coop_key_pickup = FALSE;
+				if (world.worldtype == 0) key.model = "progs/w_g_key.mdl";
+				if (world.worldtype == 1) key.model = "progs/m_g_key.mdl";
+				if (world.worldtype == 2) key.model = "progs/b_g_key.mdl";
+				key.solid = SOLID_TRIGGER;	// Allow it to be touched again	
+				sound (key, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);	
+				setorigin (key, key.origin);	
+			}
+		}
+		key = find (key, classname, "gold key");
+	}		
+};
+*/
 
 void() respawn_keys =
 {
@@ -75,7 +118,7 @@ void() SUB_regen =
 	if (self.weapon_pickedup[other.colormap] == TRUE) self.weapon_pickedup[other.colormap] = FALSE;
 	if (self.powerup_pickedup[other.colormap] == TRUE) self.powerup_pickedup[other.colormap] = FALSE;
 	if (self.health_pickedup[other.colormap] == TRUE) self.health_pickedup[other.colormap] = FALSE;
-		
+
 	self.model = self.mdl;		// Restore original model
 	self.solid = SOLID_TRIGGER;	// Allow it to be touched again				
 	sound (self, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);		
@@ -182,8 +225,7 @@ void() Item_Rot_Systems =
 	{
 		// Sleeper: This is meant to emulate Quake III: Arena style armor rotting for deathmatch games, which I don't think I'll be putting it in any time soon, unless I invent time to make a Quake III: Arena/Team Arena Rendition.
 		if (self.armorvalue <= self.max_armorvalue) self.armorrottime = time + 1;
-	}
-*/
+	}*/
 	Item_Armor_Rot();
 };
 
@@ -208,7 +250,7 @@ float(entity e, float healamount, float ignore) T_Heal =
 	e.health += ceil(healamount);
 	if (!ignore && e.health > e.max_health) e.health = e.max_health;
 
-	if (cvar("deathmatch") && !cvar("coop"))
+	if (cvar("deathmatch"))
 	{
 		if (e.health > 200) e.health = 200;
 	}
@@ -252,7 +294,7 @@ void() bound_other_health =
 {
 	if (self.healtype == 2 || other.guard == 1) // Bind health for Mega Health
 	{
-		if (cvar("deathmatch") && !cvar("coop"))
+		if (cvar("deathmatch"))
 		{
 			if (other.health > 200) other.health = 200;	
 		}
@@ -273,13 +315,13 @@ void() bound_other_health =
 void() item_health =		
 {					   // Coop Speedrunning	on a public server				     		// Single Player Speedrunning on a public server
 	local float DontChangeOnTheFly = ((coop == CLASSIC_COOP && !cvar("horde") && !deathmatch && cvar("sv_public") == 1) || (!coop && !cvar("horde") && !deathmatch && cvar("sv_public") == 1));
-	
-/*	if (cvar("instagib"))
+
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/	
+	
 	self.touch = health_touch;
 	if (self.spawnflags & H_ROTTEN)
 	{
@@ -291,8 +333,8 @@ void() item_health =
 		// When speedrunning, prevent Rotten Healthpack's healamount from being changed when changing skills on the fly.
 		if (DontChangeOnTheFly)
 		{
-			if (cvar("skill") <= 4) self.healamount = 15;  	   // Default amount
-			else if (cvar("skill") == 5) self.healamount = 10; // Sleeper Must Die! amount
+			if (cvar("skill") <= 4) self.healamount = 15;  // Default amount
+			else if (cvar("skill") == 5) self.healamount = 10;  // Sleeper Must Die! amount
 		}		
 		self.healtype = 0;
 	}
@@ -306,10 +348,10 @@ void() item_health =
 		// When speedrunning, prevent Mega Health's healamount from being changed when changing skills on the fly.
 		if (DontChangeOnTheFly)
 		{
-			if (cvar("skill") <= 3) self.healamount = 100; 	   // Default amount
-			else if (cvar("skill") == 4) self.healamount = 50; // Copper amount
-			else if (cvar("skill") == 5) self.healamount = 75; // Sleeper Must Die! amount
-			other.health_overstacked = 1;  			   // Enable overstack flag		
+			if (cvar("skill") <= 3) self.healamount = 100; 	    // Default amount
+			else if (cvar("skill") == 4) self.healamount = 50;  // Copper amount
+			else if (cvar("skill") == 5) self.healamount = 75;  // Sleeper Must Die! amount
+			other.health_overstacked = 1;  			    // Enable overstack flag		
 		}		
 		self.healtype = 2;
 	}		
@@ -383,7 +425,7 @@ void() health_touch =
 	if (self.healtype == 2)
 	{	
 		if (!deathmatch && other.health >= 250) return;
-		if (deathmatch && !coop && other.health >= 200) return;
+		if (deathmatch && other.health >= 200) return;
 								
 		if (shouldstay_horde_only) // Sleeper: Allow Megahealth to be picked up by multiple players in Horde Mode. (FIXME: Should we make Megahealth respawnable instead in Horde Mode?) 
 		{	
@@ -478,7 +520,7 @@ void() health_touch =
 			self.think = SUB_regen;	
 		}
 		// Free For All, Team Deathmatch, Capture The Flag, One Flag CTF
-		else if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF)
+		else if (deathmatch >= DM_FFA && deathmatch <= DM_OneFlagCTF)
 		{
 			if (self.healtype == 2) self.nextthink = time + 30; // Respawn Megahealth after 30 seconds.
 			else self.nextthink = time + 20; // Respawn Healthpacks after 20 seconds.
@@ -597,7 +639,7 @@ void() Enhanced_Item_Megahealth_Rot =
 	if (self.health <= 0) return;	
 		
 	// Deathmatch will always rot megahealth off regardless if a flag is present or not. A bit like Quake III: Arena in a way
-	if (cvar("deathmatch") && !cvar("coop"))
+	if (!cvar("coop") && cvar("deathmatch") >= DM_DUEL)
 	{	
 		if (self.health > self.max_health)
 		{
@@ -1023,7 +1065,7 @@ void() armor_touch =
 	// =============================================================================================================				
 	if (deathmatch)
 	{
-		if (!coop)
+		if (deathmatch >= DM_DUEL && deathmatch <= DM_OneFlagCTF)
 		{
 			self.nextthink = time + 20;
 			self.think = SUB_regen;
@@ -1073,19 +1115,18 @@ void() armor_touch =
 	}				
 	if (self.armor_lockout_selective == 1) self.armor_lockout[other.colormap] = -1;	
 	
-	if (self.armor_pickedup[other.colormap] == 1 && !deathmatch && coop == REIGNITED_COOP) self.customizeentityforclient = armor_customizeentityforclient;
+	if (self.armor_pickedup[other.colormap] == 1 && !deathmatch && coop == REIGNITED_COOP) self.customizeentityforclient = armor_customizeentityforclient;		
 };
 
 /*QUAKED item_armor1 (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 void() item_armor1 =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	self.touch = armor_touch;
 	if (cvar("skill") == 5)
@@ -1111,12 +1152,11 @@ void() item_armor1 =
 */
 void() item_armor2 =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	self.touch = armor_touch;	
 	if (cvar("skill") == 5)
@@ -1142,13 +1182,12 @@ void() item_armor2 =
 */
 void() item_armorInv =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
-	
+
 	self.touch = armor_touch;
 	if (cvar("skill") == 5)
 	{
@@ -1311,7 +1350,6 @@ void(entity weap, entity responsible) GiveWeapon =
 
 	if (self.items & HUD_WEAPONS) self.items |= weap.weapon; // Sleeper: .items field always needs the HUD weapons in case of no CSQC HUD. 
 	other.weapons |= weap.weapon;
-	if (gameworld == APOTHEOSIS) weap.cnt += weap.cnt_horde;
 	AddAmmo (self, weap.aflag, weap.cnt);
 /*	
 	if (!hadweap && self == responsible)
@@ -1388,7 +1426,6 @@ void(entity comboOwner) EnableComboWeapons =
 weapon_touch
 =============
 */
-
 float() weapon_customizeentityforclient =
 {
 	if (self.weapon_pickedup[other.colormap] == TRUE) 
@@ -1494,12 +1531,11 @@ void() weapon_touch =
 */
 void() weapon_supershotgun =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	precache_model ("progs/g_shot.mdl");
 	setmodel (self, "progs/g_shot.mdl");
@@ -1516,12 +1552,11 @@ void() weapon_supershotgun =
 */
 void() weapon_nailgun =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	precache_model ("progs/g_nail.mdl");
 	setmodel (self, "progs/g_nail.mdl");
@@ -1538,12 +1573,11 @@ void() weapon_nailgun =
 */
 void() weapon_supernailgun =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	precache_model ("progs/g_nail2.mdl");
 	setmodel (self, "progs/g_nail2.mdl");
@@ -1560,12 +1594,11 @@ void() weapon_supernailgun =
 */
 void() weapon_grenadelauncher =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	precache_model ("progs/g_rock.mdl");
 	setmodel (self, "progs/g_rock.mdl");
@@ -1582,12 +1615,11 @@ void() weapon_grenadelauncher =
 */
 void() weapon_rocketlauncher =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	precache_model ("progs/g_rock2.mdl");
 	setmodel (self, "progs/g_rock2.mdl");
@@ -1603,14 +1635,13 @@ void() weapon_rocketlauncher =
 /*QUAKED weapon_lightning (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 void() weapon_lightning =
-{
-/*	if (cvar("instagib"))
+{	
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
-
+	
 	precache_model ("progs/g_light.mdl");
 	setmodel (self, "progs/g_light.mdl");
 	self.weapon = IT_LIGHTNING;
@@ -1651,7 +1682,7 @@ void() ammo_touch =
 
 	if (other.health <= 0) return;
 	if (other.classname != "player") return;
-	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;				
+	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;					
 		
 	if (!self.cnt_trig)
 	{
@@ -1677,9 +1708,9 @@ void() ammo_touch =
 	if (coop & CLASSIC_COOP && gameworld == MG1) self.enemy = other;		// Store this player for coop
 	if (coop & ENHANCED_COOP && other == self.enemy && self.wait <= 0) return; // In coop, don't allow the same player to pick up all the respawns.
 	if (coop & ENHANCED_COOP) self.enemy = other;		// Store this player for coop				
-	if (self.ammo_lockout_selective == 1 && other == self.enemy && self.wait <= 0 && cvar("customcoop") && !deathmatch) // Choose when an ammo pack can be locked out from being picked up again from a player during coop.
+	if (self.ammo_lockout_selective == 1 && other == self.enemy && self.wait <= 0 && cvar("customcoop")) // Choose when an ammo pack can be locked out from being picked up again from a player during coop.
 	{	
-		if (coop & REIGNITED_COOP || coop & CLASSIC_COOP || coop & ENHANCED_COOP)
+		if (coop & REIGNITED_COOP || coop & CLASSIC_COOP || coop & ENHANCED_COOP || deathmatch)
 		{
 			if (self.ammo_lockout[other.colormap] == -1) return; // Lockout
 		}
@@ -1756,7 +1787,7 @@ void() ammo_touch =
 		picked_amount = other.ammo_plasma - prev_ammo;
 		other.ammo_plasma = prev_ammo; // Sleeper: Hack the ammo, so it doesn't double.
 	}				 				
-	AddAmmo(other, self.aflag, self.cnt);
+	AddAmmo(other, self.aflag, self.cnt);	
 	
 	// Sleeper: Needed for MG1.
 	// DOMA ===================================================
@@ -1873,7 +1904,7 @@ void() ammo_touch =
 	// -------------------------------------------------------------------------------------------------------------	
 	#endif				
 	{
-		if (!coop)
+		if (deathmatch >= DM_DUEL && deathmatch <= DM_OneFlagCTF)
 		{
 			self.nextthink = time + 30;
 			self.think = SUB_regen;
@@ -2022,16 +2053,16 @@ void() ammo_touch =
 			else self.ammo_lockout_selective = 0;						
 		}			
 		else self.ammo_lockout_selective = 0;
-	}
-		
+	}	
+	
 	if (!self.ammo_lockout_selective) 
 	{
 		self.model = string_null;
 		self.solid = SOLID_NOT;
 	}
 					
-	if (self.ammo_lockout_selective == 1) self.ammo_lockout[other.colormap] = -1; // Lockout ammo boxes	
-	
+	if (self.ammo_lockout_selective == 1) self.ammo_lockout[other.colormap] = -1; // Lockout ammo boxes		
+
 	if (self.ammo_pickedup[other.colormap] == 1 && !deathmatch && coop == REIGNITED_COOP) self.customizeentityforclient = ammo_customizeentityforclient;
 };
 
@@ -2042,13 +2073,12 @@ Small box is 20, Big box is 40.
 */
 void() item_shells =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
-
+	
 	self.touch = ammo_touch;
 	self.aflag = IT_SHELLS;
 	if (self.spawnflags & WEAPON_BIG2)
@@ -2075,12 +2105,11 @@ Small box is 25, Big box is 50.
 */
 void() item_spikes =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	self.touch = ammo_touch;
 	self.aflag = IT_NAILS;
@@ -2107,7 +2136,7 @@ Small box is 25, Big box is 50.
 */
 void() item_lava_spikes =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove (self);
 		return;
@@ -2138,12 +2167,11 @@ Small box is 5, Big box is 10.
 */
 void() item_rockets =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	self.touch = ammo_touch;
 	self.aflag = IT_ROCKETS;
@@ -2170,12 +2198,12 @@ Small box is 5, Big box is 10.
 */
 void() item_multi_rockets =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove (self);
 		return;
 	}
-	
+
 	self.touch = ammo_touch;
 	self.aflag = DOE_MULTI_ROCKETS;
 	if (self.spawnflags & WEAPON_BIG2)
@@ -2201,13 +2229,12 @@ Small box is 6, Big box is 12.
 */
 void() item_cells =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
-
+	
 	self.touch = ammo_touch;
 	self.aflag = IT_CELLS;
 	if (self.spawnflags & WEAPON_BIG2)
@@ -2233,7 +2260,7 @@ Small box is 6, Big box is 12.
 */
 void() item_plasma =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove (self);
 		return;
@@ -2347,7 +2374,7 @@ void() key_touch =
 	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;	
 
 	sprint (other, "You have obtained the ", self.netname, "\n");
-	stuffcmd (other, "bf\n");	
+	stuffcmd (other, "bf\n");
 	
 //	if (cvar("coop")) self.coop_key_pickup = 1;
 					
@@ -2360,9 +2387,9 @@ void() key_touch =
 			sound (other, CHAN_ITEM, self.noise, 1, ATTN_NONE);
 			all_players = find (world, classname, "player"); 	
 			while (all_players)
-			{	
-				all_players.keytaker = self; 					
+			{						
 				all_players.items |= self.items;
+				all_players.keytaker = self; 	
 				if (all_players != other) // Display a centerprint to players that don't have the key yet.
 				{
 					if ((all_players.items & other.items) == other.items) sprint (all_players, other.netname, " has obtained the ", self.netname, "\n");
@@ -2373,12 +2400,12 @@ void() key_touch =
 		else 
 		{
 			if (cvar("coop") == CLASSIC_COOP) // Sleeper: Each player will have to fetch the key themselves.
-			{ 
+			{
 				sound (other, CHAN_ITEM, self.noise, 1, ATTN_NONE);
 				all_players = find (world, classname, "player"); 	
 				while (all_players)
-				{		
-					all_players.keytaker = self;
+				{	
+					all_players.keytaker = self; 						
 					if (all_players != other) // Display a centerprint to players that don't have the key yet.
 					{
 						if ((all_players.items & other.items) == other.items) sprint (all_players, other.netname, " has obtained the ", self.netname, "\n");
@@ -2399,7 +2426,7 @@ void() key_touch =
 		all_players = find (world, classname, "player"); 	
 		while (all_players)
 		{	
-			all_players.keytaker = self;					
+			all_players.keytaker = self; 						
 			all_players.items |= self.items;
 			if (all_players != other) // Display a centerprint to players that don't have the key yet.
 			{
@@ -2408,7 +2435,7 @@ void() key_touch =
 			all_players = find (all_players, classname, "player");					
 		}
 	}
-		
+	
 	if (cvar("coop") != CLASSIC_COOP) 
 	{
 		self.solid = SOLID_NOT;
@@ -2458,6 +2485,12 @@ following:
 
 void() item_key1 =
 {
+	if (cvar("instagib"))
+	{
+		remove (self);
+		return;
+	}
+
 	if (world.worldtype == 0)
 	{
 		precache_model ("progs/w_s_key.mdl");
@@ -2497,6 +2530,12 @@ following:
 
 void() item_key2 =
 {
+	if (cvar("instagib"))
+	{
+		remove (self);
+		return;
+	}
+
 	if (world.worldtype == 0)
 	{
 		precache_model ("progs/w_g_key.mdl");
@@ -2579,6 +2618,12 @@ End of level sigil, pick up to end episode and return to jrstart.
 void() item_sigil_mg1;
 void() item_sigil =
 {
+	if (cvar("instagib"))
+	{
+		remove (self);
+		return;
+	}
+	
 	// MG1 ===================
 	if (gameworld == MG1)
 	{
@@ -2966,7 +3011,8 @@ Player is invulnerable for 30 seconds
 */
 void() item_artifact_invulnerability =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	// Sleeper: Duels don't have powerups.
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove (self);
 		return;
@@ -2990,7 +3036,8 @@ Player takes no damage from water or slime for 30 seconds
 */
 void() item_artifact_envirosuit =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	// Sleeper: Duels don't have powerups.
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove (self);
 		return;
@@ -3013,7 +3060,8 @@ Player is invisible for 30 seconds
 */
 void() item_artifact_invisibility =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	// Sleeper: Duels don't have powerups.
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove (self);
 		return;
@@ -3038,7 +3086,8 @@ The next attack from the player will do 4x damage
 */
 void() item_artifact_super_damage =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	// Sleeper: Duels don't have powerups.
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove (self);
 		return;
@@ -3434,12 +3483,13 @@ void() DropBackpack =
 	
 	local float items_weapons = self.items & HUD_WEAPONS;
 	local float weapons_weapons = self.weapons & ALL_WEAPONS;
-	
+
 	// MG1 ------------------------------
 	// Yoder Sept24 2021 Horde Merge
 	// don't drop backpacks in horde mode
 	if (horde_ent) return; 
 	// ----------------------------------
+	if (cvar("instagib")) return;
 	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;	
 			
 	if (!weapons_weapons && !(self.ammo_shells1 + self.ammo_nails1 + self.ammo_rockets1 + self.ammo_cells1 + self.ammo_lava_nails + self.ammo_multi_rockets + self.ammo_plasma)) return; // nothing in it

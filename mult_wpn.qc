@@ -34,8 +34,7 @@ void() MiniGrenadeExplode =
 //	else T_RadiusDamage (self, self.owner, 60, world);
 	
 	if (self.owner.classname == "player") T_RadiusDamage (self, self.owner, 90, world, "multi_grenade");
-	else T_RadiusDamage (self, self.owner, 60, world, "multi_grenade");	
-	
+	else T_RadiusDamage (self, self.owner, 60, world, "multi_grenade");
 
 	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte (MSG_BROADCAST, TE_EXPLOSION2);
@@ -203,7 +202,7 @@ void() MultiRocketExplode =
 
 	local float damg; 
 	if (deathmatch) damg = 60;
-	else damg = 60 + random() * 15;
+	else damg = 60 + random()*15;
 
 	if (other.health)
 	{
@@ -764,7 +763,7 @@ void() W_FirePlasma =
 		self.ammo_plasma = 0;
 		W_SetCurrentAmmo ();
 //		T_RadiusDamage (self, self, 35 * cells, world);
-		T_RadiusDamage (self, self, 35 * cells, world, "");
+		T_RadiusDamage (self, self, 35 * cells, world, "");		
 		// Sleeper: Emulate self discharge in co-op even if we've completely disabled friendly fire and self-damage.
 		if (teamplay == COOP_FF_OFF && coop == REIGNITED_COOP)
 		{

@@ -368,11 +368,12 @@ void() NQW_SpawnCharacter =
 	self.view_ofs = '0 0 22';
 	self.velocity = '0 0 0';	// 1998-07-21 Player moves after respawn, fixed by Xian
 	setsize (self, VEC_HULL_MIN, VEC_HULL_MAX);
-//	self.mask |= pointcontentsmask (self.origin, playermask);	
+//	self.mask |= pointcontentsmask (self.origin, playermask);
+	
 	self.nqwCharacter = self.nqwNextCharacter;
 //	W_SetCurrentAmmo ();
 	player_stand1 ();
-	if (!(parm17 & CLIENT_SPECTATOR) && !self.donttelefrag) spawn_tdeath (self.origin, self);
+	if (!self.spectator && !self.donttelefrag) spawn_tdeath (self.origin, self);
 	
 	if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF && !coop)
 	{	
@@ -424,11 +425,11 @@ void() NQW_SpawnCharacter =
 			self.max_armorvalue = 200;
 		}
 	}
-	
-	// Sleeper: Always have a blank inventory when in start, or horde maps no matter the scenario.
 	/*
-	local float intro_maps = (world.model == "maps/start.bsp" || world.model == "maps/hipstart.bsp" || world.model == "maps/rstart.bsp" || world.model == "maps/e5start.bsp" || world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp");      					  		
-	if (intro_maps && !cvar("deathmatch"))	
+	// Sleeper: Always have a blank inventory when in start, or horde maps no matter the scenario.
+	local float intro_maps  = (world.model == "maps/start.bsp" || world.model == "maps/hipstart.bsp" || world.model == "maps/rstart.bsp" || world.model == "maps/e5start.bsp" || world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp");
+		      					  		
+	if (intro_maps && !deathmatch)	
 	{
 		self.items = IT_SHOTGUN | IT_AXE;
 		self.weapons = IT_SHOTGUN | IT_AXE;
@@ -455,14 +456,15 @@ void() NQW_SpawnCharacter =
 		self.ammo_lava_nails = 0;
 		self.ammo_multi_rockets = 0;
 		self.ammo_plasma = 0;
+		W_SetCurrentAmmo ();
 		self.expansionitems = 0;
 		self.weapon = IT_SHOTGUN;
 		self.armortype = 0;
-	}	
-	*/		
-	
-	W_SetCurrentAmmo ();
-	self.donttelefrag = 0;				
+//		self.MOTDstay = 0;
+	}
+	*/
+	self.donttelefrag = 0;	
+	W_SetCurrentAmmo ();			
 	self.nqwSpeakSpawn ();			
 };
 
@@ -645,7 +647,7 @@ void() NQW_RedTeam =
 		return;
 	}	
 	
-	if (self.steam == TEAM2) blueteam--;
+	blueteam--;
 	redteam++;
 	TeamDropFlagOfPlayer (self); // Drop of the flag
 	self.frags = 0; // Reset frags.
@@ -675,14 +677,15 @@ void() NQW_BlueTeam =
 		return;
 	}	
 	
-	if (self.steam == TEAM1) redteam--;
+	redteam--;
 	blueteam++;
 	TeamDropFlagOfPlayer (self); // Drop of the flag
 	self.frags = 0; // Reset frags.
 	self.team = TEAM2;	
 	stuffcmd (self, "color 13\n");
-			
-	self.skin = self.nqwSkin = 2;		
+	self.nqwSkin = 2;
+		
+	self.skin = self.nqwSkin;		
 	
 	bprint (self.netname, " joined Team BLUE\n");
 	respawn ();

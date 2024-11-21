@@ -29,8 +29,10 @@ void() elvtr_button_return;
 void() elvtr_button_wait =
 {
 	elvButnDir = 0;
-	if (self.spawnflags & ELVTR_DOWN) elvButnDir = -1;
-	else elvButnDir = 1;
+	if (self.spawnflags & ELVTR_DOWN)
+		elvButnDir = -1;
+	else
+		elvButnDir = 1;
 		
 	self.state = STATE_TOP;
 	self.nextthink = self.ltime + self.wait;
@@ -50,14 +52,20 @@ void() elvtr_button_return =
 	self.state = STATE_DOWN;
 	SUB_CalcMove (self.pos1, self.speed, elvtr_button_done);
 	self.frame = 0;			// use normal textures
-	if (self.health) self.takedamage = DAMAGE_YES;	// can be shot again
+	if (self.health)
+		self.takedamage = DAMAGE_YES;	// can be shot again
 };
 
-void() elvtr_button_blocked = {/* do nothing, just don't ome all the way back out */};
+
+void() elvtr_button_blocked =
+{	// do nothing, just don't ome all the way back out
+};
+
 
 void() elvtr_button_fire =
 {
-	if (self.state == STATE_UP || self.state == STATE_TOP) return;
+	if (self.state == STATE_UP || self.state == STATE_TOP)
+		return;
 
 	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 
@@ -74,8 +82,8 @@ void() elvtr_button_use =
 
 void() elvtr_button_touch =
 {
-	if (other.classname != "player") return;
-	
+	if (other.classname != "player")
+		return;
 	self.enemy = other;
 	elvtr_button_fire ();
 };
@@ -147,15 +155,19 @@ void() func_elvtr_button =
 		self.th_die = elvtr_button_killed;
 		self.takedamage = DAMAGE_YES;
 	}
-	else self.touch = elvtr_button_touch;
+	else
+		self.touch = elvtr_button_touch;
 
-	if (!self.speed) self.speed = 40;
-	if (!self.wait) self.wait = 1;
-	if (!self.lip) self.lip = 4;
+	if (!self.speed)
+		self.speed = 40;
+	if (!self.wait)
+		self.wait = 1;
+	if (!self.lip)
+		self.lip = 4;
 
 	self.state = STATE_BOTTOM;
 
 	self.pos1 = self.origin;
-	self.pos2 = self.pos1 + self.movedir * (fabs(self.movedir * self.size) - self.lip);
+	self.pos2 = self.pos1 + self.movedir*(fabs(self.movedir*self.size) - self.lip);
 };
 

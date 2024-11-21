@@ -1,7 +1,7 @@
 // Greeting Sound Controller
 void() playsnd = 
 {
-	local entity cl = find (world, classname, "player"); 
+	entity cl = find (world, classname, "player"); 
 	while (cl) 
 	{
 		sound (cl, CHAN_VOICE, self.noise, 1, 3.9999); 
@@ -35,15 +35,13 @@ void() MOTD_Sounds =
 
 string() Write_Official_GameWorld_Names =
 {
-	if (gameworld == UNKNOWN) return "!\n\nGame World: Unknown      ";    // Sleeper: Map wasn't on a known gameworld list.
-	if (gameworld == ID1) return "!\n\nGame World: iD1          "; 	      // Sleeper: Base game.	
-	if (gameworld == HIPNOTIC) return "!\n\nGame World: Hipnotic     ";   // Sleeper: Official Mission Pack 1: Scourge Of Armagon.	
-	if (gameworld == ROGUE) return "!\n\nGame World: Rogue        ";      // Sleeper: Official Mission Pack 1: Dissolution Of Eternity.		
-	if (gameworld == DOPA) return "!\n\nGame World: DOPA         ";	      // Sleeper: Official Mission Pack 3: Dimension Of The Past.	
-	if (gameworld == MG1) return "!\n\nGame World: MG1          ";        // Sleeper: Official Mission Pack 4: Dimension Of The Machine.
-	if (gameworld == APOTHEOSIS) return "!\n\nGame World: Apotheosis   "; // Sleeper: NQW Project: Apotheosis Abyss.	
-	if (gameworld == CUSTOM) return "!\n\nGame World: Custom       ";     // Sleeper: Custom Maps List.
-	return "!\n\nGame World: Error        "; 			      // Sleeper: Something broke.
+	if (gameworld == ID1) return "!\n\nGame World: iD1          ";		
+	if (gameworld == HIPNOTIC) return "!\n\nGame World: Hipnotic     ";		
+	if (gameworld == ROGUE) return "!\n\nGame World: Rogue        ";		
+	if (gameworld == DOPA) return "!\n\nGame World: DOPA         ";		
+	if (gameworld == MG1) return "!\n\nGame World: MG1          ";		
+	if (gameworld == CUSTOM) return "!\n\nGame World: Custom       ";
+	return "!\n\nGame World: Error        ";
 };
 
 string() Write_Gametypes =
@@ -81,10 +79,30 @@ string() Write_Gametypes =
 	if (!cvar("coop")) 		    // Deathmatch
 	{
 		if (cvar("deathmatch") == DM_DUEL) return "\nGame Type: Duel        ";
-		if (cvar("deathmatch") == DM_FFA) return "\nGame Type: Free For All";
-		if (cvar("deathmatch") == DM_TDM) return "\n   Game Type: Team Deathmatch";
-		if (cvar("deathmatch") == DM_CTF) return "\n    Game Type: Capture The Flag";
-		if (cvar("deathmatch") == DM_OneFlagCTF) return "\nGame Type: One Flag CTF";
+		if (cvar("deathmatch") == DM_FFA) 
+		{
+			if (cvar("instagib") == INSTAGIB_ON) return "\nGame Type: iFFA        ";
+			if (cvar("instagib") == INSTAGIB_RAILWARZ) return "\nGame Type: Railwarz FFA";
+			return "\nGame Type: Free For All";
+		}
+		if (cvar("deathmatch") == DM_TDM) 
+		{
+			if (cvar("instagib") == INSTAGIB_ON) return "\nGame Type: iTDM        ";
+			if (cvar("instagib") == INSTAGIB_RAILWARZ) return "\nGame Type: Railwarz TDM";
+			return "\n   Game Type: Team Deathmatch";
+		}
+		if (cvar("deathmatch") == DM_CTF) 
+		{
+			if (cvar("instagib") == INSTAGIB_ON) return "\nGame Type: iCTF        ";
+			if (cvar("instagib") == INSTAGIB_RAILWARZ) return "\nGame Type: Railwarz CTF";
+			return "\n    Game Type: Capture The Flag";
+		}
+		if (cvar("deathmatch") == DM_OneFlagCTF) 
+		{
+			if (cvar("instagib") == INSTAGIB_ON) return "\nGame Type: One Flag iCTF ";
+			if (cvar("instagib") == INSTAGIB_RAILWARZ) return "\nGame Type: One Flag RWZ CTF    ";
+			return "\nGame Type: One Flag CTF";
+		}
 	}			
 	return "\nGame Type: Error       ";
 };
@@ -571,11 +589,11 @@ void() MOTD_Skill =
 
 // Send MOTDs to PlayerPostThink
 void() Send_MOTD =
-{	
+{
 	if (warmup_engaged) return;
-
+	
 	// Turn off MOTD with an input.
-	if (self.greet == ENABLE_MOTD)
+	if (self.greet == 1)
 	{	
 		// Interchangeable MOTD.
 		Write_MOTD ();
@@ -584,10 +602,11 @@ void() Send_MOTD =
 		if (self.button0 || self.button1 || self.button2)
 		{
 			id1_centerprint (self, "", "\n"); // Immediately remove current centerprint from screen (hopefully isn't repeating). 			
-			self.greet = DISABLE_MOTD;			
+			self.greet = 0;			
 		}
 	}
 };
+
 
 // Sleeper: Just needs a way to kill the menu.
 /*

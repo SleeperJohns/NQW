@@ -369,7 +369,8 @@ void() barrel_explode_mg1 =
 	T_RadiusDamage (self, self, 160, world, "");
 	sound (self, CHAN_VOICE, "weapons/r_exp3.wav", 1, ATTN_NORM);
 	particle (self.origin, '0 0 0', 75, 255);
-		
+	
+	
 	// yoder add, 27/09/2020 to make barrels fire targets on explode
 	activator = self.enemy;
 	dprint("enemy name: ");

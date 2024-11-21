@@ -45,15 +45,13 @@ void() newitems_touch =
 {
 	if (other.classname != "player") return;
 	if (other.health <= 0) return;
+	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;	
 		
 	// Only one per person, please.
 	if (self.classname == "item_sphere")
 	{
 		if (other.expansionitems & DOE_V_SPHERE) return;
 	}
-	
-	if (!self.droppable_item) self.fresh_powerup = TRUE;
-	else self.fresh_powerup = FALSE;	
 
 	local float seconds_left = rint (self.delay);
 		
@@ -155,7 +153,7 @@ The shield upgrade
 */
 void() item_powerup_shield =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove (self);
 		return;
@@ -180,7 +178,7 @@ The anti-grav belt
 */
 void() item_powerup_belt =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	if (cvar("instagib") || deathmatch == DM_DUEL || deathmatch == DM_FFA)
 	{
 		remove(self);
 		return;

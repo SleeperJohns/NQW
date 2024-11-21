@@ -53,7 +53,6 @@ void() door_blocked =
 {
 	if (world.model == "maps/hip1m4.bsp" && other.classname == "player") return;
 	
-	other.deathtype = "squish";	// QIP
 //	T_Damage (other, self, self, self.dmg);
 	T_Damage (other, self, self.goalentity, self.dmg);	// QIP
 	
@@ -801,7 +800,6 @@ void () secret_blocked =
 {
 	if (time < self.attack_finished) return;
 
-	bprint ("secret squish\n");
 	self.attack_finished = time + 0.5;
 	other.deathtype = "squish";	// QIP
 	T_Damage (other, self, self, self.dmg);
@@ -895,7 +893,7 @@ void () func_door_secret =
 	self.speed = 50;
 	self.use = fd_secret_use;
 
-	if (!self.targetname || self.spawnflags&SECRET_YES_SHOOT)
+	if (!self.targetname || self.spawnflags & SECRET_YES_SHOOT)
 	{
 		self.health = 10000;
 		self.takedamage = DAMAGE_YES;

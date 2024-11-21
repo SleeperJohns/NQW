@@ -66,8 +66,6 @@ void() NQW_CharacterName =
 float	OGRE_BOSS	= 2;
 float	OGRE_NORMAL	= 4;
 
-.float playerjump_finished; // Sleeper: Mainly just to stop people from immediately jumping after a level load.
-
 string themap;
 // .float has_vote;
 float nomap;
@@ -99,25 +97,28 @@ float customcoop_flags;
 // Time + # is temporary lockout for that player that picked up the item, -1 is permanent lockout for that player that picked up the item.
 float MAX_ACTIVE_PLAYERS = 16; 		    // Sleeper: Adjust this depending on your maxplayers limit desires.
 // Powerups
-.float powerup_lockout[MAX_ACTIVE_PLAYERS];  // Up to 32 players allowed to pickup the same powerup.
+.float powerup_lockout[MAX_ACTIVE_PLAYERS];  // Up to 16 players allowed to pickup the same powerup.
 .float powerup_lockout_selective; 	     // A hack to use self.model & self.solid in certain cases.
 .float powerup_pickedup[MAX_ACTIVE_PLAYERS]; // Visually despawn a powerup for a player.
 // Weapons
-.float weapon_lockout[MAX_ACTIVE_PLAYERS];   // Up to 32 players allowed to pickup the same weapon.
+.float weapon_lockout[MAX_ACTIVE_PLAYERS];   // Up to 16 players allowed to pickup the same weapon.
 .float weapon_lockout_selective; 	     // A hack to use self.model & self.solid in certain cases.
 .float weapon_pickedup[MAX_ACTIVE_PLAYERS];  // Visually despawn a weapon for a player.
 // Ammo
-.float ammo_lockout[MAX_ACTIVE_PLAYERS];     // Up to 32 players allowed to pickup the same ammo pack.
+.float ammo_lockout[MAX_ACTIVE_PLAYERS];     // Up to 16 players allowed to pickup the same ammo pack.
 .float ammo_lockout_selective;   	     // A hack to use self.model & self.solid in certain cases.
 .float ammo_pickedup[MAX_ACTIVE_PLAYERS];    // Visually despawn an ammopack for a player.
 // Armor
-.float armor_lockout[MAX_ACTIVE_PLAYERS];    // Up to 32 players allowed to pickup the same armor.
+.float armor_lockout[MAX_ACTIVE_PLAYERS];    // Up to 16 players allowed to pickup the same armor.
 .float armor_lockout_selective;   	     // A hack to use self.model & self.solid in certain cases.
 .float armor_pickedup[MAX_ACTIVE_PLAYERS];   // Visually despawn an armor for a player.
 // Health
-.float health_lockout[MAX_ACTIVE_PLAYERS];   // Up to 32 players allowed to pickup the same health pack.
+.float health_lockout[MAX_ACTIVE_PLAYERS];   // Up to 16 players allowed to pickup the same health pack.
 .float health_lockout_selective;  	     // A hack to use self.model & self.solid in certain cases.
 .float health_pickedup[MAX_ACTIVE_PLAYERS];  // Visually despawn a healthpack for a player.
+
+// Sleeper: I'm curious how I would be able to replace self.model with this. The goal is to make the item systems like Destiny, Serious Sam or Quake II's remaster item system.
+// .string item_model[32];
 
 // Config Settings
 float initial_vote;
@@ -129,12 +130,13 @@ void() Gametype_OneFlagCTF_Settings;
 void() Gametype_Reignited_Coop_Settings;
 void() Gametype_Classic_Coop_Settings;
 void() Gametype_Enhanced_Coop_Settings;
-// void() Gametype_Instagib_Duel_Settings;
 void() Gametype_Instagib_FFA_Settings;
 // void() Gametype_Instagib_TDM_Settings;
 // void() Gametype_Instagib_CTF_Settings;
 // void() Gametype_Instagib_OneFlagCTF_Settings;
 void() Gametype_Railwarz_FFA_Settings;
+void() Gametype_Railwarz_CTF_Settings;
+void() Gametype_Railwarz_OneFlagCTF_Settings;
 
 // .float team_connection;
 .float spectator;
@@ -456,7 +458,9 @@ float grappling_hook_anchor_time;
 float grappling_hook_anchor_timeout;
 float grappling_hook_enable_damage;
 float grappling_hook_damage;
-float killthebunny; // Disable Bunnyhopping
+float killthebunny;
+// float speedrunning_mode; // Not yet.
+
 // float sudden_death; // Overtime cvar
 // float sudden_death_type; // 0 = Default (Off), 1 = Unbalanced Score Overtime Rules (Quake III: Arena/Team Arena/Champions), 2 = Enhanced Overtime Rules (Quake Live).
 float sudden_death_engaged; // Put Sudden Death into affect when necessary.
@@ -476,6 +480,7 @@ float warmup_counttime;
 float initiate_matchtime;
 float matchtime_timer;
 float matchtime;
+
 
 // Counts
 .float cnt_mg1;  // Item Respawn cycles whenever the server is in Classic Co-Op in MG1, or in Custom Co-Op mode.
@@ -497,13 +502,12 @@ void() Item_Armor_Rot;
 .float armorrottime;
 .float max_armorvalue;
 
-// Client Detection
+// Client Checks
 .string client;
 string QSSM_CLIENT    = "QSS-M";
 string FTEQW_CLIENT   = "FTE";
 string EzQ_CLIENT     = "ezQuake";
 string VANILLA_CLIENT = "Quake";
-string IW_CLIENT      = "Ironwail";
 
 // Greeting Sound Controllers
 void(string soundToPlay, float special_delay) greet_announcer;
@@ -514,6 +518,8 @@ entity speaker;
 float campaign_valid;
 float campaign;
 
+// Are we a brand new player connecting into the server?
+// .float is_new;
 // Client Identity States
 .float client_tags;
 float NEW_PLAYER_INIT 	       = 1;     // This player is brand new to the server. To be removed immediately after inheriting weapons and items.
@@ -556,10 +562,15 @@ float TeamScore[TEAM_MAX];
 void(entity fragger, float new_frags) add_frag;
 void(entity scorer, float new_score) add_score;
 
-.float total_teamscore_red, total_teamscore_blue;
-
 // Support for alpha
 .float alpha;
+
+/*
+// Which Co-Operative experience do we want?
+float REIGNITED_COOP = 1; // The Reignited Experience
+float CLASSIC_COOP   = 2; // The Classic Experience
+float ENHANCED_COOP  = 4; // The Enhanced Experience
+*/
 
 // Sleeper Must Die! spawnfunctions (Mainly for Skill 5, but can be used in Deathmatch and other skills too)
 // Sleeper: This is used to manually tweak an experience in QC.
@@ -608,15 +619,7 @@ float update_serverinfo;
 // .float coop_key_pickup;
 .entity keytaker; // Sleeper: Hey, look another .owner deal.
 
-void() SpawnWeapon;
-
 float(string s) checkextension = #99;
-
-float ExtSupported(string extension) =
-{
-	if (!cvar("pr_checkextension")) return FALSE;
-	return checkextension(extension);
-};
 
 // .__uint mask;
 // __uint nomask = 0;
@@ -668,66 +671,66 @@ vector(vector point, float ang) NQW_RotatePointYaw =
 =================================================
 MODIFIED BASE QC FUNCTIONS
 combat
-	T_Damage		|	
-	Killed			|	
-	WaterMove		|	???
+	T_Damage			|	
+	Killed				|	
+	WaterMove			|	???
 	PlayerPostThink		|	^^^
 items
-	T_Heal			|	
-	item_health		|	
+	T_Heal				|	
+	item_health			|	
 	health_touch		|	
-	armor_touch		|	^^^
+	armor_touch			|	^^^
 	weapon_touch		|	^^^
-	sigil_touch		|	^^^
+	sigil_touch			|	^^^
 	powerup_touch		|	^^^
 	bound_other_ammo	|	set ammo limits - shells, rockets: 100, nails: 200, cells: 100
-	weapon_touch		|	
-	ammo_touch		|	set ammo limits - shells, rockets: 100, nails: 200, cells: 100; remove auto swap
+	weapon_touch		|	set cells added on LG pickup 15
+	ammo_touch			|	set ammo limits - shells, rockets: 100, nails: 200, cells: 100; remove auto swap
 weapons
-	W_FireAxe		|	added optional hit sound; set damage to 20 (Default: 20)
-	W_FireShotgun		|	set pellets to 6 (Default: 6)
-	W_FireSuperShotgun	|	set pellets to 14 (Default: 14)
+	W_FireAxe			|	added optional hit sound; set damage to 20
+	W_FireShotgun		|	set pellets to 6
+	W_FireSuperShotgun	|	set pellets to 14
 	T_MissileTouch		|	removed RNG from damage
-	W_FireLightning		|	set damage to 30 (Default: 30)
-	spike_touch		|	set damage to 9 (Default: 9)
-	superspike_touch	|	set damage to 12 (Default: 12)
+	W_FireLightning		|	set damage to 30
+	spike_touch			|	set damage to 9
+	superspike_touch	|	set damage to 12
 	W_SetCurrentAmmo	|	don't update if using an ability; changed axe models to use nqwMeleeMdl reference
 	W_BestWeapon		|	
-	W_Attack		|	changed axe sound to use NQW reference
+	W_Attack			|	changed axe sound to use NQW reference
 	CheatCommand		|	
 	ImpulseCommands		|	added NQW_PickCharacter as Impulse 100; added NQW_SwapSkin as Impulse 137
 world
-	worldspawn		|	added call to NQW_Precache()
+	worldspawn			|	added call to NQW_Precache()
 	CopyToBodyQue		|	added line to set proper skin
 client
-	SetChangeParms		|	parm64 to current character; parm63 to current skin
-	SetNewParms		|	parm63 to current skin (we don't add Champion here because it ends up in a loop of picking Ranger over and over)
-	DecodeLevelParms	|	parm64 to current character; parm63 to current skin
-	ClientKill		|	
+	SetChangeParms		|	parm16 to current champion; parm15 to current skin
+	SetNewParms			|	parm15 to current skin (we don't add Champion here because it ends up in a loop of picking Ranger over and over)
+	DecodeLevelParms	|	parm16 to current champion; parm15 to current skin
+	ClientKill			|	changed modelindex_player to self.modelindex_nqwplayer
 	PutClientInServer	|	this is where the player spawning happens; we should override it with NQW_SpawnCharacter()
 	CheckPowerups		|	changed modelindex_player to self.modelindex_nqwplayer; override model update if playing as Nyx; ability ready notification
-	PlayerJump		|	
-	WaterMove		|	
+	PlayerJump			|	
+	WaterMove			|	
 	PlayerPreThink		|	
-				|	
+						|	
 	ClientObituary		|	Added character specific melee and ability death messages; added inflictor entity to arguments
 player
-	player_axe1		|	
+	player_axe1			|	
 	player_axeb1		|	^^^^^^
 	player_axec1		|	^^^^^^
 	player_axed1		|	^^^^^^
-	PainSound		|	modified all sound references to use nqwSnd... strings
-	DeathSound		|	^^^^^^
-	GibPlayer		|	changed ThrowHead() to use nqwCharGib
-	PlayerDie		|	changed modelindex_player to self.modelindex_nqwplayer
-monster_boss / chthon
+	PainSound			|	modified all sound references to use nqwSnd... strings
+	DeathSound			|	^^^^^^
+	GibPlayer			|	changed ThrowHead() to use nqwCharGib
+	PlayerDie			|	changed modelindex_player to self.modelindex_nqwplayer
+monster_boss / cthon
 	boss_death10		|	
-	boss_awake		|	
+	boss_awake			|	
 monster_oldone / shub
-	old_wait		|	new animation function to assist with "find_character()" (see below)
+	old_wait			|	new animation function to assist with "find_character()" (see below)
 	find_character		|	new handler for when Shub sees a Character
-	old_idle46		|	animation calls th_stand now, to make sure we can switch back to default behavior
-	finale_1		|	changed "if (!pl) {error...}" to "if (pl) { remove(pl) }" on line 125;
-	finale_4		|	changed player model placement to use the current champion model instead
+	old_idle46			|	animation calls th_stand now, to make sure we can switch back to default behavior
+	finale_1			|	changed "if (!pl) {error...}" to "if (pl) { remove(pl) }" on line 125;
+	finale_4			|	changed player model placement to use the current champion model instead
 	monster_oldone		|	Commented out "self.think = old_idle1"; added "self.th_stand = old_wait"
 */

@@ -3089,7 +3089,7 @@ void() OCD_Mapname_Prints =
 		bprint("Game       : ");
 		bprint("Custom");
 		bprint("\n");		
-		bprint("Map(100m)  : ");
+		bprint("Map(100m) : ");
 		bprint("100m Run");
 		bprint("\n");		
 		bprint("Map Author : ");
@@ -3110,96 +3110,91 @@ void() OCD_Mapname_Prints =
 
 void() ExitMessage =
 {
-	if (!cvar("sv_public")) return;
-	
-	DisplayedExitMsg = 1;
-	bprint("\nQdQ Stats patch v1.8 (NQW Edition)\n");
-	bprint("\n");
-	bprint("=======================\n");
-	if (mlstage == 2)
+	if (cvar("sv_public") == 1)
 	{
-		if (mapname != "start" || mapname != "hipstart" || mapname != "rstart" || mapname != "e5start" || mapname != "mgstart" || mapname != "hub")
+		DisplayedExitMsg = 1;
+		bprint("\nQdQ Stats patch v1.8 (NQW Edition)\n");
+		bprint("\n");
+		bprint("=======================\n");
+		if (mlstage == 2)
 		{
-			if (numlevels == 1) totaltime = time;
-			else totaltime = totaltime + time;
+			if (mapname != "start" || mapname != "hipstart" || mapname != "rstart" || mapname != "e5start" || mapname != "mgstart" || mapname != "hub")
+			{
+				if (numlevels == 1) totaltime = time;
+				else totaltime = totaltime + time;
+			}
+			mlstage = 3;
 		}
-		mlstage = 3;
-	}
-//	NoCheatStamp();
-	OCD_Mapname_Prints();
-	bprint("\n");
-	if (mapname != "100m" && mapname != "400m") // Sleeper: Trick maps or bunnyhop maps don't really matter.
-	{
-		if (cvar("skill") == 0)
+	//	NoCheatStamp();
+		OCD_Mapname_Prints();
+		bprint("\n");
+		if (mapname != "100m" && mapname != "400m") // Sleeper: Trick maps or bunnyhop maps don't really matter.
 		{
-			bprint("Skill(0)   : ");
-			bprint("Easy");
+			if (cvar("skill") == 0)
+			{
+				bprint("Skill(0)   : ");
+				bprint("Easy");
+			}
+			else if (cvar("skill") == 1)
+			{
+				bprint("Skill(1)   : ");
+				bprint("Normal");
+			}
+			else if (cvar("skill") == 2)
+			{
+				bprint("Skill(2)   : ");
+				bprint("Hard");
+			}
+			else if (cvar("skill") == 3)
+			{
+				bprint("Skill(3)   : ");
+				bprint("Classic Nightmare!");
+			}
+			else if (cvar("skill") == 4)
+			{
+				bprint("Skill(4)   : ");
+				bprint("KEX Nightmare!");
+			}
+			else if (cvar("skill") == 5)
+			{
+				bprint("Skill(5)   : ");
+				bprint("Sleeper Must Die!");	
+			}
+			else if (cvar("skill") > 5 || cvar("skill") < 0)
+			{
+				bprint("Skill(?)   : ");
+				bprint("Unknown");	
+			}
+			bprint("\n");
+		}								
+		if (mapname == "start" || mapname == "hipstart" || mapname == "rstart" || mapname == "e5start" || mapname == "mgstart" || mapname == "hub")
+		{
+			bprint("Level Time : ");
+			PrintTime(time);
+			bprint("\n");
+			bprint("Total Time : ");
+			PrintTime(totaltime);
 		}
-		else if (cvar("skill") == 1)
+		else
 		{
-			bprint("Skill(1)   : ");
-			bprint("Normal");
-		}
-		else if (cvar("skill") == 2)
-		{
-			bprint("Skill(2)   : ");
-			bprint("Hard");
-		}
-		else if (cvar("skill") == 3)
-		{
-			bprint("Skill(3)   : ");
-			bprint("Classic Nightmare!");
-		}
-		else if (cvar("skill") == 4)
-		{
-			bprint("Skill(4)   : ");
-			bprint("KEX Nightmare!");
-		}
-		else if (cvar("skill") == 5)
-		{
-			bprint("Skill(5)   : ");
-			bprint("Sleeper Must Die!");	
-		}
-		else if (cvar("skill") > 5 || cvar("skill") < 0)
-		{
-			bprint("Skill(?)   : ");
-			bprint("Unknown");	
+			bprint("Level Time : ");
+			PrintTime(time);
+			bprint("\n");
+			totaltime = totaltime + time;
+			bprint("Total Time : ");
+			PrintTime(totaltime);
 		}
 		bprint("\n");
-	}								
-	if (mapname == "start" || mapname == "hipstart" || mapname == "rstart" || mapname == "e5start" || mapname == "mgstart" || mapname == "hub")
-	{
-		bprint("Level Time : ");
-		PrintTime(time);
+		bprint("Runner     : ");
+		bprint(self.netname);		
 		bprint("\n");
-		bprint("Total Time : ");
-		PrintTime(totaltime);
-	}
-	else
-	{
-		bprint("Level Time : ");
-		PrintTime(time);
+		bprint("=======================\n");
+		if (mapname == "start" || mapname == "hipstart" || mapname == "rstart" || mapname == "e5start" || mapname == "mgstart")
+			bprint("(Start maps don't add time!)\n");
+		else if (mapname == "hub")
+			bprint("(Hub maps don't add time!)\n");
 		bprint("\n");
-		totaltime = totaltime + time;
-		bprint("Total Time : ");
-		PrintTime(totaltime);
 	}
-	bprint("\n");
-	if (num_players <= 1) bprint("Runner     : ");
-	else bprint("Runners    : ");
-//	bprint(self.netname);	
-	for (entity player = find (world, classname, "player"); player; player = find (player, classname, "player")) // Sleeper: Loop through all the players to get their names.
-	{
-		local float comma;
-		bprint (player.netname);
-		if (comma <= num_players) comma++;
-		if (comma == num_players - 1) bprint (", "); // Sleeper: If there is more than one player, add a comma until the last player.											
-	}
-	bprint("\n");
-	bprint("=======================\n");
-	if (mapname == "start" || mapname == "hipstart" || mapname == "rstart" || mapname == "e5start" || mapname == "mgstart") bprint("(Start maps don't add time!)\n");
-	else if (mapname == "hub") bprint("(Hub maps don't add time!)\n");
-	bprint("\n");
 };
 
 /*

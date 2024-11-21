@@ -117,7 +117,7 @@ void() lavaspike_touch =
 	{
 		other.deathtype = "lava_nail";
 		spawn_touchblood (9);
-		if (other.classname == "player") // Sleeper: Holy shit, armor piercing lava nails!
+		if (other.classname == "player")
 		{
 			old_armortype = other.armortype;
 			old_armorvalue = other.armorvalue;
@@ -127,7 +127,7 @@ void() lavaspike_touch =
 			T_Damage (other, self, self.owner, 9);
 			other.armortype = old_armortype;
 			other.armorvalue = old_armorvalue;
-			other.items |= old_armormask;
+			other.expansionitems |= old_armormask;
 		}
 		else		// is a monster
 		{

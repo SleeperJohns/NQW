@@ -404,7 +404,8 @@ void() GrappleTrack =
 	if (self.enemy.solid == SOLID_SLIDEBOX) 
 	{
 		self.velocity = '0 0 0';
-		setorigin (self, self.enemy.origin + self.enemy.mins + self.enemy.size * 0.5);
+		setorigin(self, self.enemy.origin + self.enemy.mins +
+			self.enemy.size * 0.5);
 	} 
 	else self.velocity = self.enemy.velocity;
 

@@ -11,10 +11,12 @@ void(string soundToPlay) countdown_sounds =
 
 void() Player_Countdown_Sounds =
 {
-	if (warmup_engaged && warmup_counttime < time) 
+	if (warmup_engaged && warmup_counttime < time && !initiate_matchtime) 
 	{
 		if (warmup_countdown >= 2 && warmup_countdown <= 4) countdown_sounds ("buttons/switch04.wav");
 	}
+
+	if (matchtime >= 2 && matchtime <= 4 && initiate_matchtime && matchtime_timer < time) countdown_sounds ("buttons/switch04.wav");	
 };
 
 string() Warmup_Count =

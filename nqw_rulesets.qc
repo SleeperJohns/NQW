@@ -6,34 +6,22 @@ float DM_FFA			    = 	2;	// Free For All
 float DM_TDM			    =	3; 	// Team Deathmatch
 float DM_CTF			    =	4;	// Capture The Flag
 float DM_OneFlagCTF		    =	5;	// One Flag Capture The Flag
-/*
-float DM_Insta_DUEL		    = 	6;
-float DM_Insta_FFA		    =	7;	// Instagib Free For All (Standard iFFA, no off-hand hook)
-float DM_Insta_TDM		    =	8;	// Team Deathmatch Instagib (Standard iTDM, no off-hand hook)
-float DM_Insta_CTF		    =	9;
-float DM_Insta_OneFlagCTF	    = 	10;
-float DM_RWZ_DUEL		    =	11;
-float DM_RWZ_FFA		    =	12;	// Railwarz Free For All (Fast Paced iFFA with off-hand hook)
-float DM_RWZ_TDM		    = 	13;	// Railwarz Team Deathmatch (Fast Paced iTDM with off-hand hook)
-float DM_RWZ_CTF		    =	14;	// Railwarz Capture The Flag (Fast Paced iCTF with off-hand hook)
-float DM_RWZ_OneFlagCTF	    	    = 	15;	// Railwarz One Flag CTF (Fast Paced iOneFlagCTF with off-hand hook)
-*/
-// float DM_CA			    =	16;	// Clan Arena
-// float DM_RA			    =	17;	// Rocket Arena
-// float DM_Abyss_Duel		    =	18;	// Apotheosis Duel (1v1 with Monsters)
-// float DM_Abyss_TDM		    =	19;	// Apotheosis Team Deathmatch (up to 4v4 with Monsters)
+// float DM_CA			    =	6;	// Clan Arena
+// float DM_RA			    =	7;	// Rocket Arena
+// float DM_Abyss_Duel		    =	8;	// Apotheosis Duel (1v1 with Monsters)
+// float DM_Abyss_TDM		    =	9;	// Apotheosis Team Deathmatch (up to 4v4 with Monsters)
 
 // Sleeper: Might add these back at a later time to make the everything official wise complete.
 /*
-float DM_DMATCH_TAG		    =	20;	// deathmatch tag, no 'team' stuff
-float DM_CTF_ALT		    =	21;	// alternate CTF (three teams)
+float DM_DMATCH_TAG		    =	10;	// deathmatch tag, no 'team' stuff
+float DM_CTF_ALT		    =	11;	// alternate CTF (three teams)
 */
 
 /* INSTAGIB CVAR VALUES
 */
 float INSTAGIB_OFF 	= 0;
 float INSTAGIB_ON	= 1;
-float INSTAGIB_RAILWARZ = 2;
+float INSTAGIB_RAILWARZ = 2; // Sleeper: Increases Railgun rate of fire from 2 to 1.1. Grappling Hooks do not harm players. Fast Grappling Hook Speeds.
 
 /* COOPERATIVE CVAR VALUES
 */
@@ -111,15 +99,15 @@ float() Is_TeamBasedDMModes =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
-	if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF || cvar("deathmatch") == DM_Insta_TDM || cvar("deathmatch") == DM_Insta_CTF || cvar("deathmatch") == DM_Insta_OneFlagCTF || cvar("deathmatch") == DM_RWZ_TDM || cvar("deathmatch") == DM_RWZ_CTF || cvar("deathmatch") == DM_RWZ_OneFlagCTF) return TRUE;
+	if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_OneFlagCTF) return TRUE;
 	return FALSE;
 };
 
-float() Is_TDMModes =
+float() Is_TDMMode =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 	
-	if (cvar("deathmatch") == DM_TDM || cvar("deathmatch") == DM_Insta_TDM || cvar("deathmatch") == DM_RWZ_TDM) return TRUE;
+	if (cvar("deathmatch") == DM_TDM) return TRUE;
 	return FALSE;
 };
 
@@ -127,7 +115,7 @@ float() Is_CTFModes =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
-	if (cvar("deathmatch") == DM_CTF || cvar("deathmatch") == DM_Insta_CTF || cvar("deathmatch") == DM_RWZ_CTF) return TRUE;
+	if (cvar("deathmatch") == DM_CTF) return TRUE;
 	return FALSE;
 };
 
@@ -135,7 +123,7 @@ float() Is_OneFlagCTFModes =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 	
-	if (cvar("deathmatch") == DM_OneFlagCTF || cvar("deathmatch") == DM_Insta_OneFlagCTF || cvar("deathmatch") == DM_RWZ_OneFlagCTF) return TRUE;
+	if (cvar("deathmatch") == DM_OneFlagCTF) return TRUE;
 	return FALSE;
 };
 
@@ -143,15 +131,15 @@ float() Is_DMModes =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
-	if (cvar("deathmatch") == DM_FFA || cvar("deathmatch") == DM_Insta_FFA || cvar("deathmatch") == DM_RWZ_FFA) return TRUE;
+	if (cvar("deathmatch") == DM_FFA) return TRUE;
 	return FALSE;
 };
 
-float() Is_DuelDMModes = 
+float() Is_DuelDMMode = 
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
-	if (cvar("deathmatch") == DM_DUEL || cvar("deathmatch") == DM_Insta_DUEL || cvar("deathmatch") == DM_RWZ_DUEL) return TRUE;
+	if (cvar("deathmatch") == DM_DUEL) return TRUE;
 	return FALSE;
 };
 
@@ -159,7 +147,7 @@ float() Is_DMModes_NoItems =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
-	if (cvar("deathmatch") == DM_Insta_DUEL || cvar("deathmatch") == DM_Insta_FFA || cvar("deathmatch") == DM_Insta_TDM || cvar("deathmatch") == DM_Insta_CTF || cvar("deathmatch") == DM_Insta_OneFlagCTF || cvar("deathmatch") == DM_RWZ_DUEL || cvar("deathmatch") == DM_RWZ_FFA || cvar("deathmatch") == DM_RWZ_TDM || cvar("deathmatch") == DM_RWZ_CTF || cvar("deathmatch") == DM_RWZ_OneFlagCTF) return TRUE;
+	if (cvar("instagib")) return TRUE;
 	return FALSE;
 };
 
@@ -176,7 +164,7 @@ float() Is_InstaDM =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 	
-	if (cvar("deathmatch") == DM_Insta_DUEL || cvar("deathmatch") == DM_Insta_FFA || cvar("deathmatch") == DM_Insta_TDM || cvar("deathmatch") == DM_Insta_CTF || cvar("deathmatch") == DM_Insta_OneFlagCTF) return TRUE;	
+	if (cvar("instagib") == INSTAGIB_ON) return TRUE;	
 	return FALSE;
 };
 
@@ -184,7 +172,7 @@ float() Is_RailwarzDM =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 	
-	if (cvar("deathmatch") == DM_RWZ_DUEL || cvar("deathmatch") == DM_RWZ_FFA || cvar("deathmatch") == DM_RWZ_TDM || cvar("deathmatch") == DM_RWZ_CTF || cvar("deathmatch") == DM_RWZ_OneFlagCTF) return TRUE;
+	if (cvar("instagib") == INSTAGIB_RAILWARZ) return TRUE;
 	return FALSE;
 };
 

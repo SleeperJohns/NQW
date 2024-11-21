@@ -37,13 +37,11 @@ void() hip_powerup_touch =
 {
 	if (other.classname != "player") return;
 	if (other.health <= 0) return;
+	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;	
 	if (self.powerup_lockout_selective == 1) // Choose what powerup that can lockout a player from picking the same powerup again.
 	{
 		if (self.powerup_lockout[other.colormap] > time || self.powerup_lockout[other.colormap] == -1) return; // Lockout
 	}
-	
-	if (!self.droppable_item) self.fresh_powerup = TRUE;
-	else self.fresh_powerup = FALSE;	
 	
 	local float seconds_left = rint (self.delay);
 		
@@ -150,19 +148,13 @@ Player takes no damage from electrical attacks and swims faster for 30 seconds
 */
 void() item_artifact_wetsuit =
 {
-/*	if (cvar("instagib"))
-	{
-		remove (self);
-		return;
-	}
-*/
-
 	// Duels normally don't have powerups
-	if (deathmatch == DM_DUEL)
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
 		remove(self);
 		return;
 	}
+	
 	self.touch = hip_powerup_touch;
 	precache_model ("progs/wetsuit.mdl");
 	precache_sound ("misc/wetsuit.wav");
@@ -217,13 +209,14 @@ You must make func_spawn entities connected to this entity
 to spawn the charmed creature.
 */
 void() item_hornofconjuring =
-{	
-	if (deathmatch)
+{
+	// Spawns monsters, no need.
+	if (cvar("instagib") || deathmatch)
 	{
-		remove (self);
+		remove(self);
 		return;
-	}
-	 
+	}   
+	
 	self.touch = horn_touch;
 	precache_model("progs/horn.mdl");
 	precache_sound("hipitems/horn.wav");
@@ -238,12 +231,13 @@ Empathy Shield.
 */
 void() item_artifact_empathy_shields =
 {
-	if (/*cvar("instagib") || */deathmatch == DM_DUEL)
+	// Duels normally don't have powerups
+	if (cvar("instagib") || deathmatch == DM_DUEL)
 	{
-		remove (self);
+		remove(self);
 		return;
 	}
-	
+	 
 	self.touch = hip_powerup_touch;
 	precache_model("progs/empathy.mdl");
 	precache_sound("hipitems/empathy.wav");
@@ -270,12 +264,11 @@ HIPNOTIC WEAPONS
 
 void() weapon_mjolnir =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	precache_model ("progs/g_hammer.mdl");
 	setmodel (self, "progs/g_hammer.mdl");
@@ -295,12 +288,11 @@ void() weapon_mjolnir =
 
 void() weapon_laser_gun =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	precache_model ("progs/g_laserg.mdl");
 	setmodel (self, "progs/g_laserg.mdl");
@@ -320,12 +312,11 @@ void() weapon_laser_gun =
 
 void() weapon_proximity_gun =
 {
-/*	if (cvar("instagib"))
+	if (cvar("instagib"))
 	{
 		remove (self);
 		return;
 	}
-*/
 
 	precache_model ("progs/g_prox.mdl");
 	setmodel (self, "progs/g_prox.mdl");
@@ -408,86 +399,28 @@ void() spikemine_Home =
       }
    };
 
-.float resistant_cnt;
 void() spikemine_Touch =
-{
-	if (self.health > 0)
-	{
-		if (other.classname == "trap_spike_mine") return;
-		if (other.classname == "missile" || other.classname == "MultiRocket") 
-		{
-			if (cvar("skill") >= 5) 
-			{
-				self.resistant_cnt += 0.2;
-				if (other.owner.classname == "player" && other.owner.super_damage_finished < time) sound (self, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM);
-			}
-			return;
-		}
-		if (other.classname == "grenade" || other.classname == "MultiGrenade") 
-		{
-			if (cvar("skill") >= 5) 
-			{
-				self.resistant_cnt += 0.2;
-				if (other.owner.classname == "player" && other.owner.super_damage_finished < time) sound (self, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM);
-			}
-			return;
-		}
-		if (other.classname == "hiplaser")
-		{
-			if (cvar("skill") >= 5)
-			{
-				self.resistant_cnt += 0.3;
-				if (other.owner.classname == "player" && other.owner.super_damage_finished < time) sound (self, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM);
-			}
-			return;
-		}
-		if (other.classname == "proximity_grenade") 
-		{
-			if (cvar("skill") >= 5)
-			{
-				self.resistant_cnt += 0.2;
-				if (other.owner.classname == "player" && other.owner.super_damage_finished < time) sound (self, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM);
-			}			
-			return;
-		}
-		if (other.classname == "plasma")
-		{
-			if (cvar("skill") >= 5) 
-			{
-				self.resistant_cnt += 0.5;
-				if (other.owner.classname == "player" && other.owner.super_damage_finished < time) sound (self, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM);
-			}
-			return;
-		}
-		if (cvar("skill") >= 5) // Sleeper: Spike Mines in Skill 5 should appear greatly resistant to any damage when playing on Skill 5.
-		{
-			if (other.classname == "spike") 
-			{
-				if (other.owner.classname == "player" && other.owner.super_damage_finished < time)
-				{
-					self.resistant_cnt += 1;
-					sound (self, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM);
-					if (self.resistant_cnt < 3) return;
-				}
-			}       
-			if (other.classname == "super_spike" || other.classname == "lava_spike") // Lasy hack.
-			{
-				if (other.owner.classname == "player" && other.owner.super_damage_finished < time)
-				{
-					self.resistant_cnt += 1;
-					sound (self, CHAN_AUTO, "items/protect3.wav", 1, ATTN_NORM);
-					if (self.resistant_cnt < 2) return;
-				}
-			} 
-		}        
-	   
-		T_Damage(self, self, self, self.health + 10);
-//     		killed_monsters = killed_monsters + 1;
-//      	WriteByte (MSG_ALL, SVC_KILLEDMONSTER);
-	}
-//   	self.effects |= EF_MUZZLEFLASH;
+   {
+   if (self.health>0)
+      {
+      if (other.classname == "trap_spike_mine")
+         return;
+      if (other.classname == "missile")
+         return;
+      if (other.classname == "grenade")
+         return;
+      if (other.classname == "hiplaser")
+         return;
+      if (other.classname == "proximity_grenade")
+         return;
+   
+      T_Damage(self,self,self,self.health+10);
+//      killed_monsters = killed_monsters + 1;
+//      WriteByte (MSG_ALL, SVC_KILLEDMONSTER);
+      }
+//   self.effects = self.effects | EF_MUZZLEFLASH;
 
-//   	T_RadiusDamage (self, self, 110, world);
+//   T_RadiusDamage (self, self, 110, world);
 	T_RadiusDamage (self, self, 110, world, "");
 	sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
 
@@ -497,69 +430,67 @@ void() spikemine_Touch =
 	WriteCoord (MSG_BROADCAST, self.origin_y);
 	WriteCoord (MSG_BROADCAST, self.origin_z);
 
-	sound (self, CHAN_VOICE, "misc/null.wav", 1, ATTN_NORM);
-	self.velocity = '0 0 0';
+   sound (self, CHAN_VOICE, "misc/null.wav", 1, ATTN_NORM);
+   self.velocity = '0 0 0';
 	self.touch = SUB_Null;
 	setmodel (self, "progs/s_explod.spr");
 	self.solid = SOLID_NOT;
 	s_explode1 ();	
-};
+   };
 
 /*
 spike_mine_first_think
 */
 
 void() spike_mine_first_think =
-{
-	self.think = spikemine_Home;
-	self.nextthink = time + 0.1;
-	self.search_time = 0;
-	self.takedamage = DAMAGE_AIM;
+   {
+   self.think = spikemine_Home;
+   self.nextthink = time + 0.1;
+   self.search_time = 0;
+   self.takedamage = DAMAGE_AIM;
 	self.use = monster_use;
-};
+   };
 
 /*QUAKED trap_spike_mine (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 
 void() trap_spike_mine =
-{
-	if (deathmatch)
+   {
+   if (deathmatch)
 	{
 		remove(self);
 		return;
 	}
-	
 	self.netname = "Spike Mine";
-	precache_model ("progs/spikmine.mdl");
-	precache_sound ("weapons/r_exp3.wav");
-	precache_sound ("hipitems/spikmine.wav");
-	precache_sound ("misc/null.wav");
-	setmodel (self, "progs/spikmine.mdl");
-// 	setmodel (self, "progs/spike.mdl");
-	setsize (self, self.mins, self.maxs);
-	self.classname = "trap_spike_mine";
-	self.solid = SOLID_BBOX;
-	self.movetype = MOVETYPE_FLYMISSILE;
-// 	setsize (self, '0 0 0', '0 0 0');
-// 	self.avelocity = '-100 100 -100';
-	self.avelocity = '-50 100 150';
-	// Sleeper: Removed health conditional and went with resistance on every weapon to emulate different health values between skills on the fly (experience with this enemy should still be feel unchanged).
-	self.health = 200;
-	self.frame = 0;
-	spike_mine_first_think ();
-//	self.think = spike_mine_first_think;
-	self.touch = spikemine_Touch;
-	self.th_die = spikemine_Touch;
-	self.th_stand = spikemine_Home;
-	self.th_walk = spikemine_Home;
-	self.th_run = spikemine_Home;
-	self.th_melee = spikemine_Home;
-	self.th_missile = spikemine_Home;
-//	self.nextthink = time + 0.2;
-	total_monsters += 1;
-	self.flags |= FL_MONSTER;
-	// Sleeper: Removed self.deathtype and put in the Obituary instead.
-};
+   precache_model ("progs/spikmine.mdl");
+   precache_sound ("weapons/r_exp3.wav");
+   precache_sound ("hipitems/spikmine.wav");
+   precache_sound ("misc/null.wav");
+   setmodel (self, "progs/spikmine.mdl");
+// setmodel (self, "progs/spike.mdl");
+   setsize (self, self.mins, self.maxs);
+   self.classname = "trap_spike_mine";
+   self.solid = SOLID_BBOX;
+   self.movetype = MOVETYPE_FLYMISSILE;
+// setsize (self, '0 0 0', '0 0 0');
+// self.avelocity = '-100 100 -100';
+   self.avelocity = '-50 100 150';
+   // Sleeper: Removed health conditional and went with resistance on every weapon to emulate different health values between skills on the fly (experience with this enemy should still be feel unchanged).
+   self.health = 200;
+   self.frame = 0;
+   self.think = spike_mine_first_think;
+   self.touch = spikemine_Touch;
+   self.th_die = spikemine_Touch;
+   self.th_stand = spikemine_Home;
+   self.th_walk = spikemine_Home;
+   self.th_run = spikemine_Home;
+   self.th_melee = spikemine_Home;
+   self.th_missile = spikemine_Home;
+   self.nextthink = time + 0.2;
+   total_monsters += 1;
+   self.flags |= FL_MONSTER;
+   // Sleeper: Removed self.deathtype and put in the Obituary instead.
+   };
 
 //============================================================================
 float LIGHTNING_RANDOM = 1;

@@ -58,6 +58,13 @@ void() button_blocked =
 
 void() button_fire =
 {
+	local float MG1_GameWorld      = (mapname == "mgstart" || mapname == "hub" || mapname == "mge1m1" || mapname == "mge1m2" || mapname == "mge1m3" ||
+					  mapname == "mge2m1" || mapname == "mge2m2" || 
+				          mapname == "mge3m1" || mapname == "mge3m2" ||
+					  mapname == "mge4m1" || mapname == "mge4m2" || mapname == "mge4m2b" || mapname == "mge4arena" ||
+					  mapname == "mge5m1" || mapname == "mge5m2" ||
+					  mapname == "mgend" || mapname == "mgdm1" || mapname == "mgdm2" || mapname == "mgdm3" || mapname == "mgdm4" ||
+					  mapname == "horde1" || mapname == "horde2" || mapname == "horde3" || mapname == "horde4" || mapname == "horde5" || mapname == "horde6" || mapname == "horde7");
 	if (self.state == STATE_UP || self.state == STATE_TOP)
 		return;
 		
@@ -187,7 +194,16 @@ When a button is touched, it moves some distance in the direction of it's angle,
 3) in-out
 */
 void() func_button =
-{		
+{
+
+	local float MG1_GameWorld      = (mapname == "mgstart" || mapname == "hub" || mapname == "mge1m1" || mapname == "mge1m2" || mapname == "mge1m3" ||
+					  mapname == "mge2m1" || mapname == "mge2m2" || 
+				          mapname == "mge3m1" || mapname == "mge3m2" ||
+					  mapname == "mge4m1" || mapname == "mge4m2" || mapname == "mge4m2b" || mapname == "mge4arena" ||
+					  mapname == "mge5m1" || mapname == "mge5m2" ||
+					  mapname == "mgend" || mapname == "mgdm1" || mapname == "mgdm2" || mapname == "mgdm3" || mapname == "mgdm4" ||
+					  mapname == "horde1" || mapname == "horde2" || mapname == "horde3" || mapname == "horde4" || mapname == "horde5" || mapname == "horde6" || mapname == "horde7");
+		
 	self.netname = "func_button"; // for bot nav support.		  
 	// MG1 ------------------------------------------------------------
 	SUB_SetWorldtype();
@@ -270,7 +286,7 @@ void() func_button =
 	self.state = STATE_BOTTOM;
 
 	// MG1
-	if (gameworld == MG1)
+	if (MG1_GameWorld)
 	{
 		if (self.movedir)
 		{

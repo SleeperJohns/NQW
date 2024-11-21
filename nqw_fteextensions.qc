@@ -113,13 +113,11 @@ string(float) argv = #59; 			  /* Part of KRIMZON_SV_PARSECLIENTCOMMAND Returns 
 	#define DEP __deprecated //predefine this if you want to avoid our deprecation warnings.
 #endif
 #ifndef FTEDEP
-	#define FTEDEP(reason) //for symbols deprecated in FTE that may still be useful/required for other engines
 
 #define strcmp strncmp
 float(string s1, string s2) strcasecmp = #229; /* Part of FTE_STRINGS Compares the two strings without case sensitivity. Returns 0 if they are equal. The sign of the return value may be significant, but should not be depended upon. */
 		
 #ifdef SSQC
-float SVC_SETVIEWPORT = 5;
 .float hull;	/* Overrides the hull used by the entity for walkmove/movetogoal and not traceline/tracebox. */
 .void() customphysics;	/* Called once each physics frame, overriding the entity's .movetype field and associated logic. You'll probably want to use tracebox to move it through the world. Be sure to call .think as appropriate. */
 float trace_allsolid;
@@ -203,14 +201,9 @@ string(float n) argv = #442;		       /* Part of KRIMZON_SV_PARSECLIENTCOMMAND */
 
 // string(string addr, string uinfo, string features) SV_CheckRejectConnection;	/* Called to give the mod a chance to ignore connection requests based upon client protocol support or other properties. Use infoget to read the uinfo and features arguments. */
 
-
 .float pvsflags;	/* Reconfigures when the entity is visible to clients */
 .float uniquespawnid;	/* Incremented by 1 whenever the entity is respawned. Persists across remove calls, for when the two-second grace period is insufficient. */
 DEP_CSQC .float() customizeentityforclient;	/* Called just before an entity is sent to a client (non-csqc protocol). This gives you a chance to tailor 'self' according to what 'other' should see. */
-
-// DEP void(entity client, string sample) localsound = #0:qex_localsound;
-
-// DEP void(string sample, optional float channel, optional float volume) localsound = #65;
 
 #endif
 
@@ -218,8 +211,6 @@ DEP_CSQC .float() customizeentityforclient;	/* Called just before an entity is s
 /* Provides the sprintf builtin, which allows for rich formatting along the lines of C's function with the same name. Not to be confused with QC's sprint builtin.*/
 
 #define DP_QC_TRACEBOX
-
-
 
 .float dimension_solid;    /* This is the bitmask of dimensions which the entity is solid within. This is not networked, instead csqc traces impacting ssqc entities assumes the ssqc entity to have a dimension_solid of 1. */
 .float dimension_hit;    /* This is the bitmask of dimensions which the entity will be blocked by. If other.dimension_solid & self.dimension_hit, our traces will impact and not proceed. If its false, the traces will NOT impact, allowing self to pass straight through. */
@@ -237,9 +228,9 @@ void(vector where, float set) multicast = #82; /*
 const float SVC_CGAMEPACKET = 83;	/* Direct ssqc->csqc message. Must only be multicast. The data triggers a CSQC_Parse_Event call in the csqc for the csqc to read the contents. The server *may* insert length information for clients connected via proxies which are not able to cope with custom csqc payloads. This should only ever be used in conjunction with the MSG_MULTICAST destination. */
 
 hashtable gamestate;	/* Special hash table index for hash_add and hash_get. Entries in this table will persist over map changes (and doesn't need to be created/deleted). */
-const float MSG_ENTITY 		= 5;
+const float MSG_MULTICAST = 4;
+const float MSG_ENTITY = 5;
 const float MSG_MULTICAST	= 4;
-
 const float MULTICAST_ALL	= 0;
 const float MULTICAST_PVS	= 2;
 const float MULTICAST_ONE	= 6;
@@ -255,7 +246,3 @@ void(float num, float type, .__variant fld) clientstat = #232; /* Part of EXT_CS
 		'num' should be a value between 32 and 127, other values are reserved.
 		'type' must be set to one of the EV_* constants, one of EV_FLOAT, EV_STRING, EV_INTEGER, EV_ENTITY.
 		fld must be a reference to the field used, each player will be sent only their own copy of these fields. */
-		
-#ifdef CSQC
-float(float entnum, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod, float flags) CSQC_Event_Sound;
-#endif

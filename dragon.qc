@@ -376,7 +376,6 @@ void() FireballTouch =
 
 //	if (self.owner.classname == "monster_dragon") T_RadiusDamage (self, self.owner, 90, self.owner);
 //	else T_RadiusDamage (self, self.owner, 30, world);
-
 	if (self.owner.classname == "monster_dragon") T_RadiusDamage (self, self.owner, 90, self.owner, "");
 	else T_RadiusDamage (self, self.owner, 30, world, "");
 		

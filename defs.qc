@@ -45,7 +45,7 @@ float DAMAGE_NO;
 float DAMAGE_YES    = 1;
 float DAMAGE_AIM    = 2;
 
-// Ammo Inventory Fields (Count: 8)
+// Ammo Inventory Fields (Count: 7)
 .float ammo_shells1;
 .float ammo_nails1;
 .float ammo_rockets1;
@@ -55,7 +55,7 @@ float DAMAGE_AIM    = 2;
 .float ammo_plasma;
 .float ammo_slugs;
 
-// Weapons (Count: 18)
+// Weapons (Count: 17)
 float IT_SHOTGUN	     = 1;
 float IT_SUPER_SHOTGUN       = 2;
 float IT_NAILGUN	     = 4;
@@ -69,11 +69,11 @@ float IT_PROXIMITY_GUN       = 512;    // 3 Hipnotic Weapons
 float DOE_LAVA_SUPER_NAILGUN = 1024;
 float IT_AXE		     = 2048;   // 8 ID Weapons
 float DOE_LAVA_NAILGUN       = 4096;						
-float DOE_MULTI_GRENADE      = 8192;		
+float DOE_MULTI_GRENADE      = 8192;		// 15
 float DOE_MULTI_ROCKET       = 16384;
 float DOE_PLASMA_GUN         = 32768;
-float DOE_GRAPPLE	     = 65536;  // 6 Rogue Weapons //
-float NQW_IT_COILGUN         = 131072; // 1 NQW Weapon // 18
+float DOE_GRAPPLE	     = 65536;  // 6 Rogue Weapons
+float NQW_IT_COILGUN         = 131072; // 1 Quake II Weapon (won't be on the same .weapons field)
 // float IT_EXTRA_WEAPON     = 262144; // Most likely be Impel weapons after this point. (won't be on the same .weapons field)
 // Railgun would nice.
 
@@ -86,15 +86,6 @@ float HUD_WEAPONS = IT_AXE +
 		    IT_GRENADE_LAUNCHER + 
 		    IT_ROCKET_LAUNCHER + 
 		    IT_LIGHTNING;
-		    
-float ID1_WEAPONS = IT_AXE + 
-		    IT_SHOTGUN + 
-		    IT_SUPER_SHOTGUN + 
-		    IT_NAILGUN + 
-		    IT_SUPER_NAILGUN + 
-		    IT_GRENADE_LAUNCHER + 
-		    IT_ROCKET_LAUNCHER + 
-		    IT_LIGHTNING;		    
 
 // Sleeper: Only a weapon needs giving.		  		    
 float HIPNOTIC_WEAPONS = IT_PROXIMITY_GUN +
@@ -106,12 +97,25 @@ float ROGUE_WEAPONS = DOE_LAVA_NAILGUN +
 		      DOE_MULTI_GRENADE + 
 		      DOE_MULTI_ROCKET +
 		      DOE_PLASMA_GUN;
-
-float NQW_WEAPONS = NQW_IT_COILGUN;		      
 		    
-float ALL_WEAPONS = ID1_WEAPONS + HIPNOTIC_WEAPONS + ROGUE_WEAPONS + NQW_WEAPONS;	         	    
+float ALL_WEAPONS = IT_AXE + 
+		    IT_SHOTGUN + 
+		    IT_SUPER_SHOTGUN + 
+		    IT_NAILGUN + 
+		    DOE_LAVA_NAILGUN + 
+		    IT_SUPER_NAILGUN + 
+		    DOE_LAVA_SUPER_NAILGUN + 
+		    IT_GRENADE_LAUNCHER + 
+		    IT_PROXIMITY_GUN + 
+		    DOE_MULTI_GRENADE + 
+		    IT_ROCKET_LAUNCHER + 
+		    DOE_MULTI_ROCKET + 
+		    IT_LIGHTNING + 
+		    DOE_PLASMA_GUN + 
+		    IT_LASER_CANNON + 
+		    IT_MJOLNIR;	      	    
 
-// Ammo Types (Count: 8)
+// Ammo Types (Count: 7)
 float IT_SHELLS		= 256;
 float IT_NAILS  	= 512;
 float IT_ROCKETS	= 1024;
@@ -119,13 +123,13 @@ float IT_CELLS		= 2048;  // 4 ID Ammo Types
 float DOE_LAVA_NAILS	= 4096;
 float DOE_MULTI_ROCKETS = 8192;  // 3 Rogue Ammo Types // 29
 float DOE_PLASMA_AMMO	= 16384;
-float NQW_IT_SLUGS      = 32768;
+float NQW_IT_SLUGS 	= 32768;
 
 // Armors (Count: 3)
 float IT_ARMOR1	= 8192;
 float IT_ARMOR2	= 16384;
 float IT_ARMOR3	= 32768;
-// Armor Shards would a nice add but probably won't need bitflags.
+// Armor Shards would a nice addm but probably won't need bitflags.
 
 // Unused Megahealth Flags (Replaced by .float health_overstacked)
 // float DOE_SUPERHEALTH = 256;			// 32
@@ -564,7 +568,7 @@ float() finaleFinished = #0:ex_finaleFinished;
 // Plays a sound that only "client" can hear. Useful for announcers...
 // void(entity client, string sample) localsound = #0:qex_localsound;
 // void(string soundname, optional float channel, optional float volume) localsound = #0:ex_localsound;
-// void(string sample, optional float channel, optional float volume) localsound = #65;
+void(string sample, optional float channel, optional float volume) localsound = #65;
 
 // Debug rendering functions.
 void draw_point( vector point, float colormap, float lifetime, float depthtest ) = #0:ex_draw_point;

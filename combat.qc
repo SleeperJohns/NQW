@@ -72,8 +72,8 @@ void(entity targ, entity attacker) Killed =
 	{
 		dprint ("punish teamkill\n");
 		attacker.killtime = 0;
-		add_frag (attacker, -2);
 //		attacker.frags -= 2;
+		add_frag (attacker, -2);
 	}	
 	
 	if (self.flags & FL_MONSTER)
@@ -95,7 +95,16 @@ void(entity targ, entity attacker) Killed =
 					
 				if (time < attacker.killtime)
 				{
-					if (attacker.killspree >= 5) sprint (attacker, ftos(attacker.killspree), " Kill Streak!\n");
+					if (attacker.killspree >= 14) sprint (attacker, ftos(attacker.killspree), " Kills Streak!\n");
+					else if (attacker.killspree == 13) sprint (attacker, "13 Kills Streak!\n");
+					else if (attacker.killspree == 12) sprint (attacker, "12 Kills Streak!\n");
+					else if (attacker.killspree == 11) sprint (attacker, "11 Kills Streak!\n");
+					else if (attacker.killspree == 10) sprint (attacker, "10 Kills Streak!\n");
+					else if (attacker.killspree == 9) sprint (attacker, "9 Kills Streak!\n");
+					else if (attacker.killspree == 8) sprint (attacker, "8 Kills Streak!\n");
+					else if (attacker.killspree == 7) sprint (attacker, "7 Kills Streak!\n");
+					else if (attacker.killspree == 6) sprint (attacker, "6 Kills Streak!\n");
+					else if (attacker.killspree == 5) sprint (attacker, "5 Kills Streak!\n");
 					else if (attacker.killspree == 4) sprint (attacker, "Quad Kill!\n");
 					else if (attacker.killspree == 3) sprint (attacker, "Triple Kill!\n");
 					else if (attacker.killspree == 2) sprint (attacker, "Double Kill!\n");
@@ -127,15 +136,16 @@ void(entity targ, entity attacker) Killed =
 				else if (targ.classname == "monster_morph" || targ.classname == "monster_dragon" || targ.classname == "monster_armagon" || targ.classname == "monster_oldone" || targ.classname == "monster_boss")
 					attacker.killcount += 8;				
 				attacker.killtotal = attacker.killcount; // Sleeper: Tally up the points before giving them to the player later.
-			}	
+			}
+			killed_monsters += 1;		
 		}
 		else
 		{			
-			if (coop && attacker.flags & FL_CLIENT) // attacker.frags += 1; // Award score in Cooperative Game Types		
+			if (coop && attacker.flags & FL_CLIENT) // attacker.frags += 1; // Award score in Cooperative Game Types			
 				add_frag (attacker, 1);
 			killed_monsters += 1;
-			WriteByte (MSG_ALL, SVC_KILLEDMONSTER);
 		}
+		WriteByte (MSG_ALL, SVC_KILLEDMONSTER);
 	}
 	
 	// PGM - guarantee gib if killed by buzzsaw.
@@ -160,14 +170,14 @@ void(entity targ, entity inflictor, entity attacker, float damage) Knockback =
 {
 	local vector dir;
 	local float save, take;
-		
+	
 	dir = targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
 	dir = normalize (dir);
-	if (targ.flags & FL_CLIENT && targ == attacker) // Sleeper: Self.
+	if (targ.flags & FL_CLIENT && targ == attacker) // Sleeper: Yourself.
 	{
 		if (cvar("skill") == 5 && !cvar("deathmatch")) targ.velocity += dir * damage * 16; // Sleeper: Compensate for half self-damage on skill 5.
 		else targ.velocity += dir * damage * 8; // Sleeper: Standard knockback.
-		if ((cvar("capped_qw_physics") && cvar("allow_bunnyhopping")) || (!cvar("capped_qw_physics") && !cvar("allow_bunnyhopping"))) targ.flags |= FL_DAMAGEBOOSTED;
+		if (cvar("capped_qw_physics") >= 0 && cvar("capped_qw_physics") <= 1 && cvar("allow_bunnyhopping") >= 0 && cvar("allow_bunnyhopping") <= 1) targ.flags |= FL_DAMAGEBOOSTED;
 		return;
 	}
 			
@@ -175,7 +185,7 @@ void(entity targ, entity inflictor, entity attacker, float damage) Knockback =
 		
 	if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop"))
 	{	
-		if (cvar("teamknockback") == TRUE && attacker.steam == targ.steam && attacker != targ) // Sleeper: Do team knockback.
+		if (cvar("teamknockback") == 1 && attacker.steam == targ.steam && attacker != targ) // Sleeper: Do team knockback.
 		{
 			// Sleeper: Because we want some flinch feedback.
 			save = ceil (targ.armortype * damage);
@@ -187,7 +197,7 @@ void(entity targ, entity inflictor, entity attacker, float damage) Knockback =
 				targ.dmg_inflictor = inflictor;
 			}
 	
-			if ((cvar("capped_qw_physics") && cvar("allow_bunnyhopping")) || (!cvar("capped_qw_physics") && !cvar("allow_bunnyhopping"))) targ.flags |= FL_DAMAGEBOOSTED;
+			if (cvar("capped_qw_physics") >= 0 && cvar("capped_qw_physics") <= 1 && cvar("allow_bunnyhopping") >= 0 && cvar("allow_bunnyhopping") <= 1) targ.flags |= FL_DAMAGEBOOSTED;
 			targ.velocity += dir * damage * 8;
 			return;
 		}
@@ -195,8 +205,8 @@ void(entity targ, entity inflictor, entity attacker, float damage) Knockback =
 		if (!cvar("teamknockback") && attacker.steam == targ.steam && attacker != targ) return; // Sleeper: Don't do team knockback.
 	}	
 
-	if ((cvar("capped_qw_physics") && cvar("allow_bunnyhopping")) || (!cvar("capped_qw_physics") && !cvar("allow_bunnyhopping")))
-	{ 
+	if (cvar("capped_qw_physics") >= 0 && cvar("capped_qw_physics") <= 1 && cvar("allow_bunnyhopping") >= 0 && cvar("allow_bunnyhopping") <= 1)
+	{
 		if (attacker.classname == "player" && targ.classname == "player" && targ != attacker) targ.flags |= FL_DAMAGEBOOSTED;
 	}
 	targ.velocity += dir * damage * 8; // Sleeper: Everyone at this point takes knockback.
@@ -409,7 +419,7 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage =
 			}
 			else
 			{
-				dprint ("Player attacked with non-lightning weapon. Do nothing.\n");
+				dprint ("player attacked with non-lightning weapon. Do nothing.\n");
 				return;
 			}
 		}
@@ -438,7 +448,8 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage =
 	}   
 	 
 //ZOID--// Sleeper: Moved this up.
-/*	if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF && !coop)
+/*
+	if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF && !coop)
 	{
 		if (!TeamHealthDam(targ, inflictor, attacker, damage)) return; // same team
 	}
@@ -615,6 +626,7 @@ void(entity inflictor, entity attacker, float damage, entity ignore, string dtyp
 		head = head.chain;
 	}
 };
+
 
 /*
 void(entity inflictor, entity attacker, float damage, entity ignore) T_RadiusDamage =
