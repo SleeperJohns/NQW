@@ -3228,17 +3228,20 @@ void() SkillVotables =
 			if (cl.items & IT_ARMOR1) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.3;
-				cl.max_armorvalue = 100;			
+				cl.max_armorvalue = 100;
+				cl.fake_armortype = 0.3;			
 			}
 			if (cl.items & IT_ARMOR2) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.6;	
-				cl.max_armorvalue = 150;		
+				cl.max_armorvalue = 150;
+				cl.fake_armortype = 0.6;		
 			}
 			if (cl.items & IT_ARMOR3) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.8;
-				cl.max_armorvalue = 200;		
+				cl.max_armorvalue = 200;
+				cl.fake_armortype = 0.8;		
 			}
 			if (cl.health_deflate == 0)
 			{			
@@ -3273,17 +3276,20 @@ void() SkillVotables =
 			if (cl.items & IT_ARMOR1) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.3;
-				cl.max_armorvalue = 100;			
+				cl.max_armorvalue = 100;
+				cl.fake_armortype = 0.3;			
 			}
 			if (cl.items & IT_ARMOR2) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.6;	
-				cl.max_armorvalue = 150;		
+				cl.max_armorvalue = 150;
+				cl.fake_armortype = 0.6;		
 			}
 			if (cl.items & IT_ARMOR3) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.8;
-				cl.max_armorvalue = 200;		
+				cl.max_armorvalue = 200;
+				cl.fake_armortype = 0.8;		
 			}			
 			if (cl.health_deflate == 0)
 			{			
@@ -3318,17 +3324,20 @@ void() SkillVotables =
 			if (cl.items & IT_ARMOR1) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.3;
-				cl.max_armorvalue = 100;			
+				cl.max_armorvalue = 100;
+				cl.fake_armortype = 0.3;			
 			}
 			if (cl.items & IT_ARMOR2) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.6;	
-				cl.max_armorvalue = 150;		
+				cl.max_armorvalue = 150;
+				cl.fake_armortype = 0.6;		
 			}
 			if (cl.items & IT_ARMOR3) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.8;
-				cl.max_armorvalue = 200;		
+				cl.max_armorvalue = 200;
+				cl.fake_armortype = 0.8;		
 			}
 			if (cl.health_deflate == 0)
 			{			
@@ -3363,17 +3372,20 @@ void() SkillVotables =
 			if (cl.items & IT_ARMOR1) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.3;
-				cl.max_armorvalue = 100;			
+				cl.max_armorvalue = 100;
+				cl.fake_armortype = 0.3;			
 			}
 			if (cl.items & IT_ARMOR2) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.6;	
-				cl.max_armorvalue = 150;		
+				cl.max_armorvalue = 150;
+				cl.fake_armortype = 0.6;		
 			}
 			if (cl.items & IT_ARMOR3) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.8;
-				cl.max_armorvalue = 200;		
+				cl.max_armorvalue = 200;
+				cl.fake_armortype = 0.8;		
 			}
 			if (cl.health_deflate == 0)
 			{			
@@ -3408,17 +3420,20 @@ void() SkillVotables =
 			if (cl.items & IT_ARMOR1) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.3;
-				cl.max_armorvalue = 100;			
+				cl.max_armorvalue = 100;
+				cl.fake_armortype = 0.3;			
 			}
 			if (cl.items & IT_ARMOR2) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.6;	
-				cl.max_armorvalue = 150;		
+				cl.max_armorvalue = 150;
+				cl.fake_armortype = 0.6;		
 			}
 			if (cl.items & IT_ARMOR3) // Set max Armorvalue and armortype.
 			{
 				cl.armortype = 0.8;
-				cl.max_armorvalue = 200;		
+				cl.max_armorvalue = 200;
+				cl.fake_armortype = 0.8;		
 			}
 			if (cl.health_deflate == 0)
 			{			
@@ -3457,13 +3472,15 @@ void() SkillVotables =
 				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.15;   
 				cl.max_armorvalue = 25;
+				cl.fake_armortype = 0.3;
 				if (cl.armorvalue > 50) cl.armorvalue = 50; // If this armor came from another skill, adjust it's value and maximum value.								
 			}
 			if (cl.items & IT_ARMOR2)
 			{
 				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.19;
-				cl.max_armorvalue = 50;						
+				cl.max_armorvalue = 50;	
+				cl.fake_armortype = 0.6;					
 				if (cl.armorvalue > 100) cl.armorvalue = 100; // If this armor came from another skill, adjust it's value and maximum value.			
 			}
 			if (cl.items & IT_ARMOR3)
@@ -3471,6 +3488,7 @@ void() SkillVotables =
 				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.245;
 				cl.max_armorvalue = 75;
+				cl.fake_armortype = 0.8;
 				if (cl.armorvalue > 150) cl.armorvalue = 150; // If this armor came from another skill, adjust it's value and maximum value.																
 			}
 			if (cl.health_deflate == 0)

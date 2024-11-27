@@ -392,18 +392,21 @@ void() NQW_SpawnCharacter =
 		{
 			self.armortype = 0.15;
 			self.max_armorvalue = 25;
+			self.fake_armortype = 0.3;
 			if (self.armorvalue > self.max_armorvalue) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.
 		}
 		else if (self.items & IT_ARMOR2) // Combat Armor
 		{
 			self.armortype = 0.19;
 			self.max_armorvalue = 50;
+			self.fake_armortype = 0.6;
 			if (self.armorvalue > self.max_armorvalue) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
 		}
 		else if (self.items & IT_ARMOR3) // Heavy Armor
 		{
 			self.armortype = 0.245;
 			self.max_armorvalue = 75;
+			self.fake_armortype = 0.8;
 			if (self.armorvalue > self.max_armorvalue) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
 		}
 	}
@@ -412,16 +415,19 @@ void() NQW_SpawnCharacter =
 		if (self.items & IT_ARMOR1) 	 // Green Armor
 		{
 			self.armortype = 0.3;
+			self.fake_armortype = 0.3;
 			self.max_armorvalue = 100;
 		}
 		else if (self.items & IT_ARMOR2) // Yellow Armor
 		{
 			self.armortype = 0.6;
+			self.fake_armortype = 0.6;
 			self.max_armorvalue = 150;
 		}
 		else if (self.items & IT_ARMOR3) // Red Armor
 		{
 			self.armortype = 0.8;
+			self.fake_armortype = 0.8;
 			self.max_armorvalue = 200;
 		}
 	}
