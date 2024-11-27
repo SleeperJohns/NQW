@@ -33,6 +33,14 @@ float modelindex_eyes, modelindex_hammer;
 
 const float NO_INTERMISSION = 1;
 
+// Unused Vanilla Parms
+// parm10
+// parm14
+// parm16
+
+// Unused FTE Parms
+// parm18 to parm62 unused.
+
 /*
 =============================================================================
 
@@ -93,9 +101,7 @@ void() SetRespawnParms =
 	// Gravity
 	self.gravity = 1.0;
 	
-	// Sleeper: Dafuq you need Respawn Parms for?
-//	if ((world.model == "maps/start.bsp") || (world.model == "maps/hipstart.bsp") || (world.model == "maps/rstart.bsp") ||
-//	    (world.model == "maps/e5start.bsp") || (world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp" || world.worldtype == WORLDTYPE_HUB))
+	// Sleeper: Dafuq you need Respawn Parms for on Start Maps?
 	if (world.model == Start_Maplist[StartMaps()])
 	{
 		parm1 = parm15 = IT_SHOTGUN | IT_AXE;
@@ -112,10 +118,10 @@ void() SetRespawnParms =
 		parm8 = IT_SHOTGUN;
 		parm9 = 0;
 		parm11 = 0;
-		parm12 = self.steam;	// Save the current team of the player		
-		parm17 = self.client_tags;
-		parm63 = self.nqwSkin;
-		parm64 = self.nqwCharacter;
+		parm12 = self.steam;		// Save the current team of the player		
+		parm17 = self.client_tags;	// Save the current client tags
+		parm63 = self.nqwSkin;		// Save the current player skin
+		parm64 = self.nqwCharacter;	// Save the current player model
 		return;
 	}
 		
@@ -198,11 +204,10 @@ void() SetRespawnParms =
 	
 /*	if (!cvar("deathmatch") && cvar("sv_public") == 1)
 	{
-		if (!cvar("coop") || cvar("coop") == 2) parm14 = cvar("samelevel");
+		if (!cvar("coop") || cvar("coop") == 2) parm13 = cvar("samelevel");
 	}
 */	
 	parm15 = self.weapons;
-//	parm17 = self.is_new;
 	parm17 = self.client_tags;
 	parm63 = self.nqwSkin;
 	parm64 = self.nqwCharacter;
@@ -289,8 +294,7 @@ void() InheritParms =
 				parm10 = 0;
 				parm11 = self.ammo_slugs;				
 				parm12 = -1; 									       // Selected Team				
-				parm15 = self.weapons;
-//				parm17 = self.is_new; 	
+				parm15 = self.weapons;	
 				parm17 = self.client_tags; // Are we a brand new player anymore?
 				dprint (self.netname, " inherited ", new_player.netname, "'s inventory\n");
 				return;
@@ -303,10 +307,7 @@ void() InheritParms =
 float reset_flag;
 
 void() SetChangeParms =
-{
-	local float official_startmaps_pool	      = ((world.model == "maps/start.bsp") || (world.model == "maps/hipstart.bsp") || (world.model == "maps/rstart.bsp") ||
-						         (world.model == "maps/e5start.bsp") || (world.model == "maps/mgstart.bsp" || world.worldtype == WORLDTYPE_HUB));
-		                      
+{	                      
 	local float official_endmaps_pool	      = ((world.model == "maps/end.bsp") || (world.model == "maps/hipend.bsp") || (world.model == "maps/rend.bsp") || (world.model == "maps/e5end.bsp") || (world.model == "maps/mgend.bsp"));
 	
 	local float official_mg1_finalepisodemap_pool = ((world.model == "maps/mge1m2.bsp" || world.model == "maps/mge2m2.bsp" || world.model == "maps/mge3m2.bsp" || world.model == "maps/mge4m2.bsp" || world.model == "maps/mge5m2.bsp"));
@@ -322,7 +323,6 @@ void() SetChangeParms =
 	if (self.health <= 0 || deathmatch)
 	{
 		SetNewParms ();
-//		parm10 = self.MOTDstay;
 		if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
 		parm12 = self.steam;	// Save the current team of the player
 		parm63 = self.nqwSkin;
@@ -332,7 +332,6 @@ void() SetChangeParms =
 	if (world.worldtype == WORLDTYPE_HUB)
 	{
 //		SetNewParms ();		// Resetting inventory in SetChangeParms so we don't reset our skins & player models when the map changes
-//		parm10 = self.MOTDstay;
 		if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
 		parm12 = self.steam;	// Save the current team of the player
 		parm63 = self.nqwSkin;
@@ -353,8 +352,7 @@ void() SetChangeParms =
 		// game type doesn't involve speedrunning.
 		if (cvar("coop") != CLASSIC_COOP && !cvar("coop")) 
 		{		
-			if ((world.model == "maps/start.bsp") || (world.model == "maps/hipstart.bsp") || (world.model == "maps/rstart.bsp") ||
-			    (world.model == "maps/e5start.bsp") || (world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp"))
+			if (world.model == Start_Maplist[StartMaps()])
 			{    	 
 				if (cvar("sv_public") == 1 || !cvar("sv_public")) // Public Server
 					self.health = self.max_health;
@@ -384,7 +382,7 @@ void() SetChangeParms =
 	// --------------------------------------------------------------------------------------------------------------------------------------------
 	
 	// Sleeper: Reset all essential stats so we don't reset our skins & player models using "changelevel".
-	if (official_startmaps_pool || official_endmaps_pool || official_mg1_finalepisodemap_pool)
+	if (world.model == Start_Maplist[StartMaps()] || official_endmaps_pool || official_mg1_finalepisodemap_pool)
 	{
 		if (!cvar("horde") && !cvar("deathmatch"))
 		{
@@ -403,7 +401,6 @@ void() SetChangeParms =
 			self.weapon = IT_SHOTGUN;
 			self.armortype = 0;
 			if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
-//			self.MOTDstay = 0;
 		}
 	}
 	if (cvar("deathmatch"))
@@ -424,7 +421,6 @@ void() SetChangeParms =
 		self.weapon = IT_SHOTGUN;
 		self.armortype = 0;
 		if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
-//		self.MOTDstay = 0;
 	}	
 	if (cvar("customcoop") && !cvar("deathmatch") && !cvar("horde"))
 	{	
@@ -445,7 +441,6 @@ void() SetChangeParms =
 //			self.weapon = IT_SHOTGUN;
 //			self.armortype = 0;
 			if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
-//			self.MOTDstay = 0;
 		}
 		if (cvar("coop") == CLASSIC_COOP)
 		{
@@ -464,7 +459,6 @@ void() SetChangeParms =
 			self.weapon = IT_SHOTGUN;
 			self.armortype = 0;
 			if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
-//			self.MOTDstay = 0;
 		}
 		if (gameworld >= ID1 && gameworld <= MG1) // Sleeper: Not sure why I gotta do this, but it's better to remove anything necessary before going back to the campaign maps while custom coop was still active.
 		{
@@ -483,7 +477,6 @@ void() SetChangeParms =
 			self.weapon = IT_SHOTGUN;
 			self.armortype = 0;
 			if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
-//			self.MOTDstay = 0;
 		}
 	}					
 			
@@ -491,9 +484,9 @@ void() SetChangeParms =
 	if (cvar("deathmatch")) SetNewParms (); // don't carry items between levels in CTF
 	else 
 	{	
-		parm1 = self.items;
-		parm2 = self.health;
-		parm3 = self.armorvalue;
+		parm1 = self.items; // Items Backpack
+		parm2 = self.health; // Health
+		parm3 = self.armorvalue; // Armorvalue
 		
 		// Restock ammo
 		if (!cvar("customcoop") && !cvar("deathmatch") && cvar("coop") >= 0)
@@ -521,33 +514,31 @@ void() SetChangeParms =
 			}
 		}		
 		
-		parm4 = self.ammo_shells1;		
-		parm5 = encodeparms (self.ammo_nails1, self.ammo_rockets1, self.ammo_cells1);
-		parm6 = encodeparms (self.ammo_lava_nails, self.ammo_multi_rockets, self.ammo_plasma);
-		parm7 = self.expansionitems;
-		parm8 = self.weapon;
-		parm9 = self.armortype * 100;
+		parm4 = self.ammo_shells1; // Shells		
+		parm5 = encodeparms (self.ammo_nails1, self.ammo_rockets1, self.ammo_cells1); // Nails, Rockets, Cells
+		parm6 = encodeparms (self.ammo_lava_nails, self.ammo_multi_rockets, self.ammo_plasma); // Lava Nails, Multi Rockets, Plasma Rockets
+		parm7 = self.expansionitems; // Expansion Items Backpack
+		parm8 = self.weapon; // Current Equipped Weapon
+		parm9 = self.armortype * 100; // Armortype
 		
 		// MOTD sound and greetings
-//		parm10 = self.MOTDstay;
-                parm11 = self.ammo_slugs;	
+                parm11 = self.ammo_slugs; // Uranium Slugs	
 		//ZOID--		
-		parm12 = self.steam;	// Save the current team of the player
+		parm12 = self.steam;	// Selected Team
 		//--ZOID
 		
 		// For the speedrunning gametype(s) to keep track of time
 		if (!cvar("coop") || cvar("coop") == CLASSIC_COOP)
 		{
-			if (!cvar("deathmatch") && cvar("sv_public") == 1) parm13 = totaltime;
+			if (!cvar("deathmatch") && cvar("sv_public") == 1) parm13 = totaltime; // Total Time (Speedrunning Only)
 		}
 		
-		parm15 = self.weapons;
-//		parm17 = self.is_new;
-		parm17 = self.client_tags;
+		parm15 = self.weapons; // Weapons Backpack
+		parm17 = self.client_tags; // Client Tags
 		
 		// NQW Parms
-		parm63 = self.nqwSkin;
-		parm64 = self.nqwCharacter;
+		parm63 = self.nqwSkin; // Selected Skin
+		parm64 = self.nqwCharacter; // Selected Player Model
 	}
 };
 
@@ -557,46 +548,46 @@ void() SetNewParms =
 	{
 		if (world.model == "maps/ctf1.bsp") // Sleeper: Some maps have added protection. Thanks Rogue.
 		{
-			parm1  = IT_SHOTGUN | IT_AXE | IT_ARMOR1;	
-			parm3  = 50;
-			parm4  = 25;						// Shells
-			parm8  = IT_SHOTGUN;
-			parm15 = IT_SHOTGUN | IT_AXE;	
-			parm9  = 30;
-			parm11 = 0;						// Uranium Slugs
+			parm1  = IT_SHOTGUN | IT_AXE | IT_ARMOR1;	// Items Backpack
+			parm3  = 50;					// Armorvalue
+			parm4  = 25;					// Shells
+			parm8  = IT_SHOTGUN;				// Current Equipped Weapon
+			parm15 = IT_SHOTGUN | IT_AXE;			// Weapons Backpack
+			parm9  = 30;					// Armortype
+			parm11 = 0;					// Uranium Slugs
 		}
 		else
 		{
 			parm1 = parm15 = IT_SHOTGUN | IT_AXE;
 			parm3 = 0;
-			parm4 = 25;						// Shells
+			parm4 = 25;				
 			parm8 = IT_SHOTGUN;
 			parm9 = 0;
-			parm11 = 0;						// Uranium Slugs
+			parm11 = 0;					
 		}
 	}
 	else if (cvar("deathmatch") >= DM_FFA && cvar("deathmatch") <= DM_OneFlagCTF && cvar("instagib") && !cvar("coop"))
 	{
 		parm1 = 0;
 		parm3 = 0;
-		parm4 = 0;						// Shells
+		parm4 = 0;						
 		parm8 = parm15 = NQW_IT_COILGUN;
 		parm9 = 0;
-		if (cvar("instagib") == 2) parm11 = 666;						// Uranium Slugs
+		if (cvar("instagib") == 2) parm11 = 666;		
 		else parm11 = 100;		
 	}
 	else
 	{
 		parm1 = parm15 = IT_SHOTGUN | IT_AXE;
 		parm3 = 0;
-		parm4 = 25;						// Shells
+		parm4 = 25;						
 		parm8 = IT_SHOTGUN;
 		parm9 = 0;
-		parm11 = 0;						// Uranium Slugs
+		parm11 = 0;						
 	}
 	
 	// Deathmatch Health	
-	if (cvar("deathmatch") && !cvar("coop")) parm2 = 126;	// Similar to Quake 3
+	if (cvar("deathmatch") && !cvar("coop")) parm2 = 126;	// Similar to Quake 3 Health
 	else 
 	{
 		// Single Player & Co-Operative Health
@@ -606,7 +597,7 @@ void() SetNewParms =
 			{
 				if (cvar("skill") == 4)
 				{
-					if (!cvar("horde")) parm2 = 50;
+					if (!cvar("horde")) parm2 = 50; // Health
 					else parm2 = 76;
 				}
 				else if (cvar("skill") == 5)
@@ -631,8 +622,7 @@ void() SetNewParms =
 	
 	parm5 = encodeparms (0, 0, 0); 				// Nails, Rockets, Cells
 	parm6 = encodeparms (0, 0, 0); 			        // Lava Nails, Multi-Rockets, Plasma Rockets
-	parm7 = 0;
-//	parm10 = 1;
+	parm7 = 0;						// Expansion Items Backpack
 	//ZOID--
 	parm12 = -1; 						// Reset current team selection	
 	//--ZOID
@@ -642,7 +632,7 @@ void() SetNewParms =
 		if (!cvar("coop") || cvar("coop") == CLASSIC_COOP) parm13 = cvar("samelevel");
 	}
 */		
-	parm17 = NEW_PLAYER_INIT | DETECT_NEW_CLIENT | CLIENT_PLAYER | CLIENT_ENTERED | CLIENT_JOINED | NEW_PLAYER_MOTD;	
+	parm17 = NEW_PLAYER_INIT | DETECT_NEW_CLIENT | CLIENT_PLAYER | CLIENT_ENTERED | CLIENT_JOINED | NEW_PLAYER_MOTD; // Client Tags
 };
 
 // New Episode Parms
@@ -693,15 +683,13 @@ void() SetNewCoopParms =
 	parm7 = self.expansionitems;	
 	parm8 = self.weapon;
 	parm9 = self.armortype * 100;
-//	parm10 = 0;
 	parm11 = self.ammo_slugs;	
 	parm12 = self.steam;	// Save the current team of the player
-//	parm17 = 0;
 	parm17 = DETECT_NEW_CLIENT | CLIENT_PLAYER | CLIENT_ENTERED | CLIENT_JOINED;
 	
 /*	if (!cvar("deathmatch") && cvar("sv_public") == 1)
 	{
-		if (!cvar("coop") || cvar("coop") == 2) parm14 = cvar("samelevel");
+		if (!cvar("coop") || cvar("coop") == 2) parm13 = cvar("samelevel");
 	}
 */	
 };
@@ -823,24 +811,20 @@ void() SetNewCustomCoopParms =
 		all_players = find (all_players, classname, "player");
 	}	
 	
-	parm1 = self.items;	
-//	parm2 = self.health;			
-//	parm3 = self.armorvalue;			
+	parm1 = self.items;				
 	parm4 = self.ammo_shells1;			
 	parm5 = encodeparms (self.ammo_nails1, self.ammo_rockets1, self.ammo_cells1);	
 	parm6 = encodeparms (self.ammo_lava_nails, self.ammo_multi_rockets, self.ammo_plasma);	
 	parm7 = self.expansionitems;	
 	parm8 = self.weapon;
-//	parm10 = 0;
         parm11 = self.ammo_slugs;	
 	parm12 = self.steam;	// Save the current team of the player	
 	parm15 = self.weapons;
-//	parm17 = 0;
 	parm17 = DETECT_NEW_CLIENT | CLIENT_PLAYER | CLIENT_ENTERED | CLIENT_JOINED;
 	
 /*	if (!cvar("deathmatch") && cvar("sv_public") == 1)
 	{
-		if (!cvar("coop") || cvar("coop") == CLASSIC_COOP) parm14 = cvar("samelevel");
+		if (!cvar("coop") || cvar("coop") == CLASSIC_COOP) parm13 = cvar("samelevel");
 	}	
 */		
 };
@@ -922,10 +906,8 @@ void() DecodeLevelParms =
 	// cute bug, if grapple was selected, it still will be on level change
 	if (parm8 == DOE_GRAPPLE && deathmatch) self.weapon = IT_SHOTGUN; 
 	else self.weapon = parm8;
-//	self.weapon = parm8;
 
-	self.armortype = parm9 * 0.01;
-//	self.MOTDstay = parm10;	
+	self.armortype = parm9 * 0.01;	
 	
 	//ZOID--
 	if (TeamColorIsLegal(parm12)) 
@@ -948,16 +930,18 @@ void() DecodeLevelParms =
 				mlstage = 1;
 			}
 			cvar_set ("ambient_fade", "100");
-			/*
-			if (parm14 & OGCBit (self)) self.style += 2;
-			if (parm14 & GCBit (self)) self.style = 1;
-			if (parm14 & (65536 * GCBit (self))) self.style += 4;	
+			/* // Sleeper: Traditionally QStats did a way with Grenade Timers (both player and ogre) with WriteBytes. 
+			   // But that only works via listen servers and was across all players. 
+			   // We need a new way to make Grenade Timers (at least players only) work separately for all players as individual options.
+			   // Especially for Speedrunning.
+			if (parm13 & OGCBit (self)) self.style += 2;
+			if (parm13 & GCBit (self)) self.style = 1;
+			if (parm13 & (65536 * GCBit (self))) self.style += 4;	
 			*/
 		}
 	}
 	
 	self.weapons = parm15;
-//	self.is_new = parm17;
 	self.client_tags = parm17;
 		
 	// NQW parms	
@@ -1014,7 +998,7 @@ HORDE random map pick
 added Aug31, 2021
 ============
 */
-
+// Sleeper: This needs to be improved even more. After a while, the random map formula stops working and plays the same map twice after completion. A more stable anti-duplication must be made.
 string() HordeRandomMap =
 {
 	local float cur;
@@ -1816,23 +1800,8 @@ entity(float forceSpawn) SelectSpawnPointEX =
 	
 	if (coop && !deathmatch)
 	{	
-		/*	
-		// Sleeper: Spawning logic for MG1 maps only.
-		if (gameworld == MG1)
-		{
-			// MG1 -------------------------------------------------------------
-			// Choose a info_player_coop point that is active
-			lastspawn = find (lastspawn, classname, "info_player_coop");
-			while (lastspawn.state != COOP_SPAWN_ACTIVE) 
-			{
-				if (lastspawn == startedAt) break;
-				lastspawn = find (lastspawn, classname, "info_player_coop");
-			}			
-			if (lastspawn != world) return lastspawn; 
-			// -----------------------------------------------------------------
-		}
-		
-		// Sleeper: The traditional coop spawn logic.
+		/*
+		// Sleeper: Old co-op spawn logic.
 		lastspawn = find (lastspawn, classname, "info_player_coop");
 		if (lastspawn == world) lastspawn = find (lastspawn, classname, "info_player_start");		
 		if (lastspawn != world) return lastspawn;
@@ -1852,6 +1821,7 @@ entity(float forceSpawn) SelectSpawnPointEX =
 	{
 		if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF)
 		{
+			// Sleeper: This needs to be improved to prevent a team member from spawning inside the enemy team's base.
 			startspot = spot = lastspawn;
 			t = 0;
 			if (!self.ctf_killed)
@@ -2123,7 +2093,6 @@ void() info_player_coop;
 void() player_touch;
 
 // .float defertime;
-
 void() PutClientInServer =
 {
 	local entity spot;	
@@ -2296,7 +2265,32 @@ void() PutClientInServer =
 	self.oldorigin = self.origin = spot.origin + '0 0 1'; // R00k: update oldorigin so we dont respawn where we died. 
 	self.angles = spot.angles;
 	self.fixangle = TRUE;		// turn this way immediately	
-	self.attack_finished = time + 0.1;
+	
+	if (cvar("coop") && !cvar("deathmatch"))
+	{	
+		self.attack_finished = time + 0.3;     // Sleeper: Don't fire immediately after level load.
+		self.playerjump_finished = time + 0.4; // Sleeper: Don't jump immediately after level load.
+		self.pausetime = time + 0.3;	       // Sleeper: Don't move immediately after level load.
+	}
+	
+	if (!cvar("coop") && !cvar("deathmatch"))
+	{	
+		self.attack_finished = time + 0.1;     // Sleeper: Don't fire immediately after level load.
+		self.playerjump_finished = time + 0.1; // Sleeper: Don't jump immediately after level load.
+		self.pausetime = time + 0.1;	       // Sleeper: Don't move immediately after level load.
+	}
+	
+	// MG1
+	#ifdef COOP_RESPAWN_KEEP_WEAPONS
+	if (gameworld == MG1 && cvar("coop") & CLASSIC_COOP) 
+	{
+		// In coop we want to give back the players the weapons they progressed with
+		self.items |= spot.items & (HUD_WEAPONS);
+		if (self.items & (IT_NAILGUN | IT_SUPER_NAILGUN) && self.ammo_nails < 50) self.ammo_nails = 50;
+		if (self.items & (IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER) && self.ammo_rockets < 10) self.ammo_rockets = 10;
+		if (self.items & (IT_LIGHTNING | IT_EXTRA_WEAPON) && self.ammo_cells < 50) self.ammo_cells = 50;
+	}
+	#endif		
 	
 	self.touch = player_touch;
 
@@ -2359,6 +2353,11 @@ void() PutClientInServer =
 	
 	stuffcmd (self, "-jump\n");
 	stuffcmd (self, "-attack\n");	
+		
+	msg_entity = self;
+        WriteByte (MSG_ONE, SVC_SETVIEWPORT);
+        WriteEntity (MSG_ONE, self);  
+        setorigin (self, spot.origin);	
 };
 
 
@@ -2408,43 +2407,57 @@ void() info_player_deathmatch =
 //////////////////////////////////////////////////////////////////////////
 
 void() trigger_activate_coop_spawns_use =
-{ 
-	// Sleeper: Will add the items back in for speedrunning in coop so it's proper later, otherwise this bunch is fixed.
-/*	float it = 0;
+{
+	local float it = 0;
+	local entity coop_spawn;
 
-#ifdef COOP_RESPAWN_KEEP_WEAPONS
-	entity p = find (world, classname, "player");
-	while (p != world)
+	if (cvar("coop") & CLASSIC_COOP)
 	{
-		it |= p.items;
-		p = find (p, classname, "player");
-	}	
-	it &= IT_ALL_WEAPONS;
-*/
-	dprint ("Activating coop spawn \"");
-	dprint (self.target);
-/*	
-	dprint ("\": Collected ");
-	dprint (ftos(it));
-	dprint (" from players.");
-*/
-	dprint ("\n");
-// #endif
-	entity s = find (world, classname, "info_player_coop");
-	while (s)
-	{
-		if (s.targetname == self.target)
+		#ifdef COOP_RESPAWN_KEEP_WEAPONS
+		local entity p = find (world, classname, "player");
+		while (p != world) 
 		{
-			s.state = COOP_SPAWN_ACTIVE;
-//			s.items = it;
-		}
-		else
+			it |= p.items;
+			p = find (p, classname, "player");
+		}	
+		it &= ALL_WEAPONS;
+
+		dprint ("Activating coop spawn \"");
+		dprint (self.target);
+		dprint ("\": Collected ");
+		dprint (ftos(it));
+		dprint (" from players.\n");
+		#endif
+
+		coop_spawn = find (world, classname, "info_player_coop");
+		while (coop_spawn) 
 		{
-			s.state = 0;
-//			s.items = 0;
+			if (coop_spawn.targetname == self.target) 
+			{
+				coop_spawn.state = COOP_SPAWN_ACTIVE;
+				coop_spawn.items = it;
+			}
+			else 
+			{
+				coop_spawn.state = 0;
+				coop_spawn.items = 0;
+			}
+			coop_spawn = find (coop_spawn, classname, "info_player_coop");
 		}
-		s = find (s, classname, "info_player_coop");
 	}
+	else // Sleeper: Respawn Parms have basically replaced this mechanic. Don't give anything, just use the spawn point.
+	{
+		dprint ("Activating coop spawn \"");
+		dprint (self.target);
+		dprint ("\n");
+		coop_spawn = find (world, classname, "info_player_coop");
+		while (coop_spawn)
+		{
+			if (coop_spawn.targetname == self.target) coop_spawn.state = COOP_SPAWN_ACTIVE;
+			else coop_spawn.state = 0;
+			coop_spawn = find (coop_spawn, classname, "info_player_coop");
+		}
+	}		
 };
 
 /*QUAKED trigger_activate_coop_spawns (1 0 1) (-8 -8 -8) (8 8 8)
@@ -2585,7 +2598,7 @@ void() CheckRules =
 {
 	local entity leadingplayer, losingplayer; // Sleeper: Since we lost the ability to use the self entity, we need to loop through all the players twice and exclude them from being the same entity instead.
 		
-	if ((gameover) || (!deathmatch)) return; // Someone else quit the game already
+	if ((gameover) || (!cvar("deathmatch"))) return; // Someone else quit the game already
 		
 	timelimit = cvar("timelimit") * 60;	
 	fraglimit = cvar("fraglimit");	     // Duel, FFA, TDM
@@ -2595,7 +2608,7 @@ void() CheckRules =
 	
 	if (cvar("warmup")) // Sleeper: When in Warmup Mode, 2 players must be in the server in order to initiate warmups.
 	{	
-		if (cvar("instagib") == INSTAGIB_RAILWARZ && num_players >= 1) start_warmup = TRUE; // Sleeper: Railwarz usually starts immediately after a single player joins.
+		if (cvar("instagib") == INSTAGIB_RAILWARZ && num_players >= 1) start_warmup = TRUE; // Sleeper: Railwarz usually starts immediately after a player joins.
 		if (cvar("instagib") != INSTAGIB_RAILWARZ && num_players >= 2) start_warmup = TRUE;
 		
 		if (start_warmup == TRUE && !initiate_matchtime) warmup_engaged = TRUE;
@@ -2617,23 +2630,23 @@ void() CheckRules =
 			matchtime_timer = time + 1;
 			
 			// Sleeper: Warn players time is almost up!
-			if (matchtime == (60 * 5) && !fiveminutewarning) 
+			if (matchtime <= (60 * 5) && !fiveminutewarning) 
 			{
 				bprint ("5 Minute Warning!\n");
 				fiveminutewarning = TRUE;				
 			}
 			
-			if (matchtime == (60 * 1) && !oneminutewarning)
+			if (matchtime <= (60 * 1) && !oneminutewarning)
 			{
 				bprint ("1 Minute Warning!\n");
 				oneminutewarning = TRUE;
 			}
 			
-			if (matchtime >= 1 && matchtime <= 10) bprint (ftos(matchtime), "!\n"); // Sleeper: Countdown at 10 seconds.
+			if (matchtime >= 1 && matchtime <= 10) bprint (ftos(matchtime), "!\n"); // Sleeper: Countdown from 10 seconds.
 		}	
 	}
 	
-//	if (timelimit & timelimit >= time)	
+//	if (timelimit && time >= timelimit)	
 	if (matchtime <= 0 && sudden_death_engaged == FALSE && warmup_engaged == FALSE && initiate_matchtime == TRUE)
 	{
 		if (deathmatch == DM_DUEL || deathmatch == DM_FFA) 
@@ -2642,24 +2655,21 @@ void() CheckRules =
 			{
 				for (losingplayer = find (world, classname, "player"); losingplayer; losingplayer = find (losingplayer, classname, "player")) // Other
 				{
-					if (leadingplayer != losingplayer && num_players >= 2) 
+					if (leadingplayer.frags > losingplayer.frags && leadingplayer != losingplayer && num_players >= 2) // Sleeper: Player with the most frags won.
 					{
-						if (leadingplayer.frags > losingplayer.frags) // Sleeper: Somebody won.
+						endgame = TRUE;							
+						bprint ("Timelimit Hit. ", leadingplayer.netname, " wins!\n");
+					}
+					else // Sleeper: If alone or timelimit elapses when players are tied, either enter "Sudden Death" mode or end match.
+					{
+						if (!cvar("sudden_death"))
 						{
-							endgame = TRUE;							
-							bprint ("Timelimit Hit. ", leadingplayer.netname, " wins!\n");
+							if (loophack <= 1) loophack++;
+							endgame = TRUE;
+							if (loophack == 1) bprint ("Timelimit Hit.\n");
 						}
-						else // Sleeper: Sudden Death!
-						{
-							if (!cvar("sudden_death"))
-							{
-								if (loophack <= 1) loophack++;
-								endgame = TRUE;
-								if (loophack == 1) bprint ("Timelimit Hit.\n");
-							}
-							else sudden_death_engaged = TRUE; // Sleeper: Put match in overtime.																										
-						}					
-					}											
+						else sudden_death_engaged = TRUE; // Sleeper: Put match in overtime.																										
+					}																
 				}										
 			}			
 		}	
@@ -2732,7 +2742,7 @@ void() CheckRules =
 	if (cvar("sudden_death")) SuddenDeath_Rules ();						
 			
 	// Update team scores? 
-	if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF && !cvar("coop")) TeamCheckScoreUpdate (); // TDM, CTF, One Flag CTF		
+	if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF) TeamCheckScoreUpdate (); // TDM, CTF, One Flag CTF		
 	
 	if (!endgame) return;		
 	NextLevel();
@@ -2756,6 +2766,7 @@ void(entity scorer, float new_score) add_score =
 {
 	if (initiate_matchtime == FALSE && deathmatch) return;
 
+	// Add captures
 	if (deathmatch == DM_CTF || deathmatch == DM_OneFlagCTF) 
 	{
 		scorer.captures += new_score;
@@ -2811,7 +2822,7 @@ void() PlayerDeathThink =
 
 void() PlayerJump =
 {
-	if (self.flags & FL_WATERJUMP) return;
+	if (self.flags & FL_WATERJUMP || self.playerjump_finished > time) return;
 	
 	if (self.waterlevel >= 2)
 	{
@@ -2831,6 +2842,8 @@ void() PlayerJump =
 
 	if (!(self.flags & FL_ONGROUND)) return;
 	if (!(self.flags & FL_JUMPRELEASED)) return; // Don't pogo stick
+//	self.playerjump_finished = time + 1; // Sleeper: The Quake II Demo is a bit like Quake II 64 in regards you couldn't bunnyhop/strafe jump around.
+	
 	self.flags -= self.flags & (FL_JUMPRELEASED);
 	self.flags -= FL_ONGROUND; // Don't stairwalk	
 	self.button2 = 0;
@@ -2917,7 +2930,7 @@ void() WaterMove =
 	
 	if (!(self.flags & FL_WATERJUMP))
 	{
-		// A set of hacks to make swimming with QuakeWorld physics roughly as fast as Net Quake physics (might bug like Quake 2 does coming out of the water so quickly).
+		// Sleeper: A set of hacks to make swimming with QuakeWorld physics roughly as fast as Net Quake physics (might bug like Quake 2 does coming out of the water so quickly. Does need fixing).
 		if (!cvar("sv_nqplayerphysics"))
 		{
 			if (self.wetsuit_finished > time)
@@ -3196,13 +3209,12 @@ void() CheckPowerups =
 	// Invisibility
 	if (self.invisible_finished)
 	{
-	// Sound and screen flash when items starts to run out
+		// Sound and screen flash when items starts to run out
 		if (self.invisible_sound < time)
 		{
 			sound (self, CHAN_AUTO, "items/inv3.wav", 0.5, ATTN_IDLE);
 			self.invisible_sound = time + ((random() * 3) + 1);
 		}
-
 
 		if (self.invisible_finished < time + 3)
 		{
@@ -3609,6 +3621,7 @@ void() Detect_Client =
 {
         // Identify/advertise the player's client in use.
         local string myClient;
+        local string clientname = "";
         local string text = "";   
         
         myClient = string_null;      
@@ -3616,21 +3629,45 @@ void() Detect_Client =
         
         if (myClient != "")
         {
-		if (substring(myClient, 0, 5) == "QSS-M") self.client = QSSM_CLIENT;
-		if (substring(myClient, 0, 3) == "FTE") self.client = FTEQW_CLIENT;                                
+		if (substring(myClient, 0, 5) == "QSS-M") 
+		{
+			self.client = QSSM_CLIENT;
+			clientname = self.client;
+		}
+						
+		if (substring(myClient, 0, 3) == "FTE") 
+		{
+			self.client = FTEQW_CLIENT; 
+			clientname = self.client;
+		}                               
         }		
 	else
 	{	
 		myClient = infokey (self, "*client");                   // ezQuake
-		if (myClient != "") self.client = EzQ_CLIENT;
+		if (myClient != "") 
+		{
+			self.client = EzQ_CLIENT;
+			clientname = "ezQuake (Unsupported)";
+			sprint (self, "\n");
+			sprint (self, "You have been rejected from connecting to the server for using ezQuake!\nEzQuake is NOT SUPPORTED yet! Consider trying QSS-M 1.6.2+ or FTEQW 6446+ instead for maximum\nNet Quake & QuakeWorld compatibility!");
+			sprint (self, "\n");
+			sprint (self, "Link to QSS-M (Recommended as Client): https://qssm.quakeone.com/\n");
+			sprint (self, "Link to FTEQW (Recommended as Server): https://www.fteqw.org/\n");
+			sprint (self, "\n");
+			sprint (self, "If you want to see ezQuake be supported, inform ezQuake's Client Developer to increase\nezQuake's protocol limits for 666 and 999. The server you tried connecting to uses 999,\ndue to a large number of assets on the server\n(both mission pack assets and custom downloadable assets).\n\nRecommended you purchase the full game and it's mission packs before attempting to connect again. Don't be a cheapskate, Quake's only $10 USD on Steam and GOG, and it recently got a remaster, so stop pussyfooting around and finally play some real Quake with your girlfriend...\n");
+			sprint (self, "\n");
+			stuffcmd (self, "disconnect\n");
+			bprint (self.netname, " is getting kicked from the server for using an unsupported client\n");
+		}
 		else
 		{
 			myClient = "Vanilla/Unknown Quake";
+			clientname = "an Unnamed Quake Client";
 			self.client = VANILLA_CLIENT;	
 		}
         }
         
-        text = sprintf (" using %s.\n", myClient);                
+        text = sprintf (" using %s\n", clientname);                
         local string red_text = sprintf ("%s has connected%s", self.netname, text);      
 	bprint (redify(red_text)); // Sleeper: Only print something on the first connect.
 };
@@ -3806,7 +3843,7 @@ Called when a player disconnects from a server
 */
 void() ClientDisconnect =
 {
-	local float intro_maps = (world.model == "maps/start.bsp" || world.model == "maps/hipstart.bsp" || world.model == "maps/rstart.bsp" || world.model == "maps/e5start.bsp" || world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp" || world.worldtype == WORLDTYPE_HUB);
+	local float intro_maps = (world.model == Start_Maplist[StartMaps()] || world.worldtype == WORLDTYPE_HUB);
 	
 	// If the level end trigger has been activated, just return
 	// since they aren't *really* leaving.							
