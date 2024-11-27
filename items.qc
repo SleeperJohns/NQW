@@ -219,7 +219,7 @@ void() Item_Rot_Systems =
 	if (cvar("skill") == 5 && !cvar("deathmatch")) 
 	{
 	        // Sleeper: For a higher difficulty.
-		if (self.armorvalue <= self.max_armorvalue || self.invincible_finished > time) self.armorrottime = time + 6.66; // Initiate Armorrot after 6.66 seconds when a player's armorvalue is above max_armorvalue without the pentagram of protection.	
+		if ((self.armorvalue <= self.max_armorvalue / 2) || (self.invincible_finished > time)) self.armorrottime = time + 6.66; // Initiate Armorrot after 6.66 seconds when a player's armorvalue is above max_armorvalue without the pentagram of protection.	
 	}
 /*	else if (cvar("deathmatch") && !cvar("coop"))
 	{
@@ -749,15 +749,15 @@ void() Item_Armor_Rot =
 	// Rot -10 armorvalue on skill 5
 	if (cvar("skill") == 5 && !cvar("deathmatch")) 
 	{
-	   	// Protect armor from rotting when Pentagram is acquired (Just note, you'll still be able to take armor damage).
+	   	// Protect armor from rotting when Pentagram is acquired (you'll still be able to take armor damage).
 		if (self.invincible_finished > time) return;
 		
 		// Tick down -10 every 6.66 seconds.	
-		if (self.armorvalue > self.max_armorvalue)
+		if (self.armorvalue > self.max_armorvalue / 2)
 		{
 			self.armorvalue -= 10;
 			self.armorrottime = time + 6.66;
-			if (self.armorvalue < self.max_armorvalue) self.armorvalue = self.max_armorvalue; // Don't overshoot max armorvalue.
+			if (self.armorvalue < self.max_armorvalue / 2) self.armorvalue = self.max_armorvalue / 2; // Don't overshoot max armorvalue.
 		}
 		sound (self, CHAN_ITEM, "items/armorrot.wav", 1, ATTN_STATIC); // Make a Doom 3-style rot sound every 6.66 seconds.
 		return;
@@ -766,7 +766,7 @@ void() Item_Armor_Rot =
 	// Rot -1 armorvalue in Deathmatch
 	else if (deathmatch)
 	{
-		if (self.armorvalue > self.max_armorvalue)
+		if (self.armorvalue > self.max_armorvalue / 2)
 		{
 			self.armorvalue -= 1;
 			self.armorrottime = time + 1;
@@ -793,9 +793,24 @@ float() armor_customizeentityforclient =
 
 void() armor_touch;
 
+// Sleeper: Get Index for Armor.
+float(entity ent) ArmorIndex =
+{
+	if (ent.items & IT_ARMOR1) return IT_ARMOR1;
+	if (ent.items & IT_ARMOR2) return IT_ARMOR2;
+	if (ent.items & IT_ARMOR3) return IT_ARMOR3;
+	
+	return 0;	
+};
+
+.float fake_armortype;
 void() armor_touch =
 {
-	local float type, value, maxvalue;
+	local float type, value, maxvalue, bit;
+	
+	// Sleeper: Quake 2-style Armor System for Skill 5.
+	local float old_armor_index, salvage, salvagecount, newcount, fake_type;
+	local float oldinfo_type, oldinfo_bit, oldinfo_maxvalue, oldinfo_fake_type;
 		
 	if (other.netname == "[overseer]-BOT") return;		
 	if (other.health <= 0) return;
@@ -809,182 +824,153 @@ void() armor_touch =
 		activator = other;
 		SUB_UseTargets();
 	}
-
-	// Max Armor reached? Do nothing
-	if (cvar("skill") == 5)
-	{
-		if (!(other.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3))) other.max_armorvalue = 666; // Needs to be something
-		if (self.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3) && other.armorvalue >= other.max_armorvalue * 2) return;																		
-	}	
-					    
+				    
 	if (self.armor_lockout_selective == 1) // Choose when an ammo pack can be locked out from being picked up again from a player during coop.
 	{	
 		if (coop & REIGNITED_COOP || deathmatch)
 		{
 			if (self.armor_lockout[other.colormap] == -1) return; // Lockout
 		}
-	}		    		
+	}		
 	
 	if (self.classname == "item_armor1") // The Green Armor
 	{
+		bit = IT_ARMOR1;
 		if (cvar("skill") == 5)
 		{
-			maxvalue = 25;
-			value = 50;
+			fake_type = 0.3;
+			maxvalue = 50;
+			value = 25;
 			type = 0.15;
 			self.message = "You got the Jacket Armor";
 			self.noise = "items/q2armor1.wav"; // Quake 2 Jacket Armor pickup sound		
 		}
 		else
 		{
+			fake_type = 0.3;
 			maxvalue = 100;
 			value = 100;
 			type = 0.3;
 			self.message = "You got the Green Armor";
 			self.noise = "items/armor1.wav"; // Quake 1 Armor pickup sound	
-			self.items = IT_ARMOR1;		
+//			self.items = IT_ARMOR1;		
 		}
 	}
 	else if (self.classname == "item_armor2") // The Yellow Armor
 	{
+		bit = IT_ARMOR2;
 		if (cvar("skill") == 5)
 		{
-			maxvalue = 50;
-			value = 100;
+			fake_type = 0.6;
+			maxvalue = 100;
+			value = 50;
 			type = 0.19;
 			self.message = "You got the Combat Armor";
 			self.noise = "items/q3armor1.wav"; // Quake 3 Armor pickup sound
 		}
 		else
 		{
+			fake_type = 0.6;
 			maxvalue = 150;
 			value = 150;
 			type = 0.6;
 			self.message = "You got the Yellow Armor";
 			self.noise = "items/armor1.wav"; // Quake 1 Armor pickup sound	
-			self.items = IT_ARMOR2;		
+//			self.items = IT_ARMOR2;		
 		}			
 	}
 	else if (self.classname == "item_armorInv") // The Red Armor
 	{
+		bit = IT_ARMOR3;
 		if (cvar("skill") == 5)
 		{
-			maxvalue = 75;
-			value = 150;
+			fake_type = 0.8;
+			maxvalue = 150;
+			value = 75;
 			type = 0.245;
 			self.message = "You got the Heavy Armor";
 			self.noise = "items/q4armor1.wav"; // Quake 4 Armor pickup sound
 		}
 		else 
 		{
+			fake_type = 0.8;
 			maxvalue = 200;
 			value = 200;
 			type = 0.8;
 			self.message = "You got the Red Armor";
 			self.noise = "items/armor1.wav"; // Quake 1 Armor pickup sound
-			self.items = IT_ARMOR3;
+//			self.items = IT_ARMOR3;
 		}
-	}		
+	}
 	
-	if (cvar("skill") == 5)
-	{		
-		// Quake 2 armor upgrading mechanics and introduce armorrot
-		other.armortype = type;		 // Level of resistance
-		other.max_armorvalue = maxvalue; // The maximum armor value	
+	if (cvar("skill") == 5) // Sleeper: Skill 5 should have a Quake 2-style armor system, however still rots overtime.
+	{	
+		self.armortype = type;
+		self.fake_armortype = fake_type;
+		self.armorvalue = value;
+		self.max_armorvalue = maxvalue;
+	
 		// MG1 ================================================================================================================				
 		#ifdef COOP_RESPAWN_ITEMS_FOR_PLAYERS
 		if (coop && other == self.enemy && self.wait <= 0) return; // In coop, don't allow the same player to pick up all the respawns.
 		if ((coop == CLASSIC_COOP && gameworld == MG1) || (coop == REIGNITED_COOP && cvar("customcoop")) || (coop == ENHANCED_COOP)) self.enemy = other;	// Store this player for coop		
 		#endif			
-		// ====================================================================================================================					
-		// Dictate overstacking
-		if (self.classname == "item_armor1")
+		// ====================================================================================================================			
+	
+		old_armor_index	= ArmorIndex (other);
+		
+		if (!old_armor_index) // Sleeper: If we don't have any armor, just use it.
 		{
-			self.items = IT_ARMOR1;
-			if (other.items & (IT_ARMOR1))
-			{
-				self.items           = IT_ARMOR1; // Override armor level
-				other.armortype      = 0.15;      // Override Level of Resistence
-				other.armorvalue    += 25;        // Override additional armorvalue
-				other.max_armorvalue = 25;        // Override max armor if adding armorvalue
-				if (other.armorvalue > 50) other.armorvalue = 50;        // Cap armor				
-			}
-			else if (other.items & (IT_ARMOR2))
-			{
-				self.items           = IT_ARMOR2; // Override armor level
-				other.armortype      = 0.19;	  // Override Level of Resistence	
-				other.armorvalue    += 12;        // Override additional armorvalue
-				other.max_armorvalue = 50;        // Override max armor if adding armorvalue
-				if (other.armorvalue > 100) other.armorvalue = 100;       // Cap armor									
-			}
-			else if (other.items & (IT_ARMOR3))
-			{
-				self.items           = IT_ARMOR3; // Override armor level
-				other.armortype      = 0.245;     // Override Level of Resistence
-				other.armorvalue    += 9; 	  // Override additional armorvalue
-				other.max_armorvalue = 75;        // Override max armor if adding armorvalue
-				if (other.armorvalue > 150) other.armorvalue = 150;       // Cap armor				
-			}						
-			else other.armorvalue = 25;	          // Fresh Armor?						
+			other.armortype = type;
+			other.fake_armortype = fake_type;
+			other.armorvalue = self.armorvalue;
+			other.max_armorvalue = maxvalue;
+			self.items = bit;		
 		}
-		else if (self.classname == "item_armor2")
+		else
 		{
-			self.items = IT_ARMOR2;
-			if (other.items & (IT_ARMOR2))
+			// Sleeper: Save old armor information
+			if (old_armor_index == IT_ARMOR1) oldinfo_bit = IT_ARMOR1;
+			else if (old_armor_index == IT_ARMOR2) oldinfo_bit = IT_ARMOR2;
+			else oldinfo_bit = IT_ARMOR3;
+			
+			oldinfo_type = other.armortype;
+			oldinfo_maxvalue = other.max_armorvalue;
+			oldinfo_fake_type = other.fake_armortype;
+		
+			// Sleeper: Calculate armor stats to salvage.
+			if (self.fake_armortype > other.fake_armortype) // Sleeper: If the picked up armor is more superior, upgrade. (Also, had to cheat a bit to make it look convincing that salvaging armor feels like Quake 2, but with less max armor)
 			{
-				self.items           = IT_ARMOR2; // Override armor level
-				other.armortype      = 0.19;	  // Override Level of Resistence
-				other.armorvalue    += 50;        // Override additional armorvalue
-				other.max_armorvalue = 50;        // Override max armor if adding armorvalue
-				if (other.armorvalue > 100) other.armorvalue = 100;       // Cap armor							
+				salvage = other.fake_armortype / self.fake_armortype;
+				salvagecount = salvage * other.armorvalue;
+				newcount = self.armorvalue + salvagecount;
+				
+				if (newcount > self.max_armorvalue) newcount = self.max_armorvalue;
+				
+				old_armor_index = 0;				
+				other.armortype = self.armortype;
+				other.armorvalue = newcount;
+				other.max_armorvalue = self.max_armorvalue;
+				other.fake_armortype = self.fake_armortype;
+				self.items = bit;
 			}
-			else if (other.items & (IT_ARMOR1))
+			else // Sleeper: If the picked up armor is the same or less superior, keep original stats.
 			{
-				self.items           = IT_ARMOR2; // Override armor level
-				other.armortype      = 0.19;	  // Override Level of Resistence
-				other.armorvalue    += 22;        // Override additional armorvalue
-				other.max_armorvalue = 50;        // Override max armor if adding armorvalue
-				if (other.armorvalue > 100) other.armorvalue = 100;       // Cap armor				
+				salvage = self.fake_armortype / other.fake_armortype;
+				salvagecount = salvage * self.armorvalue;
+				newcount = other.armorvalue + salvagecount;
+				
+				if (newcount > other.max_armorvalue) newcount = other.max_armorvalue;
+				
+				if (other.armorvalue >= newcount) return; // Sleeper: We're already overstacked to the max, don't take the new armor.
+				
+				other.armortype = oldinfo_type;
+				other.armorvalue = newcount;
+				other.max_armorvalue = oldinfo_maxvalue;
+				other.fake_armortype = oldinfo_fake_type;
+				self.items = oldinfo_bit;
 			}
-			else if (other.items & (IT_ARMOR3))
-			{
-				self.items           = IT_ARMOR3; // Override armor level
-				other.armortype      = 0.245;     // Override Level of Resistence
-				other.armorvalue    += 37;        // Override additional armorvalue	
-				other.max_armorvalue = 75;        // Override max armor if adding armorvalue
-				if (other.armorvalue > 150) other.armorvalue = 150;       // Cap armor				
-			}			 
-			else other.armorvalue = 50;	          // Fresh Armor?							
-		}
-		else if (self.classname == "item_armorInv")
-		{
-			self.items = IT_ARMOR3;
-			if (other.items & (IT_ARMOR3))
-			{
-				self.items           = IT_ARMOR3; // Override armor level
-				other.armortype      = 0.245;     // Override Level of Resistence
-				other.armorvalue    += 75;        // Override additional armorvalue
-				other.max_armorvalue = 75;  	  // Override max armor if adding armorvalue.
-				if (other.armorvalue > 150) other.armorvalue = 150;       // Cap armor					
-			}
-			else if (other.items & (IT_ARMOR1))
-			{
-				self.items           = IT_ARMOR3; // Override armor level
-				other.armortype      = 0.245;     // Override Level of Resistence			
-				other.armorvalue    += 59;        // Override additional armorvalue
-				other.max_armorvalue = 75;        // Override max armor if adding armorvalue.
-				if (other.armorvalue > 150) other.armorvalue = 150;      // Cap armor				
-			}
-			else if (other.items & (IT_ARMOR2))
-			{
-				self.items           = IT_ARMOR3; // Override armor level
-				other.armortype      = 0.245;     // Override Level of Resistence
-				other.armorvalue    += 63;        // Override additional armorvalue
-				other.max_armorvalue = 75;        // Override max armor if adding armorvalue.
-				if (other.armorvalue > 150) other.armorvalue = 150;       // Cap armor				
-			}
-			else other.armorvalue = 75;	          // Fresh Armor?									
-		}
+		}				
 		// Armor shards would go next. Coop can allow overstack, but in deathmatch, overstacking for shards is locked to the maximum armor of that particular armor level.											
 	}
 	else 
@@ -1129,6 +1115,7 @@ void() item_armor1 =
 	}
 
 	self.touch = armor_touch;
+	/*
 	if (cvar("skill") == 5)
 	{
 		self.max_armorvalue = 25;
@@ -1141,6 +1128,7 @@ void() item_armor1 =
 		self.armorvalue  = 100;
 		self.armortype = 0.3;
 	}
+	*/
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
 	self.skin = 0;
@@ -1158,7 +1146,8 @@ void() item_armor2 =
 		return;
 	}
 
-	self.touch = armor_touch;	
+	self.touch = armor_touch;
+	/*	
 	if (cvar("skill") == 5)
 	{
 		self.max_armorvalue = 50;
@@ -1171,6 +1160,7 @@ void() item_armor2 =
 		self.armorvalue = 150;
 		self.armortype = 0.6;
 	}
+	*/
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
 	self.skin = 1;
@@ -1189,6 +1179,7 @@ void() item_armorInv =
 	}
 
 	self.touch = armor_touch;
+	/*
 	if (cvar("skill") == 5)
 	{
 		self.max_armorvalue = 75;
@@ -1200,7 +1191,8 @@ void() item_armorInv =
 		self.max_armorvalue = 200;
 		self.armorvalue = 200;
 		self.armortype = 0.8;
-	}		
+	}
+	*/		
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
 	self.skin = 2;
