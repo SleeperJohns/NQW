@@ -3471,7 +3471,7 @@ void() SkillVotables =
 			{
 				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.15;   
-				cl.max_armorvalue = 25;
+				cl.max_armorvalue = 50;
 				cl.fake_armortype = 0.3;
 				if (cl.armorvalue > 50) cl.armorvalue = 50; // If this armor came from another skill, adjust it's value and maximum value.								
 			}
@@ -3479,7 +3479,7 @@ void() SkillVotables =
 			{
 				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.19;
-				cl.max_armorvalue = 50;	
+				cl.max_armorvalue = 100;	
 				cl.fake_armortype = 0.6;					
 				if (cl.armorvalue > 100) cl.armorvalue = 100; // If this armor came from another skill, adjust it's value and maximum value.			
 			}
@@ -3487,7 +3487,7 @@ void() SkillVotables =
 			{
 				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.245;
-				cl.max_armorvalue = 75;
+				cl.max_armorvalue = 150;
 				cl.fake_armortype = 0.8;
 				if (cl.armorvalue > 150) cl.armorvalue = 150; // If this armor came from another skill, adjust it's value and maximum value.																
 			}
