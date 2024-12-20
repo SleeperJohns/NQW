@@ -52,7 +52,6 @@ void(entity attacker, float damage) SUB_NullPain = {};
 
 void() SUB_Remove = {remove(self);};
 
-
 /*
 QuakeEd only writes a single float for angles (bad idea), so up and down are
 just constant angles.
@@ -67,10 +66,8 @@ void() SetMovedir =
 	}
 	// -------------------------
 
-	if (self.angles == '0 -1 0')
-		self.movedir = '0 0 1';
-	else if (self.angles == '0 -2 0')
-		self.movedir = '0 0 -1';
+	if (self.angles == '0 -1 0') self.movedir = '0 0 1';
+	else if (self.angles == '0 -2 0') self.movedir = '0 0 -1';
 	else
 	{
 		makevectors (self.angles);
@@ -87,15 +84,16 @@ Removes self if COOP_ONLY spawnflag is set and we're not in coop.
 Returns TRUE if it was removed.
 ================
 */
-float RemovedOutsideCoop()
+float() RemovedOutsideCoop =
 {
 	if (!coop && (self.spawnflags & COOP_ONLY))
 	{
 		remove(self);
 		return TRUE;
 	}
+	
 	return FALSE;
-}
+};
 
 /*
 ================
@@ -138,11 +136,10 @@ void(entity ent, vector tdest, float tspeed, void() func) SUB_CalcMoveEnt =
 
 void(vector tdest, float tspeed, void() func) SUB_CalcMove =
 {
-	local vector	vdestdelta;
-	local float	len, traveltime;
+	local vector vdestdelta;
+	local float len, traveltime;
 
-	if (!tspeed)
-		objerror("No speed is defined!");
+	if (!tspeed) objerror("No speed is defined!");
 
 	self.think1 = func;
 	self.finaldest = tdest;
@@ -188,8 +185,7 @@ void()  SUB_CalcMoveDone =
 	setorigin(self, self.finaldest);
 	self.velocity = '0 0 0';
 	self.nextthink = -1;
-	if (self.think1)
-		self.think1();
+	if (self.think1) self.think1();
 };
 
 
@@ -399,16 +395,13 @@ void() SUB_UseTargets =
 	{
 // 		id1_centerprint (activator, self.message);
 		// MG1 ===============================================================
-		if (self.spawnflags & MESSAGE_ALL_PLAYERS)
-			centerprint_all (self.message); // In-game message, localized
-		else
-			id1_centerprint (activator, self.message); // In-game message, localized
+		if (self.spawnflags & MESSAGE_ALL_PLAYERS) centerprint_all (self.message); // In-game message, localized
+		else id1_centerprint (activator, self.message); // In-game message, localized
 		// ====================================================================
 		if (!self.noise) sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);	
 		if (self.special_noise) // NQW
 		{
-			if (self.special_spawned_pickup_sound == 1) 
-				sound (activator, CHAN_VOICE, "misc/secret.wav", 1, ATTN_NORM);
+			if (self.special_spawned_pickup_sound == 1)  sound (activator, CHAN_VOICE, "misc/secret.wav", 1, ATTN_NORM);
 			else sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);					
 		}					
 	}
@@ -435,8 +428,7 @@ void() SUB_UseTargets =
 			other = stemp;
 			if (self.use != SUB_Null)
 			{
-				if (self.use)
-				self.use ();
+				if (self.use) self.use ();
 			}
 			self = stemp;
 			other = otemp;
@@ -451,7 +443,7 @@ In "Nightmare!", and "Sleeper Must Die!", all attack_finished
 times become 0 some monsters refire twice automatically.
 */
 float(entity targ) HasInvisible;
-float (entity targ, float ignore_water) visible_sk5;
+float(entity targ, float ignore_water) visible_sk5;
 
 /*
 in nightmare mode, all attack_finished times become 0
@@ -519,9 +511,9 @@ void(float normal) SUB_AttackFinished =
 	if (cvar("skill") != 3 && cvar("skill") != 5) self.attack_finished = time + normal;
 };
 
-float (entity targ) visible;
+float(entity targ) visible;
 
-void (void() thinkst) SUB_CheckRefire =
+void(void() thinkst) SUB_CheckRefire =
 {
 	if (cvar("skill") != 3 && cvar("skill") != 5) return;
 	if (self.cnt == 1) return;
@@ -552,9 +544,9 @@ SUB_SwitchTargets
 ================
 */
 
-void SUB_SwitchTargets(.string field, string oldtarget, string newtarget)
+void(.string field, string oldtarget, string newtarget) SUB_SwitchTargets =
 {
-	entity e = find(world, targetname, oldtarget);
+	local entity e = find(world, targetname, oldtarget);
 	while(e)
 	{
 		e.field = newtarget;
@@ -570,11 +562,12 @@ SUB_FindWithPredicate
 
 entity SUB_FindWithPredicate(entity start, .string field, string search, float(entity e) predicate = (float(entity e))SUB_True)
 {
-	entity t = find(start, field, search);
+	local entity t = find(start, field, search);
 	while(t && !predicate(t))
 	{
 		t = find(t, field, search);
 	}
+	
 	return t;
 };
 
@@ -584,15 +577,16 @@ SUB_CountTargets
 ================
 */
 
-float SUB_CountTargets(entity e, float(entity e) predicate = (float(entity e))SUB_True) 
+float(entity e, float(entity e) predicate = (float(entity e))SUB_True) SUB_CountTargets =
 {
-	float cnt = 0;
-	entity t = SUB_FindWithPredicate(world, targetname, e.target, predicate);
+	local float cnt = 0;
+	local entity t = SUB_FindWithPredicate(world, targetname, e.target, predicate);
 	while(t)
 	{
 		cnt++;
 		t = SUB_FindWithPredicate(t, targetname, e.target, predicate);
 	}
+	
 	return cnt;
 };
 
@@ -602,16 +596,17 @@ SUB_RandomTarget
 ================
 */
 
-entity SUB_RandomTarget(entity e, float(entity e) predicate = (float(entity e))SUB_True) 
+entity(entity e, float(entity e) predicate = (float(entity e))SUB_True) SUB_RandomTarget =
 {
-	float cnt = SUB_CountTargets(e, predicate);
+	local float cnt = SUB_CountTargets(e, predicate);
 	if (cnt == 0) return world;
 	cnt = floor(cnt * random());
-	entity t = SUB_FindWithPredicate(world, targetname, e.target, predicate);
+	local entity t = SUB_FindWithPredicate(world, targetname, e.target, predicate);
 	while(cnt--)
 	{
 		t = SUB_FindWithPredicate(t, targetname, e.target, predicate);
 	}
+	
 	return t;
 };
 
@@ -621,10 +616,8 @@ SUB_SetWorldType
 ================
 */
 
-void SUB_SetWorldtype()
+void() SUB_SetWorldtype
 {
-	if(self.worldtype) 
-		self.worldtype--;
-	else
-		self.worldtype = world.worldtype;
+	if (self.worldtype) self.worldtype--;
+	else self.worldtype = world.worldtype;
 };

@@ -2818,11 +2818,11 @@ void() CheatCommand =
 	self.ammo_lava_nails    = 200;
 	self.ammo_multi_rockets = 100;
 	self.ammo_plasma 	= 100;	
-	self.ammo_slugs	        = 100;
-//	self.armorvalue 	= 200;		
-//	self.items   |= HUD_WEAPONS | IT_ARMOR3 | IT_KEY1 | IT_KEY2 | IT_INVULNERABILITY | IT_QUAD | IT_SUIT | IT_INVISIBILITY;
-	self.items   |= HUD_WEAPONS;			
-	self.weapons |= ALL_WEAPONS | NQW_IT_COILGUN;				
+//	self.ammo_slugs	        = 100;
+		
+	self.items   |= HUD_WEAPONS;	
+	self.weapons |= ALL_WEAPONS;		
+//	self.weapons |= ALL_WEAPONS | NQW_IT_COILGUN;				
 	self.weapon   = IT_ROCKET_LAUNCHER;		       
 	self.impulse  = 0;
 	W_SetCurrentAmmo ();
@@ -2838,6 +2838,8 @@ Go to the next weapon with ammo
 void() CycleWeaponCommand =
 {
 	local float weaps, current, noammo, loop;
+	
+	if (self.hook_out) return; // no changing weapons when hook is out.
 	
 	EnableComboWeapons (self);
 	UpdateAmmoCounts (self);	
@@ -2963,6 +2965,8 @@ void() CycleWeaponReverseCommand =
 {
 	local float weaps, current, noammo, loop;
 	
+	if (self.hook_out) return; // no changing weapons when hook is out.
+	
 	EnableComboWeapons (self);
 	UpdateAmmoCounts (self);	
 	weaps = self.weapons;
@@ -3080,29 +3084,29 @@ void() QuadCheat =
 	self.super_time = 1;
 	self.super_damage_finished = time + 30;
 	self.items |= IT_QUAD;
-	sprint (self, "quad cheat\n");	
+	sprint (self, "Quad cheat\n");	
 };
 
 //MED
 void() WetsuitCheat =
 {
-	if (deathmatch || coop) return;
+	if (deathmatch || coop && !cvar("developer")) return;
 	
 	self.expansionitems |= HIP_IT_WETSUIT;
 	self.wetsuit_time = 1;
 	self.wetsuit_finished = time + 30;
-	bprint ("wetsuit cheat\n");
+	sprint (self, "Wetsuit Cheat\n");
 };
 
 //MED
 void() EmpathyShieldsCheat =
 {
-	if (deathmatch || coop) return;
+	if (deathmatch || coop && !cvar("developer")) return;
 	
 	self.expansionitems |= HIP_IT_EMPATHY_SHIELDS;
 	self.empathy_time = 1;
 	self.empathy_finished = time + 30;
-	bprint ("empathycheat\n");
+	sprint (self, "Empathy Cheat\n");
 };
 
 void() DumpEntities =
@@ -3145,7 +3149,7 @@ float dump_coord;
 void() ToggleDump =
 {
 	dump_coord = 1 - dump_coord;
-	if (dump_coord == 1) bprint ("$qc_dump_player_loc");
+	if (dump_coord == 1) bprint ("$qc_dump_player_loc\n");
 };
 
 void() DumpCoordinates =
@@ -4631,6 +4635,7 @@ void() W_WeaponFrame =
 	ImpulseCommands ();
 
 // check for attack
+//	if (self.button0 && !(self.fire_held_down))
 	if (self.button0)
 	{
 		SuperDamageSound ();

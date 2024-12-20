@@ -3225,8 +3225,7 @@ void() horde_spawn_powerup =
 		
 		rand = random();
 		// HIP -------------------------------------------------
-/*
-		if (rand < 0.05) // spawn horn of conjuring
+/*		if (rand < 0.05) // spawn horn of conjuring
 		{
 			powerup.noise = "hipitems/horn.wav";
 			setmodel(powerup, "progs/horn.mdl");

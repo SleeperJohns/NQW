@@ -35,9 +35,8 @@ float SIGIL_E6 = 512; //32;
 float SIGIL_NUMBITS = 6;
 */
 
-float SIGIL_ALL = SIGIL_E1 | SIGIL_E2 | SIGIL_E3 | SIGIL_E4 | SIGIL_E5;
+float SIGIL_ALL 	  = SIGIL_E1 | SIGIL_E2 | SIGIL_E3 | SIGIL_E4 | SIGIL_E5;
 float SIGIL_ALL_ALL_ALLLL = SIGIL_E1 | SIGIL_E2 | SIGIL_E3 | SIGIL_E4 | SIGIL_E5 | SIGIL_E6;
-
 
 void() sigil_touch_mg1 =
 {
@@ -65,7 +64,7 @@ void() sigil_touch_mg1 =
 	self.solid = SOLID_NOT;
 	self.model = string_null;
 	
-	float lastPickup = SUB_LeftShift (self.spawnflags & SIGIL_ALL, SIGIL_NUMBITS);
+	local float lastPickup = SUB_LeftShift (self.spawnflags & SIGIL_ALL, SIGIL_NUMBITS);
 	serverflags |= (self.spawnflags & SIGIL_ALL) | lastPickup;
 	
 	if (cvar("horde") && (self.spawnflags & SIGIL_E2)) // Hunger
@@ -88,14 +87,11 @@ void() sigil_touch_mg1 =
 
 float() sigil_getLastPickup =
 {
-	float lastPickup = SUB_RightShift (serverflags, SIGIL_NUMBITS) & SIGIL_ALL;
+	local float lastPickup = SUB_RightShift (serverflags, SIGIL_NUMBITS) & SIGIL_ALL;
 	return lastPickup;
 };
 
-void() sigil_clearLastPickup =
-{
-	serverflags &= ~SUB_LeftShift (SIGIL_ALL, SIGIL_NUMBITS);
-};
+void() sigil_clearLastPickup = {serverflags &= ~SUB_LeftShift (SIGIL_ALL, SIGIL_NUMBITS);};
 
 /*QUAKED item_sigil_mg1 (0 .5 .8) (-16 -16 -24) (16 16 32) E1 E2 E3 E4 E5 E6
 End of level sigil_mg1, pick up to end episode and return to jrhub.
@@ -111,7 +107,7 @@ void() item_sigil_mg1 =
 	precache_sound ("misc/runekey.wav");
 	self.noise = "misc/runekey.wav";
 
-	string tempmdl = string_null;
+	local string tempmdl = string_null;
 
 	if (self.spawnflags & SIGIL_E1)
 	{
@@ -172,7 +168,7 @@ void() misc_rune_indicator_use =
 
 void() misc_rune_indicator =
 {
-	float active = self.spawnflags & RUNE_INDICATOR_ACTIVE ? TRUE : FALSE;
+	local float active = self.spawnflags & RUNE_INDICATOR_ACTIVE ? TRUE : FALSE;
 	self.spawnflags (-) RUNE_INDICATOR_ACTIVE;
 	if (!self.spawnflags) self.spawnflags |= SIGIL_E1;
 		

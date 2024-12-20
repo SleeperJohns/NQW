@@ -188,43 +188,31 @@ void() StartItem =
 void() Item_Rot_Systems =
 {
 	// Do healthrot stuff
-	if (!cvar("deathmatch"))
-	{	
-		// Sleeper: Should be exactly how ID did for Megahealth rots, just enhanced for Single Player and Cooperative.
-		if (self.health <= self.max_health)
-		{
-		       // Initiate Healthrot after 5 seconds when health is above max_health and the overstack flag gets switched on.
-		       if (self.health_overstacked == 0) self.healthtime = time + 5;
-		       // Disable overstack flag when rot is over.
-		       else if (self.health_overstacked == 1) self.health_overstacked = 0;
-		}		
-	}
-	else
+	// Sleeper: Should be exactly how ID did for Megahealth rots, just enhanced for Single Player and Cooperative.
+	if (self.health <= self.max_health)
 	{
-		// Sleeper: Emulate Quake III: Arena's Megahealth Rot System in deathmatch.	
-		if (self.health <= self.max_health) self.healthtime = time + 1; // Initiate Healthrot after 1 second when health is above max_health.	
-	}
-	Enhanced_Item_Megahealth_Rot();
-	// Sleeper: Speedrun Game Types use the Vanilla Megahealth Rot System up to Skill 3 before using the Enhanced Megahealth Rot System for Skill 4 and 5.
+		// Introduce a spawned health overstack flag, also known as Health Deflate.
+		if (self.health_deflate == TRUE) self.healthtime = time + 1; // Initiate Health deflate after 1 seconds when health is above max_health.	
+		else self.health_deflate = FALSE; // Disable spawned overstack rot when rot is over.
 	
-	// Introduce a spawned health overstack flag, also known as Health Deflate.
-	if (self.health <= self.max_health && self.health_deflate == 1) 
-	{
-		self.healthtime = time + 1; // Initiate Healthrot after 5 seconds when health is above max_health.	
-		self.health_deflate = 0;    // Disable spawned overstack rot when rot is over.
-	}	
-	Deflate_Health_Rot();	
+		// Initiate Healthrot after 5 seconds when health is above max_health and the overstack flag gets switched on.
+		if (self.health_overstacked == FALSE) self.healthtime = time + 5;
+		// Disable overstack flag when rot is over.
+		else if (self.health_overstacked == TRUE) self.health_overstacked = 0;
+	}		
+	// Sleeper: Speedrun Game Types use the Vanilla Megahealth Rot System up to Skill 3 before using the Enhanced Megahealth Rot System for Skill 4 and 5.	
+	Deflate_Health_Rot(); Enhanced_Item_Megahealth_Rot();
 					
 	// Do armorrot stuff
 	if (cvar("skill") == 5 && !cvar("deathmatch")) 
 	{
 	        // Sleeper: For a higher difficulty.
-		if ((self.armorvalue <= self.max_armorvalue / 2) || (self.invincible_finished > time)) self.armorrottime = time + 6.66; // Initiate Armorrot after 6.66 seconds when a player's armorvalue is above max_armorvalue without the pentagram of protection.	
+		if ((self.armorvalue <= self.max_armorvalue / 2) || (self.invincible_finished > time)) self.armorrottime = time + 5; // Initiate Armorrot after 6.66 seconds when a player's armorvalue is above max_armorvalue without the pentagram of protection.	
 	}
 /*	else if (cvar("deathmatch") && !cvar("coop"))
 	{
 		// Sleeper: This is meant to emulate Quake III: Arena style armor rotting for deathmatch games, which I don't think I'll be putting it in any time soon, unless I invent time to make a Quake III: Arena/Team Arena Rendition.
-		if (self.armorvalue <= self.max_armorvalue) self.armorrottime = time + 1;
+		if (self.armorvalue <= self.max_armorvalue / 2) self.armorrottime = time + 1;
 	}*/
 	Item_Armor_Rot();
 };
@@ -755,7 +743,7 @@ void() Item_Armor_Rot =
 		// Tick down -10 every 6.66 seconds.	
 		if (self.armorvalue > self.max_armorvalue / 2)
 		{
-			self.armorvalue -= 10;
+			self.armorvalue -= 5;
 			self.armorrottime = time + 6.66;
 			if (self.armorvalue < self.max_armorvalue / 2) self.armorvalue = self.max_armorvalue / 2; // Don't overshoot max armorvalue.
 		}
@@ -792,25 +780,107 @@ float() armor_customizeentityforclient =
 };
 
 void() armor_touch;
+.float fake_armortype;
 
 // Sleeper: Get Index for Armor.
-float(entity ent) ArmorIndex =
+float(entity player) ArmorIndex =
 {
-	if (ent.items & IT_ARMOR1) return IT_ARMOR1;
-	if (ent.items & IT_ARMOR2) return IT_ARMOR2;
-	if (ent.items & IT_ARMOR3) return IT_ARMOR3;
+	if (player.items & IT_ARMOR1) return IT_ARMOR1;
+	if (player.items & IT_ARMOR2) return IT_ARMOR2;
+	if (player.items & IT_ARMOR3) return IT_ARMOR3;
 	
-	return 0;	
+	return FALSE;	
 };
 
-.float fake_armortype;
-void() armor_touch =
+// Quake II-style Armor information system
+void(entity item, float armorinfo_bit, float base_count, float max_count, float true_protection, float fake_protection) item_armor_info =
 {
-	local float type, value, maxvalue, bit;
+	local string pickup_noise = string_null, pickup_message = string_null; // Sleeper: Clear strings just in case.
 	
+	// Armor pickup noise and message
+	if (armorinfo_bit & IT_ARMOR1)      // The Green Armor
+	{
+		if (cvar("skill") == 5 && !cvar("deathmatch"))
+		{
+			pickup_noise = "items/q2armor1.wav"; // Quake 2 Jacket Armor pickup sound
+			pickup_message = "Jacket Armor";
+		}
+		else
+		{
+			pickup_noise = "items/armor1.wav";   // Quake 1 Armor pickup sound
+			pickup_message = "Red Armor";		
+		}		
+	}	
+	else if (armorinfo_bit & IT_ARMOR2) // The Yellow Armor
+	{
+		if (cvar("skill") == 5 && !cvar("deathmatch"))
+		{
+			pickup_noise = "items/q3armor1.wav"; // Quake 3 Armor pickup sound
+			pickup_message = "Combat Armor";
+		}
+		else
+		{
+			pickup_noise = "items/armor1.wav";   // Quake 1 Armor pickup sound
+			pickup_message = "Yellow Armor";		
+		}			
+	}	
+	else if (armorinfo_bit & IT_ARMOR3) // The Red Armor
+	{
+		if (cvar("skill") == 5 && !cvar("deathmatch"))
+		{
+			pickup_noise = "items/q4armor1.wav"; // Quake 4 Armor pickup sound
+			pickup_message = "Heavy Armor";
+		}
+		else
+		{
+			pickup_noise = "items/armor1.wav";   // Quake 1 Armor pickup sound
+			pickup_message = "Red Armor";		
+		}			
+	}	
+
+	// Armor Info
+	item.items = armorinfo_bit;
+	item.armorvalue = base_count;
+	item.max_armorvalue = max_count;
+	item.armortype = true_protection;
+	item.fake_armortype = fake_protection;	
+	item.noise = pickup_noise;
+	item.message = sprintf ("You got the %s", pickup_message);	
+};
+
+float(entity item) armor_info = 
+{
+	// Which Self, Armor Bit, Armorvalue, Max Armorvalue, True Protection, Fake Protection (To keep the Quake II-style armor salvaging balancing intact). Next would be energy protection, for the Quake II Power Shield.	
+	if (item.classname == "item_armor1")   // The Green Armor
+	{
+		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR1, 25, 50, 0.15, 0.3);
+		else item_armor_info (item, IT_ARMOR1, 100, 100, 0.3, 0.3);
+		return IT_ARMOR1;
+	}
+	
+	if (item.classname == "item_armor2")   // The Yellow Armor
+	{
+		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR2, 50, 100, 0.19, 0.6);
+		else item_armor_info (item, IT_ARMOR2, 150, 150, 0.6, 0.6);
+		return IT_ARMOR2;
+	}
+	
+	if (item.classname == "item_armorInv") // The Red Armor
+	{
+		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR3, 75, 150, 0.245, 0.8);
+		else item_armor_info (item, IT_ARMOR3, 200, 200, 0.8, 0.8);
+		return IT_ARMOR3;
+	}
+	
+	return FALSE;		
+};
+
+void() armor_touch =
+{	
 	// Sleeper: Quake 2-style Armor System for Skill 5.
-	local float old_armor_index, salvage, salvagecount, newcount, fake_type;
-	local float oldinfo_type, oldinfo_bit, oldinfo_maxvalue, oldinfo_fake_type;
+	local float old_armor_index, salvage, salvagecount, newcount; // Sleeper: To calucate armorvalue salvage amounts.
+	local float oldinfo_type, oldinfo_bit, oldinfo_maxvalue, oldinfo_fake_type; // Sleeper: To look at the player's existing armor stats.
+	local float newinfo_bit, newinfo; // Sleeper: For new armors.
 		
 	if (other.netname == "[overseer]-BOT") return;		
 	if (other.health <= 0) return;
@@ -831,84 +901,14 @@ void() armor_touch =
 		{
 			if (self.armor_lockout[other.colormap] == -1) return; // Lockout
 		}
-	}		
-	
-	if (self.classname == "item_armor1") // The Green Armor
-	{
-		bit = IT_ARMOR1;
-		if (cvar("skill") == 5)
-		{
-			fake_type = 0.3;
-			maxvalue = 50;
-			value = 25;
-			type = 0.15;
-			self.message = "You got the Jacket Armor";
-			self.noise = "items/q2armor1.wav"; // Quake 2 Jacket Armor pickup sound		
-		}
-		else
-		{
-			fake_type = 0.3;
-			maxvalue = 100;
-			value = 100;
-			type = 0.3;
-			self.message = "You got the Green Armor";
-			self.noise = "items/armor1.wav"; // Quake 1 Armor pickup sound	
-//			self.items = IT_ARMOR1;		
-		}
-	}
-	else if (self.classname == "item_armor2") // The Yellow Armor
-	{
-		bit = IT_ARMOR2;
-		if (cvar("skill") == 5)
-		{
-			fake_type = 0.6;
-			maxvalue = 100;
-			value = 50;
-			type = 0.19;
-			self.message = "You got the Combat Armor";
-			self.noise = "items/q3armor1.wav"; // Quake 3 Armor pickup sound
-		}
-		else
-		{
-			fake_type = 0.6;
-			maxvalue = 150;
-			value = 150;
-			type = 0.6;
-			self.message = "You got the Yellow Armor";
-			self.noise = "items/armor1.wav"; // Quake 1 Armor pickup sound	
-//			self.items = IT_ARMOR2;		
-		}			
-	}
-	else if (self.classname == "item_armorInv") // The Red Armor
-	{
-		bit = IT_ARMOR3;
-		if (cvar("skill") == 5)
-		{
-			fake_type = 0.8;
-			maxvalue = 150;
-			value = 75;
-			type = 0.245;
-			self.message = "You got the Heavy Armor";
-			self.noise = "items/q4armor1.wav"; // Quake 4 Armor pickup sound
-		}
-		else 
-		{
-			fake_type = 0.8;
-			maxvalue = 200;
-			value = 200;
-			type = 0.8;
-			self.message = "You got the Red Armor";
-			self.noise = "items/armor1.wav"; // Quake 1 Armor pickup sound
-//			self.items = IT_ARMOR3;
-		}
 	}
 	
-	if (cvar("skill") == 5) // Sleeper: Skill 5 should have a Quake 2-style armor system, however still rots overtime.
+	// Sleeper: "Newinfo". Simpler-ish.
+	newinfo = armor_info (self);	
+	
+	if (cvar("skill") == 5 && !cvar("deathmatch")) // Sleeper: Skill 5 should have a Quake 2-style armor system, however still rots overtime.
 	{	
-		self.armortype = type;
-		self.fake_armortype = fake_type;
-		self.armorvalue = value;
-		self.max_armorvalue = maxvalue;
+		newinfo_bit = self.items; // Sleeper: Save the newinfo bit to decide when to override or not.
 	
 		// MG1 ================================================================================================================				
 		#ifdef COOP_RESPAWN_ITEMS_FOR_PLAYERS
@@ -921,18 +921,18 @@ void() armor_touch =
 		
 		if (!old_armor_index) // Sleeper: If we don't have any armor, just use it.
 		{
-			other.armortype = type;
-			other.fake_armortype = fake_type;
+			other.armortype = self.armortype;
+			other.fake_armortype = self.fake_armortype;
 			other.armorvalue = self.armorvalue;
-			other.max_armorvalue = maxvalue;
-			self.items = bit;		
+			other.max_armorvalue = self.max_armorvalue;
+			self.items = newinfo_bit;		
 		}
 		else
 		{
-			// Sleeper: Save old armor information
-			if (old_armor_index == IT_ARMOR1) oldinfo_bit = IT_ARMOR1;
+			     // Sleeper: Save old armor information
+			     if (old_armor_index == IT_ARMOR1) oldinfo_bit = IT_ARMOR1;
 			else if (old_armor_index == IT_ARMOR2) oldinfo_bit = IT_ARMOR2;
-			else oldinfo_bit = IT_ARMOR3;
+			else if (old_armor_index == IT_ARMOR3) oldinfo_bit = IT_ARMOR3;
 			
 			oldinfo_type = other.armortype;
 			oldinfo_maxvalue = other.max_armorvalue;
@@ -943,23 +943,22 @@ void() armor_touch =
 			{
 				salvage = other.fake_armortype / self.fake_armortype;
 				salvagecount = salvage * other.armorvalue;
-				newcount = self.armorvalue + salvagecount;
-				
+				newcount = floor(self.armorvalue + salvagecount);
 				if (newcount > self.max_armorvalue) newcount = self.max_armorvalue;
 				
-				old_armor_index = 0;				
+				old_armor_index = 0;	
+							
 				other.armortype = self.armortype;
 				other.armorvalue = newcount;
 				other.max_armorvalue = self.max_armorvalue;
 				other.fake_armortype = self.fake_armortype;
-				self.items = bit;
+				self.items = newinfo_bit;
 			}
-			else // Sleeper: If the picked up armor is the same or less superior, keep original stats.
+			else // Sleeper: If the picked up armor is the same or less superior, keep original stats, just add the salvage.
 			{
 				salvage = self.fake_armortype / other.fake_armortype;
 				salvagecount = salvage * self.armorvalue;
-				newcount = other.armorvalue + salvagecount;
-				
+				newcount = floor(other.armorvalue + salvagecount);				
 				if (newcount > other.max_armorvalue) newcount = other.max_armorvalue;
 				
 				if (other.armorvalue >= newcount) return; // Sleeper: We're already overstacked to the max, don't take the new armor.
@@ -976,16 +975,17 @@ void() armor_touch =
 	else 
 	{		
 		// General armor maths for Singleplayer/Cooperative and Deathmatch
-		if ((other.armortype * other.armorvalue) >= (type * value)) return;
+		if ((other.armortype * other.armorvalue) >= (self.armortype * self.armorvalue)) return;
+		
 		// MG1 ================================================================================================================				
 		#ifdef COOP_RESPAWN_ITEMS_FOR_PLAYERS
 		if (coop && other == self.enemy && self.wait <= 0) return; // In coop, don't allow the same player to pick up all the respawns.
 		if ((coop == CLASSIC_COOP && gameworld == MG1) || (coop == REIGNITED_COOP && cvar("customcoop")) || (coop == ENHANCED_COOP)) self.enemy = other;	// Store this player for coop			
 		#endif	
 		// ====================================================================================================================			
-		other.armortype = type;
-		other.armorvalue = value;
-		other.max_armorvalue = maxvalue; // Not needed here, but is good for consistency		
+		other.armortype = self.armortype;
+		other.armorvalue = self.armorvalue;
+		other.max_armorvalue = self.max_armorvalue; // Not needed here, but is good for consistency		
 	}
 		
 	other.items -= other.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
@@ -1115,20 +1115,6 @@ void() item_armor1 =
 	}
 
 	self.touch = armor_touch;
-	/*
-	if (cvar("skill") == 5)
-	{
-		self.max_armorvalue = 25;
-		self.armorvalue = 50;
-		self.armortype = 0.15;
-	}
-	else
-	{
-		self.max_armorvalue = 100;
-		self.armorvalue  = 100;
-		self.armortype = 0.3;
-	}
-	*/
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
 	self.skin = 0;
@@ -1147,20 +1133,6 @@ void() item_armor2 =
 	}
 
 	self.touch = armor_touch;
-	/*	
-	if (cvar("skill") == 5)
-	{
-		self.max_armorvalue = 50;
-		self.armorvalue = 100;
-		self.armortype = 0.19;
-	}
-	else
-	{
-		self.max_armorvalue = 150;
-		self.armorvalue = 150;
-		self.armortype = 0.6;
-	}
-	*/
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
 	self.skin = 1;
@@ -1178,21 +1150,7 @@ void() item_armorInv =
 		return;
 	}
 
-	self.touch = armor_touch;
-	/*
-	if (cvar("skill") == 5)
-	{
-		self.max_armorvalue = 75;
-		self.armorvalue = 150;
-		self.armortype = 0.245;
-	}
-	else 
-	{
-		self.max_armorvalue = 200;
-		self.armorvalue = 200;
-		self.armortype = 0.8;
-	}
-	*/		
+	self.touch = armor_touch;		
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
 	self.skin = 2;
@@ -3019,6 +2977,7 @@ void() item_artifact_invulnerability =
 	setmodel (self, "progs/invulner.mdl");
 	self.netname = "Pentagram of Protection";
 	self.items = IT_INVULNERABILITY;
+	self.effects |= EF_RED;
 	setsize (self, '-16 -16 -24', '16 16 32');
 	StartItem ();
 };
@@ -3094,6 +3053,7 @@ void() item_artifact_super_damage =
 	setmodel (self, "progs/quaddama.mdl");
 	self.netname = "Quad Damage";
 	self.items = IT_QUAD;
+	self.effects |= EF_BLUE;
 	setsize (self, '-16 -16 -24', '16 16 32');
 	StartItem ();
 };

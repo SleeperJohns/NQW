@@ -22,550 +22,568 @@
 // Under contract to id software for Rogue Entertainment
 
 // New entity fields
-.entity hook; // this is my hook
-.float on_hook; // we're on it
-.float hook_out; // it's out
-.float fire_hook; // Sleeper: For Off-Hand Grappling Hook.
-.float offhand_hook_enabled; // Sleeper: A fake pickup.
+// Sleeper: Moved to nqwdefs.qc
 // .float hook_finished;
 
 // prototypes for WEAPONS.QC functions
 float() crandom;
 void(vector org, vector vel, float damage) SpawnBlood;
 
-void(entity h, entity player) GrappleTrail =
+// Originally from Zoid's 3Wave
+/*********\
+* LinkPos *
+\*********/
+void() LinkPos =
 {
-	// Draw a line to the hook
-	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-	WriteByte (MSG_BROADCAST, TE_BEAM);
-	WriteEntity (MSG_BROADCAST, h);
-	WriteCoord (MSG_BROADCAST, h.origin_x);
-	WriteCoord (MSG_BROADCAST, h.origin_y);
-	WriteCoord (MSG_BROADCAST, h.origin_z);
-	WriteCoord (MSG_BROADCAST, player.origin_x);
-	WriteCoord (MSG_BROADCAST, player.origin_y);
-	WriteCoord (MSG_BROADCAST, player.origin_z + 5); // Sleeper: Default is 16.
-};
+	// R00k added
+	local vector dir = '0 0 0';
 
-void() OffHand_GrappleReset =
-{	
-	self.owner.on_hook = FALSE;
-	self.owner.hook_out = FALSE;
-	self.owner.fire_hook = FALSE;
-//	self.owner.weaponframe = 0;
-//	self.owner.attack_finished = time + 0.25;	
-	remove (self);
-};
-
-void() OffHand_GrappleTrack =
-{
-	local vector spray;
-	
-	// Sleeper: Don't stick around on the walls for too long.
-	if (self.enemy.solid == SOLID_BSP && cvar("offhand_hook_anchor_timeout") == TRUE) 
-	{
-		self.think = OffHand_GrappleReset;
-		self.nextthink = time + offhand_hook_anchor_time; // Sleeper: 5 is default.
-		return;
-	}	
-	
-	// Sleeper: Don't spam hook at a teammates.
-	if (self.enemy.classname == "player" && self.enemy.steam == self.owner.steam && self.enemy != self.owner)
-	{
-		OffHand_GrappleReset ();
-		return;
-	}	
-	
-	// Release dead targets
-	if (self.enemy.classname == "player" && self.enemy.health <= 0) self.owner.on_hook = FALSE;
-	
-	// Drop the hook if owner is dead or has released the button
-	if (!self.owner.on_hook || self.owner.health <= 0) 
-	{
-		OffHand_GrappleReset ();
-		return;
-	}
-
-	if (self.enemy.classname == "player")
-	{
-		if (self.enemy.teleport_time > time)
-		{
-			OffHand_GrappleReset ();
-			return;
-		}
-		
-		// Move the hook along with the player.  It's invisible, but
-		// we need this to make the sound come from the right spot
-		setorigin (self, self.enemy.origin);
-		
-//		sound (self, CHAN_WEAPON, "blob/land1.wav", 1, ATTN_NORM);
-		sound (self, CHAN_AUTO, "pendulum/hit.wav", 1, ATTN_NORM);
-		T_Damage (self.enemy, self, self.owner, offhand_hook_enable_damage); // Sleeper: 5 is default.
-		makevectors (self.v_angle);
-		spray_x = 100 * crandom();
-		spray_y = 100 * crandom();
-		spray_z = 100 * crandom() + 50;
-		SpawnBlood (self.origin, spray, 20);
-	}
-	
-	if (self.enemy.solid == SOLID_SLIDEBOX) 
-	{
-		self.velocity = '0 0 0';
-		setorigin (self, self.enemy.origin + self.enemy.mins + self.enemy.size * 0.5);
-	} 
-	else self.velocity = self.enemy.velocity;
-	
-	self.nextthink = time + 0.1;
-};
-
-/*
-entity(float head) GrappleMakeLink =
-{
-	newmis = spawn ();
-
-	newmis.movetype = MOVETYPE_FLYMISSILE;
-	newmis.solid = SOLID_NOT;
-	newmis.owner = self; // SELF is the hook!
-
-	newmis.avelocity = '200 200 200';
-
-	setmodel (newmis, "progs/bit.mdl");
-	setorigin (newmis, self.origin);
-	setsize (newmis, '0 0 0' , '0 0 0');
-
-	return  newmis;
-};
-*/
-
-// Removes all chain link entities; this is a separate function because CLIENT 
-// also needs to be able to remove the chain. Only one function required to
-// remove all links.
-/*
-void() GrappleRemoveChain =
-{
-	self.think = SUB_Remove;
+	dir = self.owner.origin - (self.owner.owner.origin + '0 0 16');  
+  	self.angles = vectoangles(dir);
+  	
+	makevectors (self.enemy.angles);
+	setorigin (self, self.owner.origin + (((self.enemy.origin + (v_up * 16) /* * (!self.enemy.button2))*/ + (v_forward * 16)) - self.owner.origin) * (self.weapon)));
 	self.nextthink = time;
-
-	if (self.goalentity) 
-	{
-		self.goalentity.think = SUB_Remove;
-		self.goalentity.nextthink = time;
-		if (self.goalentity.goalentity) 
-		{
-			self.goalentity.goalentity.think = SUB_Remove;
-			self.goalentity.goalentity.nextthink = time;
-		}
-	}
-};
-*/
-
-// Repositions the chain links each frame. This single function maintains the 
-// positions of all of the links. Only one link is thinking every frame. 
-/*
-void() GrappleUpdateChain =
-{
-	local vector temp;
-
-	if (!self.owner.hook_out) 
-	{
-		GrappleRemoveChain();
-		return;
-	}
-
-	temp = (self.owner.hook.origin - self.owner.origin);
-
-	// These numbers are correct assuming 3 links.
-	// 4 links would be *20 *40 *60 and *80
-	setorigin (self, self.owner.origin + temp * 0.25);
-	setorigin (self.goalentity, self.owner.origin + temp * 0.5);
-	setorigin (self.goalentity.goalentity, self.owner.origin + temp * 0.75);
-	self.nextthink = time + 0.1;
-};
-*/
-
-//
-// Build_Chain - Builds the chain (linked list)
-//
-/*
-void() GrappleBuildChain =
-{
-	self.goalentity = GrappleMakeLink ();
-	self.goalentity.think = GrappleUpdateChain;
-	self.goalentity.nextthink = time + 0.1;
-	self.goalentity.owner = self.owner;
-
-	self.goalentity.goalentity = GrappleMakeLink();
-	self.goalentity.goalentity.goalentity = GrappleMakeLink ();
-};
-*/
-
-// Tries to anchor the grapple to whatever it touches
-void() OffHand_GrappleAnchor =
-{
-	if (other == self.owner) return; // don't hook the guy that fired it
-	
-	if (pointcontents(self.origin) == CONTENT_SKY && !cvar("offhand_skyhook")) 
-	{
-		OffHand_GrappleReset ();
-		return;
-	}
-	
-	if (!cvar("offhand_hook_enable_damage") && other.classname == "player") 
-	{
-		OffHand_GrappleReset ();
-		return;
-	}	
-
-	if (other.classname == "player" && other.steam == self.owner.steam && other != self.owner) 
-	{
-		// Glance off of teammates
-		OffHand_GrappleReset ();		// PGM - fix drift after teammate hit  01/20/97
-		return;
-	} 
-	else 
-	{
-		if (self.owner.fire_hook && other.classname != "player") sound (self, CHAN_AUTO, "player/axhit2.wav", 1, ATTN_NORM);
-
-		// One point of damage inflicted upon impact. Subsequent
-		// damage will only be done to PLAYERS... this way secret
-		// doors and triggers will only be damaged once.
-		// Sleeper: The initial damage doesn't work on monsters or players anymore, but should still work on anything else shootable.
-		// So that the only damage monsters and players will ever take is the continuous one when the hook is attached to them.
-		if (other.takedamage)
-		{
-			if ((!(other.flags & FL_CLIENT)) && (!(other.flags & FL_MONSTER))) T_Damage (other, self, self.owner, 5);
-		}
-		self.velocity = '0 0 0';
-		self.avelocity = '0 0 0';
-	}
-
-//	self.frame = 2; // anchored	
-
-	if (self.owner.fire_hook && other.classname != "player") sound (self.owner, CHAN_AUTO, "weapons/tink1.wav", 1, ATTN_NORM);
-
-	if (!self.owner.fire_hook) 
-	{
-		OffHand_GrappleReset ();
-		return;
-	}
-
-	self.owner.on_hook = TRUE;
-	if (self.owner.flags & FL_ONGROUND) self.owner.flags -= FL_ONGROUND;
-
-	// CHAIN2 is a looping sample. Use LEFTY as a flag so that client.qc
-	// will know to only play the tink sound ONCE to clear the weapons
-	// sound channel. (Lefty is a leftover from AI.QC, so I reused it to
-	// avoid adding a field)
-	self.owner.lefty = TRUE;
-	self.enemy = other; // remember this guy!
-	self.think = OffHand_GrappleTrack;
-	self.nextthink = time;
-	self.solid = SOLID_NOT;
-	self.touch = SUB_Null;	
 };
 
-// void() player_grapple1;
-void() OffHand_W_FireGrapple =
+/************\
+* HookVanish *
+\************/
+void() HookVanish =
 {
-	if (self.hook_out) return; // reject subsequent calls from player.qc
-
-	self.punchangle_x = -2; // bump him
-
-	// chain out sound (loops)
-	sound (self, CHAN_AUTO, "weapons/chain1.wav", 1, ATTN_NORM);
-
-	newmis = spawn ();
-	newmis.movetype = MOVETYPE_FLYMISSILE;
-	newmis.solid = SOLID_BBOX;
-	newmis.owner = self; // newmis belongs to me
-	self.hook = newmis;  // This is my newmis
-	newmis.classname = "hook";
-
-	makevectors (self.v_angle);
-	newmis.velocity = v_forward * offhand_hook_speed; // Sleeper: 800 is default, based off Rogue.
-//	newmis.avelocity = '0 0 -500';
-	newmis.angles = vectoangles (v_forward);
-
-	newmis.touch = OffHand_GrappleAnchor;
-//	newmis.think = GrappleReset; // Sleeper: Remove maximum range for an auto release timer.
-	
-	// Grapple only lives for two seconds, this gives max range on it
-//	newmis.nextthink = time + 2;
-	newmis.frame = 1; // hook spread
-
-//	setmodel (newmis, "progs/hook.mdl");
-	setorigin (newmis, self.origin + v_forward * 16 + '0 0 16');
-	setsize (newmis, '0 0 0' , '0 0 0 ');
-	self.hook_out = TRUE;
-};
-
-// Called each frame by CLIENT.QC if client has hook_out
-void() OffHand_GrappleService =
-{
-	if (!self.on_hook && self.fire_hook) 
-	{
-		// just draw a line to the hook
-		if (vlen(self.hook.origin - self.origin) > 50) GrappleTrail (self.hook, self);
-		return;
-	}
-
-	// drop the hook if player lets go of button
-	if (!self.fire_hook || self.teleport_time > time) 
-	{ 	
-		// release when we get 'ported
-		self = self.hook;
-		OffHand_GrappleReset ();
-		return;
-	}	
-	
-	makevectors (self.angles);
-	
-	local vector dist = self.hook.origin - self.origin;
-	local vector vel = self.hook.origin - (self.origin + (v_up * 16 * (!self.button2)) + (v_forward * 16));
-	local float v = vlen (vel);
-
-	if (v <= 100) vel = normalize (vel) * v * 10;  
-	else vel = normalize (vel) * offhand_hook_pullspeed; // Sleeper: 1000 is default, based off Rogue.
-
-	self.velocity = vel;
-
-	if (vlen(dist) <= 50) 
-	{	
-		if (self.lefty) 
-		{ 	
-			// cancel chain sound
-			// If there is a chain, ditch it now. We're
-			// close enough. Having extra entities lying around
-			// is never a good idea.
-//			if (self.hook.goalentity) 
-//			{ 
-//				self.hook.goalentity.think = GrappleRemoveChain;
-//				self.hook.goalentity.nextthink = time;
-//			}
-
-			self.lefty = FALSE; // we've reset the sound channel.
-		}
-	} 
-	else GrappleTrail (self.hook, self);
-};
-
-void() GrappleReset =
-{
-	self.owner.on_hook = FALSE;
 	self.owner.hook_out = FALSE;
-	self.owner.weaponframe = 0;
 	self.owner.attack_finished = time + 0.25;	
-	remove (self);
+		
+	do
+	{	
+		if ((self.classname == "hook_chain_link") || (self.classname == "hook_entity")) remove (self); // sanity check
+		self = self.hookentity;
+	} 
+	while (self);
 };
 
-void() GrappleTrack =
+void() UnHookPlayer =
 {
-	local vector spray;
-	
-	if (self.enemy.solid == SOLID_BSP && cvar("grappling_hook_anchor_timeout") == TRUE) 
+	local entity oself;
+
+	if (self.hook_out)
 	{
-		self.think = GrappleReset;
-		self.nextthink = time + grappling_hook_anchor_time; // Sleeper: 5 is default.
+		oself = self;
+		self = self.hookentity;
+		HookVanish ();
+		self = oself;
+	}
+};
+
+/**********\
+* HookPull *
+\**********/
+void() HookPull =
+{
+	local vector vel;
+	local float v;	
+		
+	if ((!self.owner.button0 && self.owner.weapon == DOE_GRAPPLE) || (self.owner.teleport_time > time) || (self.owner.deadflag) || (gameover))
+	{
+		HookVanish ();
 		return;
-	}		
-
-	// Release dead targets
-	if (self.enemy.classname == "player" && self.enemy.health <= 0) self.owner.on_hook = FALSE;
-
-	// drop the hook if owner is dead or has released the button
-	if (!self.owner.on_hook || self.owner.health <= 0) 
+	}
+	
+	if (self.enemy.solid == SOLID_BSP && cvar("grappling_hook_anchor_timeout") == TRUE && self.grappling_hook_time < time)
 	{
-		GrappleReset ();
+		HookVanish ();
 		return;
 	}	
-
-	if (self.enemy.classname == "player")
-	{
-		if (self.enemy.teleport_time > time)
-		{
-			GrappleReset ();
-			return;
-		}
-		
-		// move the hook along with the player.  It's invisible, but
-		// we need this to make the sound come from the right spot
-		setorigin (self, self.enemy.origin);
-		
-//		sound (self, CHAN_WEAPON, "blob/land1.wav", 1, ATTN_NORM);
-		sound (self, CHAN_WEAPON, "pendulum/hit.wav", 1, ATTN_NORM);
-		T_Damage (self.enemy, self, self.owner, grappling_hook_damage); // Sleeper: Default is 5.
-		makevectors (self.v_angle);
-		spray_x = 100 * crandom();
-		spray_y = 100 * crandom();
-		spray_z = 100 * crandom() + 50;
-		SpawnBlood(self.origin, spray, 20);
-	}
 	
-	if (self.enemy.solid == SOLID_SLIDEBOX) 
+	if (self.enemy.solid == SOLID_NOT)
 	{
-		self.velocity = '0 0 0';
-		setorigin(self, self.enemy.origin + self.enemy.mins +
-			self.enemy.size * 0.5);
-	} 
+		HookVanish ();
+		return;
+	}
+
+	if (self.enemy.takedamage)
+	{
+		if (!teamplay || self.enemy.steam != self.owner.steam)
+		{
+			if (other.classname == "missile" || other.classname == "grenade" || 
+			    other.classname == "spike" || other.classname == "hook_entity" || other.classname == "offhand_hook_entity") 
+			{
+				HookVanish ();
+				return;
+			}
+
+			self.enemy.deathtype = "hook";		
+
+			// T_Damage (self.enemy, self, self.owner, 1);
+			// at lower ticrates the hook damage is updated too fast
+			// default 200a+100h = 30 seconds to death by hook
+			
+			if (cvar("grappling_hook_enable_damage"))
+			{
+				self.hookdmg += sys_ticrate / 0.1;
+
+				if (self.hookdmg >= 1)
+				{
+					sound (self, CHAN_WEAPON, "pendulum/hit.wav", 1, ATTN_NORM);
+					T_Damage (self.enemy, self, self.owner, grappling_hook_damage); // Sleeper: Default is 5.
+					if (self.enemy.classname == "player") SpawnBlood (self.origin, self.velocity, 10);
+					self.hookdmg = 0;
+				}
+			}
+
+			makevectors (self.v_angle);
+		}
+
+		if (self.enemy.classname == "player") setorigin (self, self.enemy.origin + self.enemy.mins + (self.enemy.size * 0.5));
+		else self.velocity = self.enemy.velocity;
+	}
 	else self.velocity = self.enemy.velocity;
 
-	self.nextthink = time + 0.1;
-};
-
-// Tries to anchor the grapple to whatever it touches
-void() GrappleAnchor =
-{
-	if (other == self.owner) return; // don't hook the guy that fired it
-
-	if (pointcontents(self.origin) == CONTENT_SKY && !cvar("grappling_skyhook")) 
-	{
-		GrappleReset ();
-		return;
-	}
-	
-	if (!cvar("grappling_hook_enable_damage") && other.classname == "player") 
-	{
-		GrappleReset ();
-		return;
-	}
-
-	if (other.classname == "player") 
-	{
-		// glance off of teammates
-		if (other.steam == self.owner.steam)
-		{
-			GrappleReset ();		// PGM - fix drift after teammate hit  01/20/97
-			return;
-		}
-
-//		sound (self, CHAN_WEAPON, "player/axhit1.wav", 1, ATTN_NORM);
-//		T_Damage (other, self, self.owner, 10);
-	} 
-	else 
-	{
-		if (other.classname != "player") sound (self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
-
-		// One point of damage inflicted upon impact. Subsequent
-		// damage will only be done to PLAYERS... this way secret
-		// doors and triggers will only be damaged once.
-		if (other.takedamage)
-		{
-			if ((!(other.flags & FL_CLIENT)) && (!(other.flags & FL_MONSTER))) T_Damage (other, self, self.owner, 5);
-		}
-
-		self.velocity = '0 0 0';
-		self.avelocity = '0 0 0';
-	}
-
-	self.frame = 2; // anchored
-
-	if (other.classname != "player") sound (self.owner, CHAN_WEAPON, "weapons/tink1.wav", 1, ATTN_NORM);
-
-	if (!self.owner.button0) 
-	{
-		GrappleReset ();
-		return;
-	}
-
-	self.owner.on_hook = TRUE;
-	if (self.owner.flags & FL_ONGROUND) self.owner.flags -= FL_ONGROUND;
-
-	// CHAIN2 is a looping sample. Use LEFTY as a flag so that client.qc
-	// will know to only play the tink sound ONCE to clear the weapons
-	// sound channel. (Lefty is a leftover from AI.QC, so I reused it to
-	// avoid adding a field)
-	self.owner.lefty = TRUE;
-	self.enemy = other;// remember this guy!
-	self.think = GrappleTrack;
-	self.nextthink = time;
-	self.solid = SOLID_NOT;
-	self.touch = SUB_Null;
-};
-
-void() W_FireGrapple =
-{
-	if (self.hook_out) return; // reject subsequent calls from player.qc
-
-	self.punchangle_x = -2; // bump him
-
-	// chain out sound (loops)
-	sound (self, CHAN_WEAPON, "weapons/chain1.wav", 1, ATTN_NORM);
-
-	newmis = spawn();
-	newmis.movetype = MOVETYPE_FLYMISSILE;
-	newmis.solid = SOLID_BBOX;
-	newmis.owner = self;		// newmis belongs to me
-	self.hook = newmis;			// This is my newmis
-	newmis.classname = "hook";
-
-	makevectors (self.v_angle);
-	newmis.velocity = v_forward * grappling_hook_speed;
-//	newmis.avelocity = '0 0 -500';
-	newmis.angles = vectoangles(v_forward);
-
-	newmis.touch = GrappleAnchor;
-//	newmis.think = GrappleReset;
-	// grapple only lives for two seconds, this gives max range on it
-//	newmis.nextthink = time + 2;
-	newmis.frame = 1; // hook spread
-
-	setmodel (newmis,"progs/hook.mdl");
-	setorigin (newmis, self.origin + v_forward * 16 + '0 0 16');
-	setsize(newmis, '0 0 0' , '0 0 0 ');
-
-	self.hook_out = TRUE;
-};
-
-// called each frame by CLIENT.QC if client has hook_out
-void() GrappleService =
-{
-	local vector dist, vel;
-	local float v;
-
-	if (!self.on_hook) 
-	{
-		// just draw a line to the hook
-		if (vlen(self.hook.origin - self.origin) > 50) GrappleTrail(self.hook, self);
-		return;
-	}
-
-	// drop the hook if player lets go of button
-	if ((!self.button0 && self.weapon == DOE_GRAPPLE) ||  self.teleport_time > time) 
-	{ 
-		// release when we get 'ported
-		self = self.hook;
-		GrappleReset();
-		return;
-	}
-	
-	makevectors (self.angles);
-	dist = self.hook.origin - self.origin;
-	vel = self.hook.origin - (self.origin + (v_up * 16 * (!self.button2)) + (v_forward * 16));
+	makevectors (self.owner.v_angle);
+	vel = self.origin - (self.owner.origin + (v_up * 16) /* * (!self.owner.button2))*/ + (v_forward * 16));
 
 	v = vlen (vel);
 
-	if (v <= 100) vel = normalize(vel) * v * 10;  
-	else vel = normalize(vel) * grappling_hook_pullspeed;
+//	if (hookspeedpull < 600) hookspeedpull = 850;
 
-	self.velocity = vel;
+	if (v > 100) vel = normalize(vel) * grappling_hook_pullspeed;
+	else vel = normalize(vel) * v * 10;
 
-	if (vlen(dist) <= 50) 
+	self.owner.velocity = vel;	
+
+	self.frame = 2;
+	self.dest = self.owner.origin;
+	self.nextthink = time;
+};
+
+void() T_HookTouch =
+{
+	if (other == self.owner) return;
+	
+	if (other.solid == SOLID_BSP && cvar("grappling_hook_anchor_timeout") == TRUE) self.grappling_hook_time = time + cvar("grappling_hook_anchor_time");  // Sleeper: 5 is default.	
+		
+	if (!cvar("grappling_hook_enable_damage") && other.classname == "player") 
 	{
-		if (self.lefty) 
-		{ 	
-			// cancel chain sound
-			// If there is a chain, ditch it now. We're
-			// close enough. Having extra entities lying around
-			// is never a good idea.
-//			if (self.hook.goalentity) { 
-//					self.hook.goalentity.think = GrappleRemoveChain;
-//					self.hook.goalentity.nextthink = time;
-//			}
-
-			self.lefty = FALSE;// we've reset the sound channel.
+		HookVanish ();
+		return;
+	}
+			
+	if ((pointcontents(self.origin) == CONTENT_SKY && !cvar("grappling_skyhook")) || (gameover))
+	{
+		HookVanish ();
+		return;
+	}
+		
+	if (other.solid == SOLID_SLIDEBOX)
+	{
+		if ((other.steam == self.owner.steam) && (teamplay))
+		{
+			HookVanish ();
+			return;
 		}
+		other.axhitme = 1; // make axe noise
+	}
+
+	if (other.takedamage)
+	{
+		if (cvar("grappling_hook_enable_damage")) T_Damage (other, self, self.owner, grappling_hook_damage);
+		//R00k fixed bleeding buttons/triggers
+		if (other.flags & FL_CLIENT || other.flags & FL_MONSTER) SpawnBlood (self.origin, self.velocity, 10);
+		else
+		{	
+			//R00k: hook hits triggers, just show sparks
+			WriteByte(MSG_BROADCAST, SVC_TEMPENTITY);
+			WriteByte(MSG_BROADCAST, TE_GUNSHOT);
+			WriteCoord (MSG_BROADCAST, self.origin_x);
+			WriteCoord (MSG_BROADCAST, self.origin_y);
+			WriteCoord (MSG_BROADCAST, self.origin_z);
+		}
+	}
+	else
+	{		
+		sound (self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
+		self.avelocity = '0 0 0';
+	}
+
+	if (self.owner.button0)
+	{				
+		if (other.solid == SOLID_SLIDEBOX)
+		{
+			setorigin (self, other.origin + other.mins + (other.size * 0.5));
+			//self.velocity = '0 0 0';					
+			self.velocity = other.velocity;
+		}
+		else self.velocity = other.velocity;
+		self.weapon = other.nextthink - time;
+				
+//		sound (self.owner, CHAN_WEAPON, "weapons/chain2.wav", 1, ATTN_NORM);
+		self.enemy = other;
+//		self.owner.ltime = time;
+		self.nextthink = time;
+		self.think = HookPull;
+		self.touch = SUB_Null;					
+	}
+	else
+	{
+		self.nextthink = time;
+		self.think = HookVanish;
+	}	
+};
+
+void() Hook_Check =
+{		
+	if ((!self.owner.button0 && self.owner.weapon == DOE_GRAPPLE) || (self.owner.deadflag) || (gameover))
+	{
+		HookVanish ();
+		return;
+	}	
+	
+	if (self)
+	{
+		self.nextthink = time;
+		self.think = Hook_Check;
+	}	
+};
+
+//This is a combination of the old 'W_FireChain' and 'MakeChain' functions; removed .goalentity.
+void() W_FireGrapple =
+{
+	local entity hook = world;
+	local float linknum = 0;
+	local entity link = world;
+	local entity prevlink = world;
+
+	self.hook_out = TRUE;
+	hook = spawn ();
+	hook.classname  = "hook_entity";
+	hook.owner = self;
+	self.hookentity = hook;
+	hook.movetype = MOVETYPE_FLY;
+	hook.solid = SOLID_BBOX;
+	makevectors (self.v_angle);	
+	hook.velocity = grappling_hook_pullspeed * aim (self, grappling_hook_speed);
+	hook.angles = vectoangles (hook.velocity);
+	hook.avelocity 	= '0 0 -500';
+	hook.touch = T_HookTouch;
+	hook.nextthink = time + sys_ticrate; // instead lets check if we let off the button in mid-flight! eh?
+	hook.think = Hook_Check;
+	setmodel (hook, "progs/hook.mdl");
+	hook.frame = 1; // hook spread
+	setorigin (hook, self.origin + (v_forward * 16) + '0 0 16');
+	setsize (hook, '0 0 0', '0 0 0');
+	sound (self, CHAN_WEAPON, "weapons/chain1.wav", 1, ATTN_NORM);
+
+	linknum = 36;
+	prevlink = world;
+	while (linknum)
+	{
+		link = spawn();
+		link.classname = "hook_chain_link";
+		link.hookentity = prevlink;
+		prevlink = link;
+		link.owner = hook;
+		link.enemy = self;
+		link.weapon = (linknum / 36); 
+		link.movetype = MOVETYPE_NOCLIP;
+		link.solid = SOLID_NOT;
+		link.angles = vectoangles(hook.velocity);
+		setmodel (link, "progs/chain_tail.mdl");
+		link.alpha = 0.4;		
+		makevectors (self.angles);
+		setorigin (link, hook.origin + (((self.origin + (v_up * 16)/* * (!self.button2))*/ + (v_forward * 16)) - hook.origin) * (link.weapon)));
+		setsize (link, '0 0 0', '0 0 0');
+		link.nextthink = time;
+		link.think = LinkPos;
+		linknum -= 1;
+	}
+	
+	hook.hookentity = link;
+};
+
+/*********\
+* LinkPos *
+\*********/
+void() OffHand_LinkPos =
+{
+	// R00k added
+	local vector dir = '0 0 0';
+
+	dir = self.owner.origin - (self.owner.owner.origin + '0 0 16');  
+  	self.angles = vectoangles(dir);
+	makevectors (self.enemy.angles);
+	setorigin (self, self.owner.origin + (((self.enemy.origin + (v_up * 16) /* * (!self.enemy.button2))*/ + (v_forward * 16)) - self.owner.origin) * self.weapon));
+	self.nextthink = time;
+};
+
+/************\
+* HookVanish *
+\************/
+void() OffHand_HookVanish =
+{
+	self.owner.offhand_hook_out = FALSE;	
+	self.owner.offhand_fire_hook = FALSE;
+	self.owner.offhand_on_hook = FALSE;
+		
+	do
+	{	
+		if ((self.classname == "offhand_hook_chain_link") || (self.classname == "offhand_hook_entity")) remove (self); //sanity check
+		self = self.offhand_hookentity;
 	} 
-	else GrappleTrail (self.hook, self);
+	while (self);
+};
+
+void() OffHand_UnHookPlayer =
+{
+	local entity oself;
+
+	if (self.offhand_hook_out)
+	{
+		oself = self;
+		self = self.offhand_hookentity;
+		OffHand_HookVanish ();
+		self = oself;
+	}
+};
+
+/**********\
+* HookPull *
+\**********/
+void() OffHand_HookPull =
+{
+	local vector vel;
+	local float v;	
+		
+	if ((!self.owner.offhand_fire_hook && self.offhand_hook_enabled) || (self.owner.teleport_time > time) || (self.owner.deadflag) || (gameover))
+	{
+		OffHand_HookVanish ();
+		return;
+	}
+	
+	if (self.enemy.solid == SOLID_BSP && cvar("offhand_hook_anchor_timeout") == TRUE && self.offhand_hook_time < time)
+	{
+		OffHand_HookVanish ();
+		return;
+	}	
+	
+	if (self.enemy.solid == SOLID_NOT)
+	{
+		OffHand_HookVanish ();
+		return;
+	}
+	
+	if (!self.owner.offhand_on_hook)
+	{
+		OffHand_HookVanish ();
+		return;
+	}	
+
+	if (self.enemy.takedamage)
+	{
+		if (!teamplay || self.enemy.steam != self.owner.steam)
+		{
+			if (other.classname == "missile" || other.classname == "grenade" || 
+			    other.classname == "spike" || other.classname == "hook_entity" || other.classname == "offhand_hook_entity") 
+			{
+				OffHand_HookVanish ();
+				return;
+			}
+			
+			self.enemy.deathtype = "hook";		
+
+		     // T_Damage (self.enemy, self, self.owner, 1);
+			// at lower ticrates the hook damage is updated too fast
+			// default 200a + 100h = 30 seconds to death by hook
+			
+			if (cvar("offhand_hook_enable_damage"))
+			{
+				self.hookdmg += sys_ticrate / 0.1;
+				if (self.hookdmg >= 1)
+				{
+					sound (self, CHAN_WEAPON, "pendulum/hit.wav", 1, ATTN_NORM);
+					T_Damage (self.enemy, self, self.owner, offhand_hook_damage); // Sleeper: Default is 5.
+					if (self.enemy.classname == "player") SpawnBlood (self.origin, self.velocity, 10);
+					self.hookdmg = 0;
+				}
+			}
+
+			makevectors (self.v_angle);
+		}
+
+		if (self.enemy.classname == "player") setorigin (self, self.enemy.origin + self.enemy.mins + (self.enemy.size * 0.5));
+		else self.velocity = self.enemy.velocity;
+	}
+	else self.velocity = self.enemy.velocity;
+
+	makevectors (self.owner.v_angle);
+	vel = self.origin - (self.owner.origin + (v_up * 16) /* * (!self.owner.button2))*/ + (v_forward * 16));
+
+	v = vlen (vel);
+
+//	if (hookspeedpull < 600) hookspeedpull = 850;
+
+	if (v > 100) vel = normalize(vel) * offhand_hook_pullspeed;
+	else vel = normalize(vel) * v * 10;
+
+	self.owner.velocity = vel;	
+	self.dest = self.owner.origin;
+	self.nextthink = time;
+};
+
+void() OffHand_T_HookTouch =
+{
+	if (other == self.owner) return;
+	
+	if (other.solid == SOLID_BSP && cvar("offhand_hook_anchor_timeout") == TRUE) self.offhand_hook_time = time + cvar("offhand_hook_anchor_time");  // Sleeper: 5 is default.	
+		
+	if (!cvar("offhand_hook_enable_damage") && other.classname == "player") 
+	{
+		OffHand_HookVanish ();
+		return;
+	}
+			
+	if ((pointcontents(self.origin) == CONTENT_SKY && !cvar("offhand_skyhook")) || (gameover))
+	{
+		OffHand_HookVanish ();
+		return;
+	}
+		
+	if (other.solid == SOLID_SLIDEBOX)
+	{
+		if ((other.steam == self.owner.steam) && (teamplay))
+		{
+			OffHand_HookVanish ();
+			return;
+		}
+		other.axhitme = 1; // make axe noise
+	}
+
+	if (other.takedamage)
+	{
+		if (cvar("offhand_hook_enable_damage"))
+		{
+			T_Damage (other, self, self.owner, offhand_hook_damage);
+			// R00k fixed bleeding buttons/triggers
+			if (other.flags & FL_CLIENT || other.flags & FL_MONSTER) SpawnBlood (self.origin, self.velocity, 10);
+			else
+			{	
+				// R00k: hook hits triggers, just show sparks
+				WriteByte(MSG_BROADCAST, SVC_TEMPENTITY);
+				WriteByte(MSG_BROADCAST, TE_GUNSHOT);
+				WriteCoord (MSG_BROADCAST, self.origin_x);
+				WriteCoord (MSG_BROADCAST, self.origin_y);
+				WriteCoord (MSG_BROADCAST, self.origin_z);
+			}
+		}
+	}
+	else
+	{		
+//		sound (self, CHAN_ITEM, "railwarz/laserhook_pull.wav", 1, ATTN_NORM);
+		self.avelocity = '0 0 0';
+	}
+	
+	sound (self, CHAN_ITEM, "railwarz/laserhook_pull.wav", 1, ATTN_NORM);
+
+	self.owner.offhand_on_hook = TRUE;
+	
+	if (self.owner.offhand_fire_hook)
+	{				
+		if (other.solid == SOLID_SLIDEBOX)
+		{
+			setorigin (self, other.origin + other.mins + (other.size * 0.5));
+			// self.velocity = '0 0 0';					
+			self.velocity = other.velocity;
+		}
+		else self.velocity = other.velocity;
+		
+		self.weapon = other.nextthink - time;
+		self.enemy = other;
+		self.nextthink = time;
+		self.think = OffHand_HookPull;
+		self.touch = SUB_Null;					
+	}
+	else
+	{
+		self.nextthink = time;
+		self.think = OffHand_HookVanish;
+	}	
+};
+
+void() OffHand_Hook_Check =
+{
+	if ((!self.offhand_fire_hook && self.offhand_hook_enabled) || (self.owner.deadflag) || (gameover))
+	{
+		OffHand_HookVanish ();
+		return;
+	}
+	
+	if (self)
+	{
+		self.nextthink = time;
+		self.think = OffHand_Hook_Check;
+	}
+};
+
+//This is a combination of the old 'W_FireChain' and 'MakeChain' functions; removed .goalentity.
+void() OffHand_W_FireGrapple =
+{
+	local entity hook = world;
+	local float linknum = 0;
+	local entity link = world;
+	local entity prevlink = world;
+
+	self.offhand_hook_out = TRUE;
+	self.offhand_fire_hook = TRUE;
+	hook = spawn ();
+	hook.classname  = "offhand_hook_entity";
+	hook.owner = self;
+	self.offhand_hookentity = hook;
+	hook.movetype = MOVETYPE_FLY;
+	hook.solid = SOLID_BBOX;
+	makevectors (self.v_angle);	
+	hook.velocity = offhand_hook_speed * aim(self, offhand_hook_speed);
+	hook.angles = vectoangles(hook.velocity);
+	hook.avelocity 	= '0 0 -500';
+	hook.touch = OffHand_T_HookTouch;
+	hook.nextthink = time + sys_ticrate;//instead lets check if we let off the button in mid-flight! eh?
+	hook.think = OffHand_Hook_Check;
+	setorigin (hook, self.origin + (v_forward * 16) + '0 0 16');
+	setsize (hook, '0 0 0', '0 0 0');
+	sound (self, CHAN_ITEM, "railwarz/laserhook_fire.wav", 1, ATTN_NORM);
+
+	linknum = 36;
+	prevlink = world;
+	while (linknum)
+	{
+		link = spawn ();
+		link.classname = "offhand_hook_chain_link";
+		link.offhand_hookentity = prevlink;
+		prevlink = link;
+		link.owner = hook;
+		link.enemy = self;
+		link.weapon = (linknum / 36); 
+		link.movetype = MOVETYPE_NOCLIP;
+		link.solid = SOLID_NOT;
+		link.angles = vectoangles(hook.velocity);
+		
+		if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (self.steam == TEAM_BLUE_13) setmodel (link, "progs/laserhook_blue.mdl");
+			if (self.steam == TEAM_RED_4) setmodel (link, "progs/laserhook_red.mdl");
+		}
+		else setmodel (link, "progs/laserhook.mdl");
+//		setmodel (link, "progs/beam.mdl");
+
+		link.alpha = 0.4;
+		link.scale = 0.5;		
+		makevectors (self.angles);
+		setorigin (link, hook.origin + (((self.origin + (v_up * 16)/* * (!self.button2))*/ + (v_forward * 16)) - hook.origin) * (link.weapon)));
+		setsize (link, '0 0 0', '0 0 0');
+		link.nextthink = time + sys_ticrate;
+		link.think = OffHand_LinkPos;
+		linknum -= 1;
+	}
+	
+	hook.offhand_hookentity = link;
 };
 
 // Sleeper: Called in Client.QC, since it was starting to get ridiculous in PlayerPreThink.
@@ -603,28 +621,5 @@ void() Use_Grappling_Hooks =
 			self.offhand_hook_enabled = FALSE; // Sleeper: Remove the offhand hook.
 			return;
 		}
-	}	
-
-	// Track the grapple
-	// Sleeper: Can only fire one hook at a time.
-	if (self.impulse == 38 && !self.fire_hook) 
-	{
-		if (!cvar("use_offhand_hook"))
-		{
-			sprint (self, "Offhand-Hook must be enabled first!\n");
-			return;
-		}
-		else self.fire_hook = TRUE;
-	}		
-	if (self.impulse == 39 && self.fire_hook) self.fire_hook = FALSE;
-		
-	if (self.weapon == DOE_GRAPPLE && self.button0)
-	{			
-		if (self.hook_out) GrappleService (); // Standard Grappling Hook
 	}
-	else
-	{
-		if (self.hook_out) OffHand_GrappleService (); // Offhand Grappling Hook	
-	}
-	if (self.fire_hook) OffHand_W_FireGrapple ();	
 };

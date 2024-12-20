@@ -52,6 +52,7 @@ void() NQW_DukeNukem =
 	self.nqwSndDrown1 = "duke/drown1.wav";
 	self.nqwSndDrown2 = "duke/drown2.wav";
 	self.nqwSndH2oDeath = "duke/chokn.wav";
+	self.nqwSndFalling = "";
 	
 	self.nqwSpeakSpawn = NQW_DukeSpawn;
 	self.nqwSpeakFrag = NQW_DukeFrag;
@@ -60,7 +61,6 @@ void() NQW_DukeNukem =
 	self.nqwSpeakCthonKill = "duke/dukesentya.wav";
 	self.nqwSpeakShubGreet = "duke/quake.wav";
 	self.nqwSpeakShubKill = "duke/teleport.wav";
-//	NQW_DukeSpawn();
 };
 
 void(entity targ, entity attacker) NQW_DukeFrag =

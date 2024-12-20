@@ -129,7 +129,7 @@ void() newitems_touch =
 			if (other.antigrav_finished > time && self.fresh_powerup == TRUE) other.antigrav_finished = time + self.delay + self.storetime;
 			else other.antigrav_finished = time + self.delay;
 			
-			if (other.antigrav_finished > time + 30) other.antigrav_finished = time + 30; // Sleeper: Don't overstack the timer.
+			if (other.antigrav_finished > time + 45) other.antigrav_finished = time + 45; // Sleeper: Don't overstack the timer.
 		}
 		else other.antigrav_finished = time + 45;
 		

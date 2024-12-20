@@ -61,4 +61,5 @@ void() NQW_DuskDude =
 	self.nqwSndDrown1 = "dusk/damage.wav";
 	self.nqwSndDrown2 = "dusk/damage.wav";
 	self.nqwSndH2oDeath = "dusk/death.wav";
+	self.nqwSndFalling = "";
 };

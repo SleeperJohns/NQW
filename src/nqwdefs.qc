@@ -63,8 +63,33 @@ void() NQW_CharacterName =
 
 //.float player_collision;
 
-float	OGRE_BOSS	= 2;
-float	OGRE_NORMAL	= 4;
+#define redify(s) strconv(0,2,2,s)
+
+void() OffHand_W_FireGrapple;
+void() OffHand_UnHookPlayer;
+.entity hook; // This is my hook
+.float hookdmg;
+
+// Weapon Grappling Hook
+.entity hookentity;
+.float on_hook;  // We're on it
+.float hook_out; // It's out
+.float grappling_hook_time;
+
+// Offhand Grappling Hook
+.entity offhand_hookentity;
+.float offhand_on_hook;      // We're on it
+.float offhand_hook_out;     // It's out
+.float offhand_fire_hook;    // Sleeper: For Off-Hand Grappling Hook.
+.float offhand_hook_enabled; // Sleeper: A fake pickup.
+.float offhand_hook_time;
+
+float sys_ticrate = 0.013;
+
+float OGRE_BOSS	= 2;
+float OGRE_NORMAL = 4;
+
+.float playerjump_finished;
 
 string themap;
 // .float has_vote;
@@ -242,12 +267,20 @@ float HORDE_START_DELAY = 10; // how long to wait before starting
 float HORDE_AMMO_RESPAWN_DELAY = 20; // how long between horde ammo spawns
 
 // AY Dec15 2021, moving from item_runes to defs since these get used by horde now
+/*
 float SIGIL_E1 = 1;
 float SIGIL_E2 = 2;
 float SIGIL_E3 = 4;
 float SIGIL_E4 = 8;
 float SIGIL_E5 = 16;
 float SIGIL_E6 = 32;
+*/
+float SIGIL_E1 = 16;
+float SIGIL_E2 = 32;
+float SIGIL_E3 = 64;
+float SIGIL_E4 = 128;
+float SIGIL_E5 = 256;
+float SIGIL_E6 = 512;
 float SIGIL_NUMBITS = 6;
 
 // Bots. Probably will give support for only Deathmatch modes.
@@ -398,10 +431,8 @@ void(entity collector, entity item) NQW_SpeakItemNull = {};
 .string nqwSndDrown1; // water pain
 .string nqwSndDrown2;
 .string nqwSndH2oDeath;
+.string nqwSndFalling;
 
-// .float ammo_slugs; // Not yet
-// .float items3;
-// .float items4;
 .float weapons;
 
 // Powerup Drop
@@ -608,7 +639,7 @@ float APOTHEOSIS     = 6;  // NQW Exclusive Endless Horde Mode (For now)
 // float BASEQ2_DEMO = 14; // Quake II Demo // Sleeper: To avoid a possible takedown, I'm only making the Quake II Demo maps playable. Not sure about adding all the weapons, but campaign wise, it'll only be the demo.
 float Halt_GameWorld_Traffic;
 void() Change_New_Cvars;
-float update_serverinfo;
+// float update_serverinfo;
 
 // Sleeper: Bit of a clever hack. This field helps to respawn keys in coop when they have been removed out the world.
 // It's main use for now, is when all players have disconnected, the key can automatically be respawned. As long as it

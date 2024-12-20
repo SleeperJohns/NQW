@@ -224,7 +224,6 @@ float EF_RED  = 32;
 float EF_CANDLELIGHT	= 64;
 float EF_YELLOW    = 128;
 */
-
 float MSG_BROADCAST;
 float MSG_ONE    = 1;
 float MSG_ALL    = 2;

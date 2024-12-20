@@ -74,8 +74,8 @@ void() Send_General_Aliases =
 	stuffcmd(self, "alias change_skin impulse 137\n");
 	stuffcmd(self, "alias taunt impulse 40\n");
 	stuffcmd(self, "alias change_playerphysics impulse 59\n");
-	stuffcmd(self, "alias +hook impulse 38\n");
-	stuffcmd(self, "alias -hook impulse 39\n");
+	stuffcmd(self, "alias +hook cmd hook\n");
+	stuffcmd(self, "alias -hook cmd unhook\n");
 	if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF && !coop)
 	{
 		stuffcmd(self, "alias health_protect_disable_friendlyfire impulse 101\n");
@@ -105,8 +105,8 @@ void() Send_Enforced_Settings =
 	if (self.client == QSSM_CLIENT) stuffcmd(self, "cl_nopext 0\n");	
 
 	// Sleeper: ezQuake version of above
-	if (self.client == EzQ_CLIENT) stuffcmd(self, "setinfo cl_pext 0\n");
-	if (self.client == EzQ_CLIENT) stuffcmd(self, "cl_pext 0\n");
+//	if (self.client == EzQ_CLIENT) stuffcmd(self, "setinfo cl_pext 0\n");
+//	if (self.client == EzQ_CLIENT) stuffcmd(self, "cl_pext 0\n");
 	
 	// Sleeper: Disable autotrack so FTE spectator mode can attach to a intermission camera
 	if (self.client == FTEQW_CLIENT) stuffcmd(self, "cl_autotrack 0\n");

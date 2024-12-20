@@ -409,6 +409,7 @@ void() SetChangeParms =
 		self.weapons = IT_SHOTGUN | IT_AXE;	
 		self.armorvalue = 0;
 		self.health = 126;
+		self.max_health = 100;
 		self.ammo_shells1 = 25;
 		self.ammo_nails1 = 0;
 		self.ammo_rockets1 = 0;
@@ -586,8 +587,8 @@ void() SetNewParms =
 		parm11 = 0;						
 	}
 	
-	// Deathmatch Health	
-	if (cvar("deathmatch") && !cvar("coop")) parm2 = 126;	// Similar to Quake 3 Health
+	// Deathmatch Health (Similar to Quake 3 Health)
+	if (cvar("deathmatch") && !cvar("coop") && !cvar("customcoop")) parm2 = 126;
 	else 
 	{
 		// Single Player & Co-Operative Health
@@ -643,34 +644,31 @@ void() SetNewCoopParms =
 	parm15 = self.weapons | IT_SHOTGUN | IT_AXE;
 	parm1  = self.items   | IT_SHOTGUN | IT_AXE; // Sleeper: Start episode with Axe and Shotgun, and keep items after dying.
 	
-	if (!cvar("deathmatch"))
-	{	
-		// Single Player & Co-Operative Health
-		if (cvar("coop") <= REIGNITED_COOP || cvar("coop") == ENHANCED_COOP)
+	// Single Player & Co-Operative Health
+	if (cvar("coop") <= REIGNITED_COOP || cvar("coop") == ENHANCED_COOP)
+	{
+		if (cvar("skill") == 4)   // KEX's Nightmare! skill (Skill 3 with a 50 health handicap and less aggressive monsters)
 		{
-			if (cvar("skill") == 4)   // KEX's Nightmare! skill (Skill 3 with a 50 health handicap and less aggressive monsters)
-			{
-				if (!cvar("horde")) parm2 = 50;
-				else parm2 = 76;  // Deflatable health for Horde Mode.
-			}
-			else if (cvar("skill") == 5) // Sleeper Must Die! skill (Higher monster density, +25 standard max health, and Quake II style armors with armor rot).
-			{
-				if (!cvar("horde")) parm2 = 125;
-				else parm2 = 151; // Deflatable health for Horde Mode.
-			}
-			else if (cvar("skill") <= 3) // Standard Skills.	
-			{
-				if (!cvar("horde")) parm2 = 100;
-				else parm2 = 126; // Deflatable health for Horde Mode.
-			}					
+			if (!cvar("horde")) parm2 = 50;
+			else parm2 = 76;  // Deflatable health for Horde Mode.
 		}
-		else if (cvar("coop") == CLASSIC_COOP)
+		else if (cvar("skill") == 5) // Sleeper Must Die! skill (Higher monster density, +25 standard max health, and Quake II style armors with armor rot).
 		{
-			if (cvar("skill") == 4) parm2 = 50;
-			else if (cvar("skill") == 5) parm2 = 125;
-			else if (cvar("skill") <= 3) parm2 = 100;				
-		}	
+			if (!cvar("horde")) parm2 = 125;
+			else parm2 = 151; // Deflatable health for Horde Mode.
+		}
+		else if (cvar("skill") <= 3) // Standard Skills.	
+		{
+			if (!cvar("horde")) parm2 = 100;
+			else parm2 = 126; // Deflatable health for Horde Mode.
+		}					
 	}
+	else if (cvar("coop") == CLASSIC_COOP)
+	{
+		if (cvar("skill") == 4) parm2 = 50;
+		else if (cvar("skill") == 5) parm2 = 125;
+		else if (cvar("skill") <= 3) parm2 = 100;				
+	}	
 				
 	parm3 = self.armorvalue;
 	
@@ -829,7 +827,7 @@ void() SetNewCustomCoopParms =
 */		
 };
 
-// New Episode Parms
+// New Spec Parms
 void() SetSpecParms =
 {
 	parm1 = 0;
@@ -860,13 +858,13 @@ void() DecodeLevelParms =
 	if (/*serverflags && */world.model == Start_Maplist[StartMaps()] && !customcoop_flags && !cvar("deathmatch")) SetNewParms (); // Take away all stuff on start maps				
 	  
 	// iD1 / HIPNOTIC / ROGUE / DOPA / MG1 Episodes Maps -------------------------------------------------------------------------------------------------------------                   
-	if (firstlevelmaps && !cvar("deathmatch") && !customcoop_flags)
+	if (firstlevelmaps && !customcoop_flags && !cvar("deathmatch"))
 	{
 		if (coop == REIGNITED_COOP || coop == ENHANCED_COOP) SetNewCoopParms (); // Take away all stuff on starting new episode, but also keep items & ammo you pick up in co-op after respawning
 		else SetNewParms ();   	    	     			       		 // Take away all stuff on starting new episode
 	}	
 	// Custom Coop ---------------------------------------------------------------------------------------------------------------------------------------------------	
-	if (customcoop_flags && !cvar("deathmatch") && world.model != Start_Maplist[StartMaps()] && !firstlevelmaps)
+	if (customcoop_flags && world.model != Start_Maplist[StartMaps()] && !firstlevelmaps && !cvar("deathmatch"))
 	{	
 		if (coop == REIGNITED_COOP || coop == ENHANCED_COOP)
 		{
@@ -884,7 +882,7 @@ void() DecodeLevelParms =
 		else SetNewParms ();							 // Take away all stuff on starting new map
 	}
 	
-	if (cvar("deathmatch")) SetNewParms ();	
+//	if (cvar("deathmatch") && !cvar("coop")) SetNewParms ();	
 	
 	self.items = parm1;		
 	self.health = parm2;			
@@ -988,7 +986,7 @@ entity() FindIntermission =
 	if (spot) return spot;
 
 	objerror ("FindIntermission: no spot");
-	return world;
+	return spot;
 };
 
 /*
@@ -1285,7 +1283,7 @@ void() IntermissionThink =
 	{
 		if (!deathmatch && cvar("sv_public") == 1)
 		{
-			if (!DisplayedExitMsg) ExitMessage(); // Display a recorded time down to the hundred thousandth of a second for speedrunning
+			if (!DisplayedExitMsg) ExitMessage (); // Display a recorded time down to the hundred thousandth of a second for speedrunning
 		}
 	}	
 
@@ -2148,7 +2146,11 @@ void() PutClientInServer =
 		if (!cvar("horde")) self.health = 100;
 		else self.health = 126; // Deflatable Health
 	}
-	if	(cvar("deathmatch") && !cvar("coop") && !cvar("horde") && !cvar("customcoop")) self.health = 126;	   	      	   // Deathmatch Deflatable Health (Similar to Quake 3)					
+	if (cvar("deathmatch") && !cvar("coop") && !cvar("horde") && !cvar("customcoop")) 
+	{
+		self.health = 126;	   	      	   // Deathmatch Deflatable Health (Similar to Quake 3)	
+		self.health_deflate = 1;
+	}				
 		
 	self.classname = "player";	
 	
@@ -2330,8 +2332,12 @@ void() PutClientInServer =
 	// Grapple stuff
 	self.on_hook = 0;
 	self.hook_out = 0;
-	self.fire_hook = 0;	
-
+	
+	self.offhand_on_hook = 0;
+	self.offhand_hook_out = 0;	
+	self.offhand_fire_hook = 0;
+//	self.fire_held_down = FALSE;
+	
 	spawn_tdeath (self.origin, self);  
 	
 	// MG1 ----------------------------------------
@@ -2357,9 +2363,8 @@ void() PutClientInServer =
 	msg_entity = self;
         WriteByte (MSG_ONE, SVC_SETVIEWPORT);
         WriteEntity (MSG_ONE, self);  
-        setorigin (self, spot.origin);	
+        setorigin (self, spot.origin);	       
 };
-
 
 /*
 =============================================================================
@@ -3068,35 +3073,6 @@ void() PlayerPreThink =
 	}		
 
 	// HIPNOTIC: JIM
-	// Kill player on Edge of Oblivion
-	if ((self.origin_z < -1300) && (world.model == "maps/hipdm1.bsp") && (self.health > 0))
-	{
-		self.deathtype = "void";
-		if (self.invincible_finished >= time)
-		{
-			self.invincible_finished = 0;
-			self.items -= self.items & (IT_INVULNERABILITY);
-			self.invincible_time = 0;
-			self.invincible_finished = 0;
-			self.effects -= self.effects & (EF_RED);
-		}
-		T_Damage (self, self, world, self.health + 1000);
-	}
-
-	if (self.nqwCharacter == NQW_RANGER)
-	{
-		if ((self.origin_z < 50) && (world.model == "maps/hipdm1.bsp") && (self.health > 0))
-		{
-			self.deathtype = "void";
-			if (!self.falling) // Sleeper: So it doesn't repeat.
-			{
-				sound (self, CHAN_VOICE, "ranger/falling.wav", 1, ATTN_NORM);
-				self.falling = 1;
-			}
-		}
-	}
-
-	// HIPNOTIC: JIM
      /* if (!deathmatch)*/ earthquake_prethink ();
 
 	makevectors (self.v_angle);		// Is this still used?
@@ -3115,6 +3091,35 @@ void() PlayerPreThink =
 		}
 	}	
 */
+
+	// HIPNOTIC: JIM
+	// Kill player on Edge of Oblivion
+	if ((world.model == "maps/hipdm1.bsp") && (self.health > 0))
+	{
+		if (self.origin_z < -1300)
+		{
+			self.deathtype = "void";
+			if (self.invincible_finished >= time)
+			{
+				self.invincible_finished = 0;
+				self.items -= self.items & (IT_INVULNERABILITY);
+				self.invincible_time = 0;
+				self.invincible_finished = 0;
+				self.effects -= self.effects & (EF_RED);
+			}
+			T_Damage (self, self, world, self.health + 1000);
+		}
+
+		if (self.origin_z < 50)
+		{
+			self.deathtype = "void";
+			if (!self.falling) // Sleeper: So it doesn't repeat.
+			{
+				sound (self, CHAN_VOICE, self.nqwSndFalling, 1, ATTN_NORM);
+				self.falling = TRUE;
+			}
+		}
+	}
 
 	TeamCheckLock (); // TeamCheckLock performs all necessary teamlock checking, and performs all actions needed
 //	CheckRules ();   // Sleeper: Moved to StartFrame.
@@ -3562,6 +3567,7 @@ void() PlayerPostThink =
 
 	// Do rot stuff (Health, Armor)
 	Item_Rot_Systems ();
+//	bprint (ftos(self.max_health), "\n");
 	
 	// Sleeper: Send copies to CSQC.
 //	self.playerrunes = serverflags;
@@ -3594,7 +3600,8 @@ void() PlayerPostThink =
 		score = ceil (self.killtotal);
 		streak = ceil (self.killspree);
 		if (self.killspree > 1) sprint (self, "Streak Ended with ", ftos(streak), " (+", ftos(score), " Points)\n"); // Sleeper: Only print something to the player when they have 2 or more in a killing spree.
-		self.frags += score;			
+//		self.frags += score;	
+		add_frag (self, score);
 		self.killspree = 0; // Reset killspree
 		self.killcount = 0; // Reset killcount
 		self.killtotal = 0; // Reset killtotal
@@ -3647,7 +3654,7 @@ void() Detect_Client =
 		if (myClient != "") 
 		{
 			self.client = EzQ_CLIENT;
-			clientname = "ezQuake (Unsupported)";
+			clientname = "ezQuake (Unsupported)";		
 			sprint (self, "\n");
 			sprint (self, "You have been rejected from connecting to the server for using ezQuake!\nEzQuake is NOT SUPPORTED yet! Consider trying QSS-M 1.6.2+ or FTEQW 6446+ instead for maximum\nNet Quake & QuakeWorld compatibility!");
 			sprint (self, "\n");
@@ -3657,7 +3664,7 @@ void() Detect_Client =
 			sprint (self, "If you want to see ezQuake be supported, inform ezQuake's Client Developer to increase\nezQuake's protocol limits for 666 and 999. The server you tried connecting to uses 999,\ndue to a large number of assets on the server\n(both mission pack assets and custom downloadable assets).\n\nRecommended you purchase the full game and it's mission packs before attempting to connect again. Don't be a cheapskate, Quake's only $10 USD on Steam and GOG, and it recently got a remaster, so stop pussyfooting around and finally play some real Quake with your girlfriend...\n");
 			sprint (self, "\n");
 			stuffcmd (self, "disconnect\n");
-			bprint (self.netname, " is getting kicked from the server for using an unsupported client\n");
+			bprint (self.netname, " is getting kicked from the server for using an unsupported client\n"); 
 		}
 		else
 		{

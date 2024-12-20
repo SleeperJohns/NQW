@@ -26,10 +26,10 @@
 
 float(float v, float m) mod =
 {	
-	if (m == 0) objerror( "Illegal op: mod(x, 0)!");
+	if (m == 0) objerror("Illegal op: mod(x, 0)!");
 	if (fabs(v) < m) return v;
 	if (v == m) return 0;
-	float r = floor(v / m) * m;
+	local float r = floor(v / m) * m;
     
 	return v - r;
 };
@@ -39,7 +39,7 @@ float(float v, float m) mod =
 
 float(float angle) sin =
 {
-	vector a = {0, angle, 0};
+	local vector a = {0, angle, 0};
 	makevectors (a);
     
 	return v_forward_y;
@@ -50,7 +50,7 @@ float(float angle) sin =
 
 float(float angle) cos =
 {
-	vector a = {0, angle, 0};
+	local vector a = {0, angle, 0};
 	makevectors (a);
     
 	return v_forward_x;
@@ -98,6 +98,7 @@ vector(float x, float y, float z) Vector =
 	swiz_x = x;
 	swiz_y = y;
 	swiz_z = z;
+	
 	return swiz;
 };
 
@@ -122,8 +123,9 @@ vector(float num) SinCos =
 
 float(float num) tan =
 {
-	vector temp = SinCos (num);
+	local vector temp = SinCos (num);
 	if (temp_y == 0) return A_SHITLOAD;	// to infinity and beyond
+	
 	return temp_x / temp_y;
 };
  
@@ -132,6 +134,7 @@ float(float y, float x) atan2 =
 	local vector ang = '0 0 0';  // Temporary used to calculate trig values
 	ang_x = x;
 	ang_y = y;
+	
 	return vectoyaw (ang);
 };
 // -----------------------------------------------------------------------

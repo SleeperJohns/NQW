@@ -1,7 +1,7 @@
 // Greeting Sound Controller
 void() playsnd = 
 {
-	entity cl = find (world, classname, "player"); 
+	local entity cl = find (world, classname, "player"); 
 	while (cl) 
 	{
 		sound (cl, CHAN_VOICE, self.noise, 1, 3.9999); 
@@ -29,7 +29,7 @@ void() MOTD_Sounds =
 	if (!cvar("sv_public") || cvar("sv_public") == 1)
 	{
 		if ((coop >= REIGNITED_COOP && coop <= ENHANCED_COOP && !deathmatch) || 
-		    (deathmatch >= DM_FFA && deathmatch <= DM_OneFlagCTF && !coop)) greet_announcer ("wizard/wsight.wav", 0.2);
+		    (deathmatch >= DM_DUEL && deathmatch <= DM_OneFlagCTF && !coop)) greet_announcer ("wizard/wsight.wav", 0.2);
 	}
 };
 
@@ -211,7 +211,7 @@ string() Write_Current_Num_Players_Coop =
 	if (num_players == 30) return "\n      Allies: 29             ";
 	if (num_players == 31) return "\n      Allies: 30             ";
 	if (num_players == 32) return "\n      Allies: 31             ";
-	if (num_players > 32) return "\n      Allies: 31+             ";
+	if (num_players > 32) return "\n      Allies: 32+             ";
 	return "\nPlayer Count: Error ";
 };
 

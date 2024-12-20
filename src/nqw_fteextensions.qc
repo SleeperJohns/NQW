@@ -1,6 +1,13 @@
 #define FTE_QC_HASHTABLES /* Provides efficient string-based lookups. */
 #define _ACCESSORS
 #define DP_SV_CUSTOMIZEENTITYFORCLIENT /* Deprecated feature for compat with DP. Can be slow, incompatible with splitscreen, usually malfunctions with mvds. */
+#define FTE_FORCEINFOKEY /* Provides an easy way to change a user's userinfo from the server. */
+
+#define PROTOCOL_VERSION_FTE		(('F'<<0) + ('T'<<8) + ('E'<<16) + ('X' << 24))
+#define PEXT_FLOATCOORDS		0x00008000
+
+#define PROTOCOL_VERSION_FTE2		(('F'<<0) + ('T'<<8) + ('E'<<16) + ('2' << 24))
+#define PEXT2_REPLACEMENTDELTAS		0x00000008
 
 #ifdef _ACCESSORS
 accessor strbuf : float;
@@ -118,6 +125,7 @@ string(float) argv = #59; 			  /* Part of KRIMZON_SV_PARSECLIENTCOMMAND Returns 
 float(string s1, string s2) strcasecmp = #229; /* Part of FTE_STRINGS Compares the two strings without case sensitivity. Returns 0 if they are equal. The sign of the return value may be significant, but should not be depended upon. */
 		
 #ifdef SSQC
+float SVC_SETVIEWPORT = 5;
 .float hull;	/* Overrides the hull used by the entity for walkmove/movetogoal and not traceline/tracebox. */
 .void() customphysics;	/* Called once each physics frame, overriding the entity's .movetype field and associated logic. You'll probably want to use tracebox to move it through the world. Be sure to call .think as appropriate. */
 float trace_allsolid;
@@ -205,6 +213,9 @@ string(float n) argv = #442;		       /* Part of KRIMZON_SV_PARSECLIENTCOMMAND */
 .float uniquespawnid;	/* Incremented by 1 whenever the entity is respawned. Persists across remove calls, for when the two-second grace period is insufficient. */
 DEP_CSQC .float() customizeentityforclient;	/* Called just before an entity is sent to a client (non-csqc protocol). This gives you a chance to tailor 'self' according to what 'other' should see. */
 
+void(entity player, string key, string value) forceinfokey = #213; /* Part of FTE_FORCEINFOKEY
+		Directly changes a user's info without pinging off the client. Also allows explicitly setting * keys, including *spectator. Does not affect the user's config or other servers. */
+
 #endif
 
 #define DP_QC_SPRINTF 
@@ -246,3 +257,5 @@ void(float num, float type, .__variant fld) clientstat = #232; /* Part of EXT_CS
 		'num' should be a value between 32 and 127, other values are reserved.
 		'type' must be set to one of the EV_* constants, one of EV_FLOAT, EV_STRING, EV_INTEGER, EV_ENTITY.
 		fld must be a reference to the field used, each player will be sent only their own copy of these fields. */
+		
+.float scale;

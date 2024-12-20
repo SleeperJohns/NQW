@@ -393,21 +393,21 @@ void() NQW_SpawnCharacter =
 			self.armortype = 0.15;
 			self.max_armorvalue = 50;
 			self.fake_armortype = 0.3;
-			if (self.armorvalue > self.max_armorvalue) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.
+			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.
 		}
 		else if (self.items & IT_ARMOR2) // Combat Armor
 		{
 			self.armortype = 0.19;
 			self.max_armorvalue = 100;
 			self.fake_armortype = 0.6;
-			if (self.armorvalue > self.max_armorvalue) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
+			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
 		}
 		else if (self.items & IT_ARMOR3) // Heavy Armor
 		{
 			self.armortype = 0.245;
 			self.max_armorvalue = 150;
 			self.fake_armortype = 0.8;
-			if (self.armorvalue > self.max_armorvalue) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
+			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
 		}
 	}
 	else // Skill 4 and below, and deathmatch is not needed, but it's good to add for consistency.
@@ -431,44 +431,7 @@ void() NQW_SpawnCharacter =
 			self.max_armorvalue = 200;
 		}
 	}
-	/*
-	// Sleeper: Always have a blank inventory when in start, or horde maps no matter the scenario.
-	local float intro_maps  = (world.model == "maps/start.bsp" || world.model == "maps/hipstart.bsp" || world.model == "maps/rstart.bsp" || world.model == "maps/e5start.bsp" || world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp");
-		      					  		
-	if (intro_maps && !deathmatch)	
-	{
-		self.items = IT_SHOTGUN | IT_AXE;
-		self.weapons = IT_SHOTGUN | IT_AXE;
-		if (cvar("skill") == 4)
-		{
-			if (!cvar("horde")) self.health = 50;
-			else self.health = 76;
-		}
-		else if (cvar("skill") == 5)
-		{
-			if (!cvar("horde")) self.health = 125;
-			else self.health = 151; 
-		}
-		else if (cvar("skill") <= 3)	
-		{
-			if (!cvar("horde")) self.health = 100;
-			else self.health = 126; 
-		}
-		self.armorvalue = 0;
-		self.ammo_shells1 = 25;
-		self.ammo_nails1 = 0;
-		self.ammo_rockets1 = 0;
-		self.ammo_cells1 = 0;
-		self.ammo_lava_nails = 0;
-		self.ammo_multi_rockets = 0;
-		self.ammo_plasma = 0;
-		W_SetCurrentAmmo ();
-		self.expansionitems = 0;
-		self.weapon = IT_SHOTGUN;
-		self.armortype = 0;
-//		self.MOTDstay = 0;
-	}
-	*/
+	
 	self.donttelefrag = 0;	
 	W_SetCurrentAmmo ();			
 	self.nqwSpeakSpawn ();			

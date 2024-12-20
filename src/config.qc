@@ -1,5 +1,5 @@
 // What version are we on? (Major, Minor, Patches)
-string NQW_Version = "NQWVer 1.13.2";
+string NQW_Version = "NQWVer 1.14.0";
 
 float Version_To_Startframe_Traffic;
 
@@ -17,6 +17,7 @@ string() Campaign_Name =
 		if (gameworld == APOTHEOSIS) return "GameWorld APOTHEOSIS";
 	}
 	if (cvar("deathmatch")) return "GameWorld QuakeWorld";
+	
 	return "GameWorld Unknown";
 };
 
@@ -53,122 +54,51 @@ void() Create_New_Cvars =
 
 void() Change_New_Cvars =
 {
-	if (update_serverinfo > time) return;
-	
-	// Custom Coop
-	localcmd ("serverinfo customcoop ");
-	localcmd (ftos(cvar("customcoop")));
-	localcmd ("\n");
+	// Custom Coop	
+	forceinfokey (world, "customcoop", ftos(cvar("customcoop")));
 		
-	// Teamknockback		
-	localcmd ("serverinfo teamknockback ");
-	localcmd (ftos(cvar("teamknockback")));
-	localcmd ("\n");						
-	
-	// Falling Damage				
-	localcmd ("serverinfo falldamage ");
-	localcmd (ftos(cvar("falldamage")));
-	localcmd ("\n");					
-	
-	// Offhand Hook		
-	localcmd ("serverinfo use_offhand_hook ");
-	localcmd (ftos(cvar("use_offhand_hook")));
-	localcmd ("\n");			
-			
-	localcmd ("serverinfo offhand_hook_speed ");
-	localcmd (ftos(cvar("offhand_hook_speed")));
-	localcmd ("\n");
-			
-	localcmd ("serverinfo offhand_hook_pullspeed ");
-	localcmd (ftos(cvar("offhand_hook_pullspeed")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo offhand_hook_anchor_time ");
-	localcmd (ftos(cvar("offhand_hook_anchor_time")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo offhand_hook_anchor_timeout ");
-	localcmd (ftos(cvar("offhand_hook_anchor_timeout")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo offhand_hook_enable_damage ");
-	localcmd (ftos(cvar("offhand_hook_enable_damage")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo offhand_hook_damage ");
-	localcmd (ftos(cvar("offhand_hook_damage")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo offhand_skyhook ");		
-	localcmd (ftos(cvar("offhand_skyhook")));
-	localcmd ("\n");
+	// Teamknockback
+	forceinfokey (world, "teamknockback", ftos(cvar("teamknockback")));
+		
+	// Falling Damage
+	forceinfokey (world, "falldamage", ftos(cvar("falldamage")));
+		
+	// Offhand Hook	
+	forceinfokey (world, "use_offhand_hook", ftos(cvar("use_offhand_hook")));
+	forceinfokey (world, "offhand_hook_speed", ftos(cvar("offhand_hook_speed")));
+	forceinfokey (world, "offhand_hook_pullspeed", ftos(cvar("offhand_hook_pullspeed")));
+	forceinfokey (world, "offhand_hook_anchor_time", ftos(cvar("offhand_hook_anchor_time")));
+	forceinfokey (world, "offhand_hook_anchor_timeout", ftos(cvar("offhand_hook_anchor_timeout")));
+	forceinfokey (world, "offhand_hook_enable_damage", ftos(cvar("offhand_hook_enable_damage")));
+	forceinfokey (world, "offhand_hook_damage", ftos(cvar("offhand_hook_damage")));
+	forceinfokey (world, "offhand_skyhook", ftos(cvar("offhand_skyhook")));
 		
 	// Grappling Hook
-	localcmd ("serverinfo use_grappling_hook ");
-	localcmd (ftos(cvar("use_grappling_hook")));
-	localcmd ("\n");	
-	
-	localcmd ("serverinfo grappling_hook_speed ");
-	localcmd (ftos(cvar("grappling_hook_speed")));
-	localcmd ("\n");
-			
-	localcmd ("serverinfo grappling_hook_pullspeed ");
-	localcmd (ftos(cvar("grappling_hook_pullspeed")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo grappling_hook_anchor_time ");
-	localcmd (ftos(cvar("grappling_hook_anchor_time")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo grappling_hook_anchor_timeout ");
-	localcmd (ftos(cvar("grappling_hook_anchor_timeout")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo grappling_hook_enable_damage ");
-	localcmd (ftos(cvar("grappling_hook_enable_damage")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo grappling_hook_damage ");
-	localcmd (ftos(cvar("grappling_hook_damage")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo grappling_skyhook ");		
-	localcmd (ftos(cvar("grappling_skyhook")));
-	localcmd ("\n");			
-	
-	// Bunnies
-	localcmd ("serverinfo qw_physics_capped ");
-	localcmd (ftos(cvar("qw_physics_capped")));
-	localcmd ("\n");	
-	
-	localcmd ("serverinfo qw_physics_speedcap ");
-	localcmd (ftos(cvar("qw_physics_speedcap")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo allow_bunnyhopping ");
-	localcmd (ftos(cvar("allow_bunnyhopping")));
-	localcmd ("\n");	
-	
-	// Capturelimit	
-	localcmd ("serverinfo capturelimit ");
-	localcmd (ftos(cvar("capturelimit")));
-	localcmd ("\n");
-	
-	// Warmup
-	localcmd ("serverinfo warmup ");
-	localcmd (ftos(cvar("warmup")));
-	localcmd ("\n");
-	
-	localcmd ("serverinfo warmup_countdown_num ");
-	localcmd (ftos(cvar("warmup_countdown_num")));
-	localcmd ("\n");	
-	
-	// Instagib
-	localcmd ("serverinfo instagib ");
-	localcmd (ftos(cvar("instagib")));
-	localcmd ("\n");	
+	forceinfokey (world, "use_grappling_hook", ftos(cvar("use_grappling_hook")));
+	forceinfokey (world, "grappling_hook_speed", ftos(cvar("grappling_hook_speed")));
+	forceinfokey (world, "grappling_hook_pullspeed", ftos(cvar("grappling_hook_pullspeed")));
+	forceinfokey (world, "grappling_hook_anchor_time", ftos(cvar("grappling_hook_anchor_time")));
+	forceinfokey (world, "grappling_hook_anchor_timeout", ftos(cvar("grappling_hook_anchor_timeout")));
+	forceinfokey (world, "grappling_hook_enable_damage", ftos(cvar("grappling_hook_enable_damage")));
+	forceinfokey (world, "grappling_hook_damage", ftos(cvar("grappling_hook_damage")));
+	forceinfokey (world, "grappling_skyhook", ftos(cvar("grappling_skyhook")));
 		
-	update_serverinfo = time + 60;						
+	// Bunnies
+	forceinfokey (world, "qw_physics_capped", ftos(cvar("qw_physics_capped")));
+	forceinfokey (world, "qw_physics_speedcap", ftos(cvar("qw_physics_speedcap")));
+	forceinfokey (world, "allow_bunnyhopping", ftos(cvar("allow_bunnyhopping")));
+		
+	// Capturelimit	
+	forceinfokey (world, "capturelimit", ftos(cvar("capturelimit")));
+		
+	// Warmup
+	forceinfokey (world, "warmup", ftos(cvar("warmup")));
+		
+	// Instagib
+	forceinfokey (world, "instagib", ftos(cvar("instagib")));
+		
+	// Sudden Death
+	forceinfokey (world, "sudden_death", ftos(cvar("sudden_death")));					
 };
 
 /*

@@ -60,6 +60,7 @@ void() NQW_Caleb =
 	self.nqwSndDrown1       = "caleb/drown1.wav";
 	self.nqwSndDrown2       = "caleb/drown2.wav";
 	self.nqwSndH2oDeath     = "caleb/h2odeath.wav";
+	self.nqwSndFalling	= "";
 	
 	self.nqwSpeakSpawn      = NQW_CalebSpawn;
 	self.nqwSpeakFrag       = NQW_CalebFrag;

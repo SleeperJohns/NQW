@@ -41,9 +41,9 @@ void() Warmup_Rules =
 							
 	if (warmup_engaged == TRUE && warmup_counttime < time) 
 	{	
-		for (float num = 0; num <= 1; num++)
+		for (float num = 0; num <= 1; num++) // Sleeper: Pitch this to everyone once.
 		{			
-			for (player = find (world, classname, "player"); player; player = find (player, classname, "player"))
+			for (player = find (world, classname, "player"); player; player = find (player, classname, "player")) 
 			{				
 				loophack2++;
 				if (loophack2 == 1) warmup_countdown = cvar("warmup_countdown_num") + 1;
@@ -54,7 +54,7 @@ void() Warmup_Rules =
 					else if (deathmatch >= DM_TDM && deathmatch <= DM_OneFlagCTF) id1_centerprint (player, "Prepare Your Team!\n\n\n", Warmup_Count(), "\n");
 					warmup_counttime = time + 1;
 				}
-				else
+				else // Sleeper: Match has begun.
 				{
 					initiate_matchtime = TRUE;
 					warmup_engaged = FALSE;
@@ -68,7 +68,7 @@ void() Warmup_Rules =
 					if (warmup_engaged) player.attack_finished = time + 99999;	
 					else 
 					{
-						if (!player.client_spawned)
+						if (!player.client_spawned) // Sleeper: Prevent a looping telefrag by respawning everyone once.
 						{
 							player.client_spawned = TRUE;
 							player.attack_finished = time;
@@ -168,7 +168,7 @@ void() SuddenDeath_Rules =
 								}
 							}																	
 						}
-						else
+						else // Sleeper: Everybody was pussy footing around or didn't play aggressive enough to break the tie.
 						{
 							sudden_death_engaged = FALSE;
 							endgame = TRUE;
@@ -247,7 +247,7 @@ void() SuddenDeath_Rules =
 								}
 							}									
 						}
-						else
+						else // Sleeper: Everybody was pussy footing around or didn't play aggressive enough to break the tie.
 						{
 							sudden_death_engaged = FALSE;
 							endgame = TRUE;

@@ -23,23 +23,25 @@ Bmodel rotation
 ===============================================================================
 */
 
-vector ModAngles(vector a)
+vector(vector a) ModAngles =
 {
-    while(a_x > 360) a_x -= 360;
-    while(a_x < 0)   a_x += 360;
-    while(a_y > 360) a_y -= 360;
-    while(a_y < 0)   a_y += 360;
-    while(a_z > 360) a_z -= 360;
-    while(a_x < 0)   a_z += 360;
-    return a;
-}
+	while (a_x > 360) a_x -= 360;
+	while (a_x < 0)   a_x += 360;
+	while (a_y > 360) a_y -= 360;
+	while (a_y < 0)   a_y += 360;
+	while (a_z > 360) a_z -= 360;
+	while (a_x < 0)   a_z += 360;
+    
+	return a;
+};
 
-float Clamp(float v, float min, float max)
+float(float v, float min, float max) Clamp =
 {
-    if(v < min) return min;
-    if(v > max) return max;
-    return v;
-}
+	if (v < min) return min;
+	if (v > max) return max;
+	
+	return v;
+};
 
 
 /*QUAKED info_rotate (0.4 1.0 0.6) (-8 -8 -8) (8 8 8) 
@@ -61,132 +63,126 @@ self.delay     = editor field for how long the acceleration should take
 
 enum : int
 {
-    RotateStateOff,
-    RotateStateAccelUp,
-    RotateStateOn,
-    RotateStateDecelDown
+	RotateStateOff,
+	RotateStateAccelUp,
+	RotateStateOn,
+	RotateStateDecelDown
 };
 
-void rotate_object_continuously_tick(float DeltaTime)
-{
-    self.angles = ModAngles(self.angles + self.avelocity * DeltaTime);
-}
+void(float DeltaTime) rotate_object_continuously_tick = {self.angles = ModAngles(self.angles + self.avelocity * DeltaTime);};
 
-void rotate_object_tween_tick(float DeltaTime)
+void(float DeltaTime) rotate_object_tween_tick =
 {
-    self.speed += self.distance * DeltaTime;
-    self.speed = Clamp(self.speed, 0, 1);
-    if(self.speed == 0)
-    {
-        self.state = RotateStateOff;
-        RemoveFrameTickEntity(self);
-        return;
-    }
-    if(self.speed == 1)
-    {
-        self.state = RotateStateOn;
-        self.tick = rotate_object_continuously_tick;
-        self.tick(DeltaTime);
-        
-        return;
-    }
-    self.angles = ModAngles(self.angles + self.avelocity * DeltaTime * self.speed);
-}
+	self.speed += self.distance * DeltaTime;
+	self.speed = Clamp (self.speed, 0, 1);
+	
+	if (self.speed == 0)
+	{
+		self.state = RotateStateOff;
+		RemoveFrameTickEntity (self);
+		return;
+	}
+	
+	if (self.speed == 1)
+	{
+		self.state = RotateStateOn;
+		self.tick = rotate_object_continuously_tick;
+		self.tick (DeltaTime);   
+		return;
+	}
+	
+	self.angles = ModAngles (self.angles + self.avelocity * DeltaTime * self.speed);
+};
 
-void rotate_object_continuously_use()
+void() rotate_object_continuously_use =
 {
-    if(self.delay <= 0)
-    {
-        //No acceleration, just toggle on or off
-        if(self.state == RotateStateOff)
-        {
-            self.state = RotateStateOn;
-            RegisterFrameTickEntity(self);
-        }
-        else
-        {
-            self.state = RotateStateOff;
-            RemoveFrameTickEntity(self);
-        }
-        return;
-    }
+	if (self.delay <= 0)
+	{
+		// No acceleration, just toggle on or off
+		if (self.state == RotateStateOff)
+		{
+			self.state = RotateStateOn;
+			RegisterFrameTickEntity (self);
+		}
+		else
+		{
+			self.state = RotateStateOff;
+			RemoveFrameTickEntity (self);
+		}
+		return;
+	}
 
-    switch(self.state)
-    {
-    case RotateStateOff:
-        self.state = RotateStateAccelUp;
-        self.tick = rotate_object_tween_tick;
-        self.distance = fabs(self.distance);
-        RegisterFrameTickEntity(self);
-        return;
+	switch (self.state)
+	{
+		case RotateStateOff:
+			self.state = RotateStateAccelUp;
+			self.tick = rotate_object_tween_tick;
+			self.distance = fabs (self.distance);
+			RegisterFrameTickEntity (self);
+			return;
         
-    case RotateStateAccelUp:
-        self.state = RotateStateDecelDown;
-        self.tick = rotate_object_tween_tick;
-        self.distance = -fabs(self.distance);
-        return;
+		case RotateStateAccelUp:
+			self.state = RotateStateDecelDown;
+			self.tick = rotate_object_tween_tick;
+			self.distance = -fabs (self.distance);
+			return;
         
-    case RotateStateOn:
-        self.state = RotateStateDecelDown;
-        self.tick = rotate_object_tween_tick;
-        self.distance = -fabs(self.distance);
-        return;
+		case RotateStateOn:
+			self.state = RotateStateDecelDown;
+			self.tick = rotate_object_tween_tick;
+			self.distance = -fabs (self.distance);
+			return;
     
-    case RotateStateDecelDown:
-        self.state = RotateStateAccelUp;
-        self.tick = rotate_object_tween_tick;
-        self.distance = fabs(self.distance);
-        return;
-    }
-}
+		case RotateStateDecelDown:
+			self.state = RotateStateAccelUp;
+			self.tick = rotate_object_tween_tick;
+			self.distance = fabs (self.distance);
+			return;
+	}
+};
 
 /*QUAKED rotate_object_continuously (0.4 1.0 0.6) (? ? ?) (? ? ?) START_OFF 
 Non-solid object that rotates continuously.
 Trigger to turn on and off.
 */
-void rotate_object_continuously()
+void() rotate_object_continuously =
 {
-    if(!self.avelocity)
-    {
-        self.avelocity = '0 30 0';
-    }
-    if(self.delay > 0)
-    {
-        self.distance = 1 / self.delay;
-    }
+	if (!self.avelocity) self.avelocity = '0 30 0';
+	
+	if (self.delay > 0) self.distance = 1 / self.delay;
 
-    if(self.spawnflags & SOLID_BSP)
-    {
-        self.movetype = MOVETYPE_PUSH;
-        self.solid = SOLID_BSP;
-    }
-    else
-    {
-        self.movetype = MOVETYPE_NONE;
-        self.solid = SOLID_NOT;
-    }
-    self.angles = '0 0 0';
-    if(self.pos2)
-    {
-        self.origin = self.pos2;
-        setorigin(self, self.origin);
-    }
-    setmodel(self, self.model);
+	if (self.spawnflags & SOLID_BSP)
+	{
+		self.movetype = MOVETYPE_PUSH;
+		self.solid = SOLID_BSP;
+	}
+	else
+	{
+		self.movetype = MOVETYPE_NONE;
+		self.solid = SOLID_NOT;
+	}
+	
+	self.angles = '0 0 0';
+	
+	if (self.pos2)
+	{
+		self.origin = self.pos2;
+		setorigin (self, self.origin);
+	}
+	
+	setmodel (self, self.model);
     
-    self.use = rotate_object_continuously_use;
-    self.tick = rotate_object_continuously_tick;
+	self.use = rotate_object_continuously_use;
+	self.tick = rotate_object_continuously_tick;
 
-    if(self.spawnflags & START_OFF)
-    {
-        self.state = RotateStateOff;
-    }
-    else
-    {
-        self.state = RotateStateOn;
-        self.speed = 1;
-        RegisterFrameTickEntity(self);
-    }
-}
+	if (self.spawnflags & START_OFF) self.state = RotateStateOff;
+	else
+	{
+		self.state = RotateStateOn;
+		self.speed = 1;
+		RegisterFrameTickEntity(self);
+	}
+};
 
 /*
 ===============================================================================

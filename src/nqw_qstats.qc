@@ -1463,43 +1463,38 @@ void(float tt) PrintTime =
 	local float t;
 	local float p;
 
-	t = (tt / 60);
+	t = tt / 60;
 	t = floor(t);
-	if ((t > 999))
-	{
-		bprint("too damn high!");
-	}
+	
+	if (t > 999) bprint ("too damn high!");
 	else
 	{
 		if (t)
 		{
-			bprint(ftos(t));
-			bprint(":");
-			t = (tt - (60 * t));
+			bprint (ftos(t));
+			bprint (":");
+			t = tt - (60 * t);
 			t = floor(t);
-			if ((t < TE_LAVASPLASH))
-			{
-				bprint("0");
-			}
+			if (t < 10) bprint ("0");
 		}
-		else
-		{
-			t = floor(tt);
-		}
-		bprint(ftos(t));
-		bprint(".");
-		p = TE_LAVASPLASH;
+		else t = floor(tt);
+		
+		bprint (ftos(t));
+		bprint (".");
+		p = 10;
+		
 		do
 		{
-			t = (p * (tt - floor(tt)));
+			t = p * (tt - floor(tt));
 			t = floor(t);
-			t = (t / TE_LAVASPLASH);
-			t = ((t - floor(t)) * TE_LAVASPLASH);
-			t = floor((t + 0.1));
-			bprint(ftos(t));
-			p = (TE_LAVASPLASH * p);
+			t /= 10;
+			t = (t - floor(t)) * 10;
+			t = floor(t + 0.1);
+			bprint (ftos(t));
+			p = 10 * p;
 
-		} while ((p < 100001));
+		} 
+		while (p < 100001);
 	}
 };
 
@@ -3110,91 +3105,96 @@ void() OCD_Mapname_Prints =
 
 void() ExitMessage =
 {
-	if (cvar("sv_public") == 1)
+	if (!cvar("sv_public")) return;
+	
+	DisplayedExitMsg = 1;
+	bprint("\nQdQ Stats patch v1.8 (NQW Edition)\n");
+	bprint("\n");
+	bprint("=======================\n");
+	if (mlstage == 2)
 	{
-		DisplayedExitMsg = 1;
-		bprint("\nQdQ Stats patch v1.8 (NQW Edition)\n");
-		bprint("\n");
-		bprint("=======================\n");
-		if (mlstage == 2)
+		if (mapname != "start" || mapname != "hipstart" || mapname != "rstart" || mapname != "e5start" || mapname != "mgstart" || mapname != "hub")
 		{
-			if (mapname != "start" || mapname != "hipstart" || mapname != "rstart" || mapname != "e5start" || mapname != "mgstart" || mapname != "hub")
-			{
-				if (numlevels == 1) totaltime = time;
-				else totaltime = totaltime + time;
-			}
-			mlstage = 3;
+			if (numlevels == 1) totaltime = time;
+			else totaltime += time;
 		}
-	//	NoCheatStamp();
-		OCD_Mapname_Prints();
-		bprint("\n");
-		if (mapname != "100m" && mapname != "400m") // Sleeper: Trick maps or bunnyhop maps don't really matter.
-		{
-			if (cvar("skill") == 0)
-			{
-				bprint("Skill(0)   : ");
-				bprint("Easy");
-			}
-			else if (cvar("skill") == 1)
-			{
-				bprint("Skill(1)   : ");
-				bprint("Normal");
-			}
-			else if (cvar("skill") == 2)
-			{
-				bprint("Skill(2)   : ");
-				bprint("Hard");
-			}
-			else if (cvar("skill") == 3)
-			{
-				bprint("Skill(3)   : ");
-				bprint("Classic Nightmare!");
-			}
-			else if (cvar("skill") == 4)
-			{
-				bprint("Skill(4)   : ");
-				bprint("KEX Nightmare!");
-			}
-			else if (cvar("skill") == 5)
-			{
-				bprint("Skill(5)   : ");
-				bprint("Sleeper Must Die!");	
-			}
-			else if (cvar("skill") > 5 || cvar("skill") < 0)
-			{
-				bprint("Skill(?)   : ");
-				bprint("Unknown");	
-			}
-			bprint("\n");
-		}								
-		if (mapname == "start" || mapname == "hipstart" || mapname == "rstart" || mapname == "e5start" || mapname == "mgstart" || mapname == "hub")
-		{
-			bprint("Level Time : ");
-			PrintTime(time);
-			bprint("\n");
-			bprint("Total Time : ");
-			PrintTime(totaltime);
-		}
-		else
-		{
-			bprint("Level Time : ");
-			PrintTime(time);
-			bprint("\n");
-			totaltime = totaltime + time;
-			bprint("Total Time : ");
-			PrintTime(totaltime);
-		}
-		bprint("\n");
-		bprint("Runner     : ");
-		bprint(self.netname);		
-		bprint("\n");
-		bprint("=======================\n");
-		if (mapname == "start" || mapname == "hipstart" || mapname == "rstart" || mapname == "e5start" || mapname == "mgstart")
-			bprint("(Start maps don't add time!)\n");
-		else if (mapname == "hub")
-			bprint("(Hub maps don't add time!)\n");
-		bprint("\n");
+		mlstage = 3;
 	}
+//	NoCheatStamp();
+	OCD_Mapname_Prints();
+	bprint("\n");
+	if (mapname != "100m" && mapname != "400m") // Sleeper: Trick maps or bunnyhop maps don't really matter.
+	{
+		if (cvar("skill") == 0)
+		{
+			bprint("Skill(0)   : ");
+			bprint("Easy");
+		}
+		else if (cvar("skill") == 1)
+		{
+			bprint("Skill(1)   : ");
+			bprint("Normal");
+		}
+		else if (cvar("skill") == 2)
+		{
+			bprint("Skill(2)   : ");
+			bprint("Hard");
+		}
+		else if (cvar("skill") == 3)
+		{
+			bprint("Skill(3)   : ");
+			bprint("Classic Nightmare!");
+		}
+		else if (cvar("skill") == 4)
+		{
+			bprint("Skill(4)   : ");
+			bprint("KEX Nightmare!");
+		}
+		else if (cvar("skill") == 5)
+		{
+			bprint("Skill(5)   : ");
+			bprint("Sleeper Must Die!");	
+		}
+		else if (cvar("skill") > 5 || cvar("skill") < 0)
+		{
+			bprint("Skill(?)   : ");
+			bprint("Unknown");	
+		}
+		bprint("\n");
+	}								
+	if (mapname == "start" || mapname == "hipstart" || mapname == "rstart" || mapname == "e5start" || mapname == "mgstart" || mapname == "hub")
+	{
+		bprint("Level Time : ");
+		PrintTime(time);
+		bprint("\n");
+		bprint("Total Time : ");
+		PrintTime(totaltime);
+	}
+	else
+	{
+		bprint("Level Time : ");
+		PrintTime(time);
+		bprint("\n");
+		totaltime += time;
+		bprint("Total Time : ");
+		PrintTime(totaltime);
+	}
+	bprint("\n");
+	if (num_players <= 1) bprint("Runner     : ");
+	else bprint("Runners    : ");
+//	bprint(self.netname);	
+	for (entity player = find (world, classname, "player"); player; player = find (player, classname, "player")) // Sleeper: Loop through all the players to get their names.
+	{
+		local float comma;
+		bprint (player.netname);
+		if (comma <= num_players) comma++;
+		if (comma == num_players - 1) bprint (", "); // Sleeper: If there is more than one player, add a comma until the last player.											
+	}
+	bprint("\n");
+	bprint("=======================\n");
+	if (mapname == "start" || mapname == "hipstart" || mapname == "rstart" || mapname == "e5start" || mapname == "mgstart") bprint("(Start maps don't add time!)\n");
+	else if (mapname == "hub") bprint("(Hub maps don't add time!)\n");
+	bprint("\n");
 };
 
 /*
@@ -3353,6 +3353,7 @@ void(float t, float ogre) PrintGCounter =
 	WriteByte (MSG_ONE, 100);
 	WriteByte (MSG_ONE, 101);
 	WriteByte (MSG_ONE, 32);
+	
 	if (ogre) WriteByte (MSG_ONE, 79);
 	if (t > 0)
 	{
@@ -3399,6 +3400,7 @@ float() GrenadeCounter =
 	PrintGCounter (a, 0);
 	return TRUE;
 };
+
 void() OgreGrenadeTouch;
 
 void() OgreGrenadeCounter =

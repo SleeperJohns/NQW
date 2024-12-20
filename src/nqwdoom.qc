@@ -56,4 +56,5 @@ void() NQW_Doomguy =
 	self.nqwSndDrown1 = "player/drown1.wav";
 	self.nqwSndDrown2 = "player/drown2.wav";
 	self.nqwSndH2oDeath = "player/h2odeath.wav";
+	self.nqwSndFalling = "";
 };

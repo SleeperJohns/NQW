@@ -330,7 +330,7 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage =
 */	
     
 	// Sleeper: In Skill 5 ("Sleeper Must Die"), armors will appear more durable to damage.
-	if  (cvar("skill") == 5 && !cvar("deathmatch"))
+	if  (cvar("skill") == 5 && !cvar("deathmatch") && attacker.flags & FL_MONSTER && targ.flags & FL_CLIENT)
 	{
 		     if (targ.items & IT_ARMOR1) damage /= 1.05;
 		else if (targ.items & IT_ARMOR2) damage /= 1.3;

@@ -613,6 +613,9 @@ float(string mapstr) validatemap =
 
 void(string argument2, string cmd) Main_Vote_System = {main_vote_start (argument2);};
 
+
+void() OffHand_W_FireGrapple;
+void() OffHand_UnHookPlayer;
 // This allows clients to send cmd based commands to the server.
 // Useful for voting systems.
 void(string cmd) SV_ParseClientCommand =
@@ -714,6 +717,15 @@ void(string cmd) SV_ParseClientCommand =
  	else if (command == "hordemode") sprint (self, "Invalid Command.\n");	
  	else if (command == "hordemap") sprint (self, "Invalid Command.\n");
  	else if (command == "gametype") sprint (self, "Invalid Command.\n");	
+ 		
+	else if (command == "hook") 
+	{
+		if (warmup_countdown >= 0 && warmup_countdown <= 6 && warmup_engaged || self.offhand_fire_hook || gameover || self.deadflag) return; // Sleeper: Prevent usage during the end of warmups, an don't send out multiple hooks if already firing one.
+		
+		if (cvar("use_offhand_hook")) OffHand_W_FireGrapple ();
+		else sprint (self, "Offhand-Hook must be enabled first!\n");
+	}
+	else if (command == "unhook" && cvar("use_offhand_hook")) OffHand_UnHookPlayer ();
  	
 	else // Send commands to the server
 	{

@@ -95,12 +95,12 @@ string Start_Maplist[] =
 
 float() StartMaps =
 {
-	if (world.model == "maps/start.bsp") return 1;
+	if (world.model == "maps/start.bsp")    return 1;
 	if (world.model == "maps/hipstart.bsp") return 2;
-	if (world.model == "maps/rstart.bsp") return 3;
-	if (world.model == "maps/e5start.bsp") return 4; 
-	if (world.model == "maps/mgstart.bsp") return 5; 
-	if (world.model == "maps/hub.bsp") return 6; 
+	if (world.model == "maps/rstart.bsp")   return 3;
+	if (world.model == "maps/e5start.bsp")  return 4; 
+	if (world.model == "maps/mgstart.bsp")  return 5; 
+	if (world.model == "maps/hub.bsp") 	return 6; 
 	return FALSE; // Blank Map.
 };
 

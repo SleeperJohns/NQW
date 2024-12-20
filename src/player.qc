@@ -226,21 +226,22 @@ void() player_grapple4;
 void() player_grapple5;
 
 void()  player_grapple1 =  [$axattd1, player_grapple2 ] 
-	{ self.weaponframe=1; W_FireGrapple(); };
-//	{ self.weaponframe=2; W_FireGrapple(); };
-void()  player_grapple2 =  [$axattd2, player_grapple3 ]
+//	{ self.weaponframe=1; W_FireGrapple(); };
 	{ self.weaponframe=2;};
-//	{ self.weaponframe=3; };
+void()  player_grapple2 =  [$axattd2, player_grapple3 ]
+//	{ self.weaponframe=2;};
+	{ self.weaponframe=3; W_FireGrapple ();};
 void()  player_grapple3 =  [$axattd3, player_grapple3 ]
 	{
-//		self.weaponframe = 3;
-		self.weaponframe = 2;
+		self.weaponframe = 3;
+//		self.weaponframe = 2;
 
 		if (!self.hook_out) 
 		{
 			player_grapple5();
 			return;
 		}
+		/*
 		if (vlen(self.hook.origin - self.origin) >= 50) 
 		{
 			if (self.on_hook) 
@@ -249,19 +250,35 @@ void()  player_grapple3 =  [$axattd3, player_grapple3 ]
 				return;
 			}
 		}
+		*/
+		if (vlen(self.velocity) >= 750)
+		{
+			if (time > self.ltime) //delay the flying animation,ie no belly flop on grapple hops
+			{
+				player_grapple4();
+				return;
+			}
+		}		
 
 	};
 void() player_grapple4 =  [$deathc4, player_grapple4 ]
 	{
-//		self.weaponframe=4;
-		self.weaponframe=2;
+		self.weaponframe=4;
+//		self.weaponframe=2;
 
 		if (!self.hook_out) 
 		{
 			player_grapple5();
 			return;
 		}
+		/*
 		if (vlen(self.hook.origin - self.origin) < 50 || !self.on_hook) 
+		{
+			player_grapple3();
+			return;
+		}
+		*/
+		if (vlen(self.velocity) < 750)
 		{
 			player_grapple3();
 			return;
@@ -269,8 +286,8 @@ void() player_grapple4 =  [$deathc4, player_grapple4 ]
 		
 	};
 void()  player_grapple5 =  [$axattd4, player_run    ] 
-//	{self.weaponframe=5;};
-	{self.weaponframe=1;};
+	{self.weaponframe=5;};
+//	{self.weaponframe=1;};
 //--ZOID
 //============================================================================
 
@@ -616,13 +633,13 @@ vector(float dm) VelocityForDamage =
 	local vector v;
 
 	//MED 01/17/97
-	if (vlen(damage_inflictor.velocity)>0)
+	if (vlen(damage_inflictor.velocity) > 0)
 	{
 		v = 0.2 * damage_inflictor.velocity;
-		v = v + (25 * normalize(self.origin-damage_inflictor.origin));
+		v += 25 * normalize(self.origin-damage_inflictor.origin);
 		v_z = 100 + 100 * random();
-		v_x = v_x + (50 * crandom());
-		v_y = v_y + (50 * crandom());
+		v_x += 50 * crandom();
+		v_y += 50 * crandom();
 	}
 	else
 	{
@@ -633,14 +650,15 @@ vector(float dm) VelocityForDamage =
 	if (dm > -50)
 	{
 //  	  	dprint ("level 1\n");
-		v = v * 0.7;
+		v *= 0.7;
 	}
 	else if (dm > -200)
 	{
 //   		dprint ("level 3\n");
-		v = v * 2;
+		v *= 2;
 	}
-	else v = v * 10;
+	else v *= 10;
+	
 	return v;
 };
 
@@ -746,7 +764,7 @@ void() hip_powerup_touch;
 void() newitems_touch;
 void(float powerup) Powerup_Drop = 
 {
-	entity new = spawn ();
+	local entity new = spawn ();
 		
 	if (powerup == IT_INVULNERABILITY && self.invincible_finished > time) 
 	{
@@ -891,10 +909,7 @@ void() PlayerDie =
 		TeamDropFlagOfPlayer (self);
 //		DropRune ();	
 	}
-	if (coop == CLASSIC_COOP && !deathmatch)
-	{
-		if (!start_maps) DropBackpack (); // Sleeper: Because vanilla experience, remember? Also, not needed in start maps.
-	}
+	if (coop == CLASSIC_COOP && !deathmatch && world.model != Start_Maplist[StartMaps()]) DropBackpack (); // Sleeper: Because vanilla experience, remember? Also, not needed in start maps.
 	if (self.rune) RuneRespawn (); // Sleeper: Support runes will now respawn at a dedicated spot when the player occupying that rune dies.
 	
 	if (self.ctf_killed == 2) self.ctf_killed = 0;

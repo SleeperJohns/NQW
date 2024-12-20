@@ -601,6 +601,8 @@ void() worldspawn =
 	precache_sound ("misc/foot7.wav");
 	
 	precache_sound ("weapons/coilgun.wav");
+	precache_sound ("railwarz/laserhook_pull.wav");
+	precache_sound ("railwarz/laserhook_fire.wav");
 
 	precache_model ("progs/player.mdl");
 	precache_model ("progs/eyes.mdl");
@@ -626,6 +628,7 @@ void() worldspawn =
 	precache_model ("progs/v_rock2.mdl");
 	
 	precache_model ("progs/v_coilgun.mdl");
+//	precache_model ("progs/rail3_1.mdl");
 	
 	// Sleeper: Precache world weapons to drop them.
 	precache_model ("progs/g_shot.mdl");
@@ -655,6 +658,13 @@ void() worldspawn =
 	// hook for CTF
 	precache_model ("progs/hook.mdl");
 	precache_model ("progs/v_grpple.mdl");
+	precache_model ("progs/beam.mdl");
+	precache_model ("progs/chain.mdl");
+	precache_model ("progs/chain_short.mdl");
+	precache_model ("progs/chain_tail.mdl");
+	precache_model ("progs/laserhook_red.mdl");
+	precache_model ("progs/laserhook_blue.mdl");
+	precache_model ("progs/laserhook.mdl");
 //	precache_model ("progs/bit.mdl");
 //--ZOID	
 
@@ -722,6 +732,8 @@ float idk;
 void() StartFrame =
 {
 	local float mg1_horde_maps_pool  = (world.model == "maps/horde1.bsp" || world.model == "maps/horde2.bsp" || world.model == "maps/horde3.bsp" || world.model == "maps/horde4.bsp" || world.model == "maps/horde5.bsp" || world.model == "maps/horde6.bsp" || world.model == "maps/horde7.bsp");
+
+	local float routine_server_restart = (60 * 60) * 6; // 6 hour resets
 			                    
 //	local float custom_story_maps_pool; // This is for community maps that deserve to be played as a campaign. There are no stories yet to be told.
 			                                 			                   	
@@ -730,14 +742,43 @@ void() StartFrame =
 	isHordeMode = cvar("horde");	
 	customcoop_flags = cvar("customcoop");
 	
-	// Restart the server every 6 hours when there's no players in the server. This helps with floating point issues.
-        if (time >= (60 * 60) * 6)
+	// Restart the server every set amount of hours when there's no players in the server. This helps with floating point issues.
+        if (time >= routine_server_restart)
         {
                 local entity server_inactive = find (world, classname, "player");
-                if (server_inactive == world) 
+                if (server_inactive == world)
                 {
 			dprint ("!ROUTINE 6-HOUR SERVER RESTART INITIATED!\n");
-			localcmd ("restart\n");	
+			if (cvar("coop") && !cvar("deathmatch") && !cvar("customcoop")) // Sleeper: If the server is hosted in the middle or late in an episode, restart the episode from the beginning.
+			{
+				if (world.model == "maps/e1m2.bsp" || world.model == "maps/e1m3.bsp" || world.model == "maps/e1m4.bsp" || world.model == "maps/e1m5.bsp" || world.model == "maps/e1m6.bsp" || world.model == "maps/e1m7.bsp" || world.model == "maps/e1m8.bsp")
+					localcmd ("changelevel e1m1\n");	
+				else if (world.model == "maps/e2m2.bsp" || world.model == "maps/e2m3.bsp" || world.model == "maps/e2m4.bsp" || world.model == "maps/e2m5.bsp" || world.model == "maps/e2m6.bsp" || world.model == "maps/e2m6_qe.bsp" || world.model == "maps/e2m7.bsp")
+					localcmd ("changelevel e2m1\n");
+				else if (world.model == "maps/e3m2.bsp" || world.model == "maps/e3m3.bsp" || world.model == "maps/e3m4.bsp" || world.model == "maps/e3m5.bsp" || world.model == "maps/e3m6.bsp" || world.model == "maps/e3m7.bsp")
+					localcmd ("changelevel e3m1\n");	
+				else if (world.model == "maps/e4m2.bsp" || world.model == "maps/e4m3.bsp" || world.model == "maps/e4m4.bsp" || world.model == "maps/e4m5.bsp" || world.model == "maps/e4m6.bsp" || world.model == "maps/e4m7.bsp" || world.model == "maps/e4m8.bsp")
+					localcmd ("changelevel e4m1\n");
+				else if (world.model == "maps/hip1m2.bsp" || world.model == "maps/hip1m3.bsp" || world.model == "maps/hip1m4.bsp" || world.model == "maps/hip1m5.bsp")
+					localcmd ("changelevel hip1m1\n");
+				else if (world.model == "maps/hip2m2.bsp" || world.model == "maps/hip2m3.bsp" || world.model == "maps/hip2m4.bsp" || world.model == "maps/hip2m5.bsp" || world.model == "maps/hip2m6.bsp")
+					localcmd ("changelevel hip2m1\n");
+				else if (world.model == "maps/hip3m2.bsp" || world.model == "maps/hip3m3.bsp" || world.model == "maps/hip3m4.bsp" || world.model == "maps/hipdm1.bsp" || world.model == "maps/hipend.bsp")
+					localcmd ("changelevel hip3m1\n");	
+				else if (world.model == "maps/r1m2.bsp" || world.model == "maps/r1m3.bsp" || world.model == "maps/r1m4.bsp" || world.model == "maps/r1m5.bsp" || world.model == "maps/r1m6.bsp" || world.model == "maps/r1m7.bsp")
+					localcmd ("changelevel r1m1\n");
+				else if (world.model == "maps/r2m2.bsp" || world.model == "maps/r2m3.bsp" || world.model == "maps/r2m4.bsp" || world.model == "maps/r2m5.bsp" || world.model == "maps/r2m6.bsp" || world.model == "maps/r2m7.bsp" || world.model == "maps/rend.bsp")
+					localcmd ("changelevel r2m1\n");
+				else if (world.model == "maps/e5m2.bsp" || world.model == "maps/e5m3.bsp" || world.model == "maps/e5m4.bsp" || world.model == "maps/e5m5.bsp" || world.model == "maps/e5m6.bsp" || world.model == "maps/e5m7.bsp" || world.model == "maps/e5end.bsp" || world.model == "maps/e5sm1.bsp" || world.model == "maps/e5sm2.bsp")
+					localcmd ("changelevel e5m1\n");	
+				else if (world.model == "maps/mge1m2.bsp" || world.model == "maps/mge1m3.bsp") localcmd ("changelevel mge1m1\n");
+				else if (world.model == "maps/mge2m2.bsp") localcmd ("changelevel mge2m1\n");
+				else if (world.model == "maps/mge3m2.bsp") localcmd ("changelevel mge3m1\n");
+				else if (world.model == "maps/mge4m2.bsp") localcmd ("changelevel mge4m1\n");
+				else if (world.model == "maps/mge5m2.bsp") localcmd ("changelevel mge5m1\n");
+				else localcmd ("restart\n"); // Sleeper: Custom maps or Horde maps can just restart plainly.
+			}
+			else localcmd ("restart\n"); // Sleeper: Because we still want deathmatch and custom coop to receive the routine restart.
 		}
 	}
 				
@@ -766,7 +807,7 @@ void() StartFrame =
 	{
 		cvar_set("customcoop", "0");
 	}
-	else if (gameworld == CUSTOM)
+	else if (gameworld == CUSTOM && !cvar("deathmatch"))
 	{
 		cvar_set("customcoop", "1");
 	}

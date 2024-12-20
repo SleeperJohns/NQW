@@ -6,15 +6,16 @@ float DM_FFA			    = 	2;	// Free For All
 float DM_TDM			    =	3; 	// Team Deathmatch
 float DM_CTF			    =	4;	// Capture The Flag
 float DM_OneFlagCTF		    =	5;	// One Flag Capture The Flag
-// float DM_CA			    =	6;	// Clan Arena
-// float DM_RA			    =	7;	// Rocket Arena
-// float DM_Abyss_Duel		    =	8;	// Apotheosis Duel (1v1 with Monsters)
-// float DM_Abyss_TDM		    =	9;	// Apotheosis Team Deathmatch (up to 4v4 with Monsters)
+// float DM_ARENA		    =   6;	// Standard Arena (All Weapons, Spawn Protection, Max Ammo Start)
+// float DM_CA			    =	7;	// Clan Arena (All Weapons, Teams, No Self Damage, No Team Damage, Spawn Protection???, Max Ammo Start)
+// float DM_RA			    =	8;	// Rocket Arena (All Weapons, Teams, Self Damage, No Team Damage, Limited Ammo)
+// float DM_Abyss_Duel		    =	9;	// Apotheosis Duel (Hyper Demon-style 1v1 with Monsters)
+// float DM_Abyss_TDM		    =	10;	// Apotheosis Team Deathmatch (Hyper Demon-style TDM up to 4v4 with Monsters)
 
 // Sleeper: Might add these back at a later time to make the everything official wise complete.
 /*
-float DM_DMATCH_TAG		    =	10;	// deathmatch tag, no 'team' stuff
-float DM_CTF_ALT		    =	11;	// alternate CTF (three teams)
+float DM_DMATCH_TAG		    =	11;	// deathmatch tag, no 'team' stuff
+float DM_CTF_ALT		    =	12;	// alternate CTF (three teams)
 */
 
 /* INSTAGIB CVAR VALUES
@@ -58,7 +59,7 @@ float GAMECFG_NQW_RUNES		    =	2; // enable Net QuakeWorld's variant of runeset 
 //    get assigned).
 // float GAMECFG_ALLOW_CHG		=	16; // allow people to change teams
 
-/* Rulesets // Sleeper: Used to be very precise and accurate for every gameplay engagement without overlap.
+/* Rulesets // Sleeper: Used to be very precise and accurate for every gametype without overlap.
 */
 // Sleeper: Basic stuff.
 /*
@@ -66,7 +67,7 @@ float() Is_SinglePlayer =
 {
 	if (cvar("deathmatch")) return FALSE;
 
-	if (cvar("coop") & SINGLE_PLAYER) return TRUE;
+	if (cvar("coop") & SINGLE_PLAYER && cvar("deathmatch") == DM_DISABLED) return TRUE;
 	return FALSE;
 };
 
@@ -111,7 +112,7 @@ float() Is_TDMMode =
 	return FALSE;
 };
 
-float() Is_CTFModes =
+float() Is_CTFMode =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
@@ -119,7 +120,7 @@ float() Is_CTFModes =
 	return FALSE;
 };
 
-float() Is_OneFlagCTFModes = 
+float() Is_OneFlagCTFMode = 
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 	
@@ -127,7 +128,7 @@ float() Is_OneFlagCTFModes =
 	return FALSE;
 };
 
-float() Is_DMModes =
+float() Is_FFAMode =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
@@ -135,7 +136,7 @@ float() Is_DMModes =
 	return FALSE;
 };
 
-float() Is_DuelDMMode = 
+float() Is_DuelMode = 
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
@@ -143,7 +144,7 @@ float() Is_DuelDMMode =
 	return FALSE;
 };
 
-float() Is_DMModes_NoItems =
+float() Is_InstagibMode =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
@@ -151,7 +152,7 @@ float() Is_DMModes_NoItems =
 	return FALSE;
 };
 
-float() Is_DMModes_Items = 
+float() Is_DMModes_PowerUps = 
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 
@@ -160,7 +161,7 @@ float() Is_DMModes_Items =
 	return FALSE;	
 };
 
-float() Is_InstaDM =
+float() Is_Instagib =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 	
@@ -168,20 +169,12 @@ float() Is_InstaDM =
 	return FALSE;
 };
 
-float() Is_RailwarzDM =
+float() Is_Railwarz =
 {
 	if (cvar("coop") || cvar("horde")) return FALSE;
 	
 	if (cvar("instagib") == INSTAGIB_RAILWARZ) return TRUE;
 	return FALSE;
 };
-
-float() Is_DuelDMMode =
-{
-	if (cvar("coop") || cvar("horde")) return FALSE;
-	
-	if (cvar("deathmatch") == DM_DUEL) return TRUE;
-	return FALSE;
-}
 */
 /* Rulesets End */
