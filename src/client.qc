@@ -965,7 +965,8 @@ entity() FindIntermission =
 	// Look for info_intermission first
 	spot = find (world, classname, "info_intermission");
 	if (spot)
-	{	// Pick a random one
+	{	
+		// Pick a random one
 		cyc = random() * 4;
 		while (cyc > 1)
 		{
@@ -996,67 +997,66 @@ HORDE random map pick
 added Aug31, 2021
 ============
 */
-// Sleeper: This needs to be improved even more. After a while, the random map formula stops working and plays the same map twice after completion. A more stable anti-duplication must be made.
-string() HordeRandomMap =
+string() Horde_NextMap =
 {
-	local float cur;
-	
-	// Find the index of the current map
-	for (; cur < RandomHordeMode_MapsList.length; ++cur)
+	local float canUse = FALSE, selected_map[2];
+	local float currentmapnumber, next_horde_map_number, random_map_number;
+
+	// Sleeper: Find the index of the current map.
+	for (; currentmapnumber < RandomHordeMode_MapsList.length; ++currentmapnumber)
 	{
-		if (world.model == RandomHordeMode_MapsList[cur]) break; 
+		if (world.model == RandomHordeMode_MapsList[currentmapnumber]) break; 
 	}
-
-	// If the current map isn't in the list, pick any of them
-	if (cur == RandomHordeMode_MapsList.length) return RandomHordeMode_MapsList[rint(random() * (RandomHordeMode_MapsList.length - 1))];
-
-	// Offset from the current map with a min of 1 and a max of length -1 so that it'll never pick the current map
-	cur = (cur + rint(random() * (RandomHordeMode_MapsList.length - 2)) + 1) % RandomHordeMode_MapsList.length;	
-	return RandomHordeMode_MapsList[cur];
+	
+	next_horde_map_number = rint(currentmapnumber + 1);
+	if (next_horde_map_number > RandomHordeMode_MapsList.length - 1) next_horde_map_number = 0; // Sleeper: Circle back to the first map.
+	
+	selected_map[0] = next_horde_map_number; // Sleeper: Next map.
+	
+	for (float j = 0; j < RandomHordeMode_MapsList.length; j++)
+	{		
+		while (canUse == FALSE) // Sleeper: Find us a map number that isn't the same as the current map.
+		{
+			random_map_number = rint(random() * RandomHordeMode_MapsList.length);
+			if (random_map_number < 0) random_map_number = 0;
+			if (random_map_number > RandomHordeMode_MapsList.length - 1) random_map_number = RandomHordeMode_MapsList.length - 1;
+										
+			if (random_map_number != currentmapnumber)
+			{
+				selected_map[1] = random_map_number;
+				canUse = TRUE;
+				break;
+			}	
+		}
+	}		
+		
+	return RandomHordeMode_MapsList[selected_map[1]];
 };
 
 /*
 string() HordeRandomMap =
 {
-	local string newmap;	
-	local float loops = 0;
+//	local string newmap;	
+//	local float loops = 0;
 	
-	while (loops < 4)
-	{
-		local float r = random() * 4;
-		if (r <= 1) newmap = "horde1";
-		else if (r <= 2) newmap = "horde2";
-		else if (r <= 3) newmap = "horde3";
-		else newmap = "horde4";
+//	while (loops < 4)
+//	{
+//		local float r = random() * 4;
+//		if (r <= 1) newmap = "horde1";
+//		else if (r <= 2) newmap = "horde2";
+//		else if (r <= 3) newmap = "horde3";
+//		else newmap = "horde4";
 			
-		if (mapname != newmap) return newmap;
-		else loops += 1;
-	}
+//		if (mapname != newmap) return newmap;
+//		else loops += 1;
+//	}
 
 	// dprint ("go with next map in progression\n");
 	if (mapname == "horde1") return "horde2";
 	else if (mapname == "horde2") return "horde3";
 	else if (mapname == "horde3") return "horde4";
 	else return "horde1";
-
-	dprint ("go with next map in progression\n");
-	string RandomHordeMode_Maps = RandomHordeMode_MapsList[random() * RandomHordeMode_MapsList.length]; // NQW	
-	return RandomHordeMode_Maps;	
 };
-*/
-
-/*
-// #ifdef RANDOMCUSTOMCOOPMAPS
-string() CustomCoopRandomMaps =
-{
-//	float RandomCustomCoop = random() * RandomCustomCoop_MapsList.length;
-//	string RandomCustomCoop_Maps = RandomCustomCoop_MapsList[RandomCustomCoop];
-
-	dprint ("choosing a random map from the Co-Op map pool\n");
-	string RandomCustomCoop_Maps = RandomCustomCoop_MapsList[random() * RandomCustomCoop_MapsList.length];
-	return RandomCustomCoop_Maps;
-};
-// #endif
 */
 
 string nextmap;
@@ -1084,7 +1084,7 @@ void() GotoNextMap =
 	// =======================================================================================================================================		
 	
 	if (cvar("samelevel")) changelevel (mapname); // if samelevel is set, stay on same level
-	else if (cvar("horde")) changelevel (HordeRandomMap()); // MG1
+	else if (cvar("horde")) changelevel (Horde_NextMap()); // MG1
 //	#ifdef RANDOMCUSTOMCOOPMAPS
 	else if (cvar("customcoop")) changelevel (CustomCoopRandomMaps()); // NQW
 //	#endif
@@ -1346,8 +1346,8 @@ void() execute_changelevel =
 		other = find (world, category, CATEGORY_MONSTER);
 		while (other != world)
 		{
-			//void(entity targ, entity inflictor, entity attacker, float damage)
-			//T_Damage(other, world, world, 4000);
+			// void(entity targ, entity inflictor, entity attacker, float damage)
+			// T_Damage(other, world, world, 4000);
 			other.think = GibMonster;
 			other.nextthink = time + 0.2 + random() * 1.8;
 			other = find (other, category, CATEGORY_MONSTER);
