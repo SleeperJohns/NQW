@@ -1000,16 +1000,16 @@ added Aug31, 2021
 string() Horde_NextMap =
 {
 	local float canUse = FALSE, selected_map[2];
-	local float currentmapnumber, next_horde_map_number, random_map_number;
+	local float current_map_number, next_horde_map_number, random_map_number, max_map_number = RandomHordeMode_MapsList.length - 1;
 
 	// Sleeper: Find the index of the current map.
-	for (; currentmapnumber < RandomHordeMode_MapsList.length; ++currentmapnumber)
+	for (; current_map_number < RandomHordeMode_MapsList.length; ++current_map_number)
 	{
-		if (world.model == RandomHordeMode_MapsList[currentmapnumber]) break; 
+		if (world.model == RandomHordeMode_MapsList[current_map_number]) break; 
 	}
 	
-	next_horde_map_number = rint(currentmapnumber + 1);
-	if (next_horde_map_number > RandomHordeMode_MapsList.length - 1) next_horde_map_number = 0; // Sleeper: Circle back to the first map.
+	next_horde_map_number = rint(current_map_number + 1);
+	if (next_horde_map_number > max_map_number) next_horde_map_number = 0; // Sleeper: Circle back to the first map.
 	
 	selected_map[0] = next_horde_map_number; // Sleeper: Next map.
 	
@@ -1017,11 +1017,10 @@ string() Horde_NextMap =
 	{		
 		while (canUse == FALSE) // Sleeper: Find us a map number that isn't the same as the current map.
 		{
-			random_map_number = rint(random() * RandomHordeMode_MapsList.length);
-			if (random_map_number < 0) random_map_number = 0;
-			if (random_map_number > RandomHordeMode_MapsList.length - 1) random_map_number = RandomHordeMode_MapsList.length - 1;
+			random_map_number = rint(random() * max_map_number);
+			if (random_map_number < 0) random_map_number = 0; // Sleeper: Correct for the -1 undershot.
 										
-			if (random_map_number != currentmapnumber)
+			if (random_map_number != current_map_number)
 			{
 				selected_map[1] = random_map_number;
 				canUse = TRUE;
@@ -1031,6 +1030,46 @@ string() Horde_NextMap =
 	}		
 		
 	return RandomHordeMode_MapsList[selected_map[1]];
+};
+
+/*
+NQW ========
+Custom random map pick
+============
+*/
+string() CustomCoop_NextMap =
+{
+	local float canUse = FALSE, selected_map[2];
+	local float current_map_number, next_customcoop_map_number, random_map_number, max_map_number = RandomCustomCoop_MapsList.length - 1;
+
+	// Sleeper: Find the index of the current map.
+	for (; current_map_number < RandomCustomCoop_MapsList.length; ++current_map_number)
+	{
+		if (world.model == RandomCustomCoop_MapsList[current_map_number]) break; 
+	}
+	
+	next_customcoop_map_number = rint(current_map_number + 1);
+	if (next_customcoop_map_number > max_map_number) next_customcoop_map_number = 0; // Sleeper: Circle back to the first map.
+	
+	selected_map[0] = next_customcoop_map_number; // Sleeper: Next map.
+	
+	for (float j = 0; j < RandomCustomCoop_MapsList.length; j++)
+	{		
+		while (canUse == FALSE) // Sleeper: Find us a map number that isn't the same as the current map.
+		{
+			random_map_number = rint(random() * max_map_number);
+			if (random_map_number < 0) random_map_number = 0; // Sleeper: Correct for the -1 undershot.
+										
+			if (random_map_number != current_map_number)
+			{
+				selected_map[1] = random_map_number;
+				canUse = TRUE;
+				break;
+			}	
+		}
+	}		
+		
+	return RandomCustomCoop_MapsList[selected_map[1]];	
 };
 
 /*
@@ -1086,7 +1125,7 @@ void() GotoNextMap =
 	if (cvar("samelevel")) changelevel (mapname); // if samelevel is set, stay on same level
 	else if (cvar("horde")) changelevel (Horde_NextMap()); // MG1
 //	#ifdef RANDOMCUSTOMCOOPMAPS
-	else if (cvar("customcoop")) changelevel (CustomCoopRandomMaps()); // NQW
+	else if (cvar("customcoop")) changelevel (CustomCoop_NextMap()); // NQW
 //	#endif
 	else changelevel (nextmap);
 };
@@ -2502,8 +2541,10 @@ void() NextLevel =
 {
 	local entity o;
 	
+	if (!deathmatch) return;
+	
 	// iD1 ----------------------------------------
-	if (mapname == "start" && !deathmatch) // Sleeper: Added compatibility to exclude deathmatch.
+	if (mapname == "start")
 	{
 		if (!cvar("registered")) mapname = "e1m1";		
 		else if (!(serverflags & 1))
@@ -2530,14 +2571,14 @@ void() NextLevel =
 		o.map = mapname;	
 	}
 	// HIPNOTIC -----------------------------------
-	else if (mapname == "hipstart" && !deathmatch) // Sleeper: Added compatibility to exclude deathmatch.
+	else if (mapname == "hipstart")
 	{
 		mapname = "hip1m1";
 		o = spawn ();
 		o.map = mapname;	
 	}
 	// ROGUE --------------------------------------
-	else if (mapname == "rstart" && !deathmatch) // Sleeper: Added compatibility to exclude deathmatch.
+	else if (mapname == "rstart")
 	{
 		// PGM 03/02/97 - make it always go to rogue level1 when in our progs
 		mapname = "r1m1";

@@ -1,5 +1,5 @@
 // What version are we on? (Major, Minor, Patches)
-string NQW_Version = "NQWVer 1.14.0";
+string NQW_Version = "NQWVer 1.14.2";
 
 float Version_To_Startframe_Traffic;
 

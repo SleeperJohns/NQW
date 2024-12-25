@@ -45,29 +45,6 @@ string RandomCustomCoop_MapsList[] =
 	"desout.bsp"	
 };
 
-/*
-NQW ========
-Custom random map pick
-============
-*/
-string() CustomCoopRandomMaps =
-{
-	local float cur;
-	
-	// Find the index of the current map
-	for (; cur < RandomCustomCoop_MapsList.length; ++cur)
-	{
-		if (mapname == RandomCustomCoop_MapsList[cur]) break;
-	}
-
-	// If the current map isn't in the list, pick any of them
-	if (cur == RandomCustomCoop_MapsList.length) return RandomCustomCoop_MapsList[rint(random() * (RandomCustomCoop_MapsList.length - 1))];
-
-	// Offset from the current map with a min of 1 and a max of length -1 so that it'll never pick the current map
-	cur = (cur + rint(random() * (RandomCustomCoop_MapsList.length - 2)) + 1) % RandomCustomCoop_MapsList.length;
-	return RandomCustomCoop_MapsList[cur];
-};
-
 // A map list for horde mode to play randomly.
 string RandomHordeMode_MapsList[] =
 {
