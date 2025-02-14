@@ -32,6 +32,15 @@ void(entity inflictor, entity attacker, float damage, entity ignore, string dtyp
 void(vector org, vector vel, float damage) SpawnBlood;
 void() SuperDamageSound;
 
+/*
+float() weapon_projectile_customizeentityforclient =
+{
+	player_projectile_collision ();
+	
+	return TRUE;
+};
+*/
+
 //MED 10/18/96
 void(float damage) spawn_touchblood;
 /*
@@ -43,8 +52,8 @@ void() HIP_LaserTouch =
 {
 	local vector org, spot1, spot2, oldvel;
 	local float r;
- 
-	self.owner = world;
+	
+	/*if (self.owner.classname != "player" || cvar("coop") == CLASSIC_COOP) */self.owner = world; // Sleeper: Some players think damaging themselves is annoying.
 	self.cnt += 1;
 	
 	if (pointcontents(self.origin) == CONTENT_SKY)
@@ -52,15 +61,15 @@ void() HIP_LaserTouch =
 		remove (self);
 		return;
 	}
-	
-	oldvel = normalize (self.old_velocity);
+		
+	oldvel = normalize(self.old_velocity);
 	spot1 = self.origin - (16 * oldvel);
 	spot2 = self.origin + (16 * oldvel);
 	traceline (spot1, spot2, FALSE, self);  // see through other monsters
 	self.origin = trace_endpos;
 
 	org = self.origin;
-
+	
 	if (other.health)
 	{
 		other.deathtype = "laser_spike";
@@ -92,7 +101,7 @@ void() HIP_LaserTouch =
 		self.velocity = self.speed * self.velocity;
 		self.old_velocity = self.velocity;
 		if (self.flags & FL_ONGROUND) self.flags -= FL_ONGROUND;
-		r = random ();
+		r = random();
 		sound (self, CHAN_WEAPON, "hipweap/laserric.wav", 1, ATTN_STATIC);
 /*
 		if (r<0.33) sound (self, CHAN_WEAPON, "weapons/ric1.wav", 1, ATTN_STATIC);
@@ -107,7 +116,7 @@ void() HIP_LaserTouch =
 };
 void() HIP_LaserThink =
 {
-	if (time>self.attack_finished)
+	if (time > self.attack_finished)
 	{
 		remove (self);
 		return;
@@ -135,10 +144,9 @@ void(vector org, vector vec, float light) HIP_LaunchLaser =
 //  	if (light)
 		newmis.effects |= EF_DIMLIGHT;
 
+	setorigin (newmis, org);
 	setmodel (newmis, "progs/lasrspik.mdl");
 	setsize (newmis, '0 0 0', '0 0 0');
-
-	setorigin (newmis, org);
 
 	newmis.speed = 1000;
 	newmis.dmg = 18;
@@ -152,6 +160,26 @@ void(vector org, vector vec, float light) HIP_LaunchLaser =
 	newmis.think = HIP_LaserThink;
 	newmis.touch = HIP_LaserTouch;
 	newmis.count = 0;
+	
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (newmis, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}						
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (newmis, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (newmis, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (newmis, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (newmis, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);		
 };
 
 /*
@@ -234,41 +262,40 @@ void(vector p1, vector p2, entity from, float damage) HIP_HammerDamage =
 	f_x = 0 - f_y;
 	f_y = f_x;
 	f_z = 0;
-	f = f*16;
+	f *= 16;
 
 	e1 = e2 = world;
 
 	traceline (p1, p2, FALSE, self);
 //JIM
-	if (trace_ent.takedamage && !trace_ent.wetsuit_finished )
+	if (trace_ent.takedamage && !trace_ent.wetsuit_finished)
 	{
 		if (trace_ent.classname == "trap_spike_mine")
 		{
 			if (cvar("skill") == 5)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage*4);
+				particle (trace_endpos, '0 0 100', 225, damage * 4);
 				T_Damage (trace_ent, from, from, damage * 0.25); // ~75% immunity to the Mjolnir's Lightning (Emulate 800 Health)
 			}
 			else if (cvar("skill") >= 1 && cvar("skill") <= 4)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage*4);
+				particle (trace_endpos, '0 0 100', 225, damage * 4);
 				T_Damage (trace_ent, from, from, damage * 0.5); // ~50% immunity to the Mjolnir's Lightning (Emulate 400 Health)
 			}
 			else if (cvar("skill") == 0)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage*4);
+				particle (trace_endpos, '0 0 100', 225, damage * 4);
 				T_Damage (trace_ent, from, from, damage); // 0% immunity to the Mjolnir's Lightning (Emulate 200 Health)
 			}
 		}
 		else
 		{
-			particle (trace_endpos, '0 0 100', 225, damage*4);
+			particle (trace_endpos, '0 0 100', 225, damage * 4);
 			T_Damage (trace_ent, from, from, damage);
 		}
 		if (self.classname == "player")
 		{
-			if (other.classname == "player")
-				trace_ent.velocity_z = trace_ent.velocity_z + 400;
+			if (other.classname == "player") trace_ent.velocity_z += 400;
 		}
 	}
 	e1 = trace_ent;
@@ -278,7 +305,7 @@ void(vector p1, vector p2, entity from, float damage) HIP_HammerDamage =
 	if (trace_ent != e1 && trace_ent.takedamage &&
 		!trace_ent.wetsuit_finished )
 	{
-		particle (trace_endpos, '0 0 100', 225, damage*4);
+		particle (trace_endpos, '0 0 100', 225, damage * 4);
 		T_Damage (trace_ent, from, from, damage);
 	}
 	e2 = trace_ent;
@@ -288,7 +315,7 @@ void(vector p1, vector p2, entity from, float damage) HIP_HammerDamage =
 	if (trace_ent != e1 && trace_ent != e2 && trace_ent.takedamage &&
 		!trace_ent.wetsuit_finished )
 	{
-		particle (trace_endpos, '0 0 100', 225, damage*4);
+		particle (trace_endpos, '0 0 100', 225, damage * 4);
 		T_Damage (trace_ent, from, from, damage);
 	}
 };
@@ -580,7 +607,6 @@ void() HIP_FireMjolnirLightning =
 					set_suicide_frame();
 					if (self.health < -99) // Doesn't need to show extremely low negative numbers.
 						self.health = -99;						
-					self.modelindex = modelindex_nqwplayer;	
 																
 					// Emulate an Obituary	
 					bprint (self.netname);
@@ -803,14 +829,13 @@ vector() wall_velocity =
 {
 	local vector	vel;
 
-	vel = normalize (self.velocity);
-	vel = normalize(vel + v_up*(random()- 0.5) + v_right*(random()- 0.5));
-	vel = vel + 2*trace_plane_normal;
-	vel = vel * 200;
+	vel = normalize(self.velocity);
+	vel = normalize(vel + v_up * (random() - 0.5) + v_right * (random() - 0.5));
+	vel += 2 * trace_plane_normal;
+	vel *= 200;
 
 	return vel;
 };
-
 
 /*
 ================
@@ -819,9 +844,7 @@ SpawnMeatSpray
 */
 void(vector org, vector vel) SpawnMeatSpray =
 {
-	local	entity missile;
-
-	missile = spawn ();
+	local entity missile = spawn ();
 	missile.owner = self;
 	missile.movetype = MOVETYPE_BOUNCE;
 	missile.solid = SOLID_NOT;
@@ -856,7 +879,7 @@ spawn_touchblood
 */
 void(float damage) spawn_touchblood =
 {
-	local vector vel = wall_velocity () * 0.2;
+	local vector vel = wall_velocity() * 0.2;
 	SpawnBlood (self.origin + vel * 0.01, vel, damage);
 };
 
@@ -878,8 +901,8 @@ Collects multiple small damages into a single damage
 ==============================================================================
 */
 
-entity	multi_ent;
-float	multi_damage;
+entity multi_ent;
+float  multi_damage;
 
 void() ClearMultiDamage =
 {
@@ -903,7 +926,7 @@ void(entity hit, float damage) AddMultiDamage =
 		multi_damage = damage;
 		multi_ent = hit;
 	}
-	else multi_damage = multi_damage + damage;
+	else multi_damage += damage;
 };
 
 /*
@@ -965,81 +988,81 @@ void(float damage, vector dir) TraceAttack =
 	}
 };
 
-void() FireSlug =
+void(float damage, vector dir) SlugImpact =
 {
-	makevectors(self.v_angle);
+	local vector org = trace_endpos - dir * 4;
 
-	local vector src = self.origin + self.view_ofs - v_up * 8;	
-	src_z = self.absmin_z + self.size_z * 0.8125;
-	local vector finaldest = src + v_forward * 4000;
-
-	// bmFbr: Cache v_forward locally to make sure it won't be lost during loop shenanigans.
-	local vector pl_v_forward = v_forward;
-
-	traceline (src, finaldest, 0, self);
-
-	local entity victim;
-	local vector endpos;
-	local float damg;	
-	
-	while (trace_ent.takedamage) 
-	{
-		// bmFbr: Just to make sure, since after a T_Damage call all hell may break loose.
-		victim = trace_ent;
-		endpos = trace_endpos;	
-
-		if (trace_ent.classname == "player") damg = 80;
-		else damg = 125 + random() * 25;
-
-		if (!cvar("instagib"))
+	if (!trace_ent.health) return;
+		
+	trace_ent.deathtype = "slug"; 
+	if (!cvar("instagib"))
+	{				
+		if (trace_ent.classname == "monster_shambler")
 		{
-			if (trace_ent.classname == "trap_spike_mine")
-			{
-				if (cvar("skill") == 5) T_Damage (victim, self, self, damg * 0.25); // ~75% immunity to Slugs (Emulate 800 health)
-				else if (cvar("skill") >= 1 && cvar("skill") <= 4) T_Damage (victim, self, self, damg * 0.5); // ~50% immunity to Slugs (Emulate 400 health)
-				else if (cvar("skill") == 0) T_Damage (victim, self, self, damg); // ~0% immunity to Slugs (Emulate 200 health)
-			}
-			else if (trace_ent.classname == "monster_shambler") T_Damage (victim, self, self, damg * 0.5);
-			else T_Damage (victim, self, self, damg);
+			if (cvar("skill") == 5) damage /= 4;
+			else damage /= 2;
 		}
-		else T_Damage (victim, self, self, 50000);
-		SpawnBlood (endpos, pl_v_forward * 300, 80);
-
-		// Sleeper: Don't pierce through secret doors.
-		if (trace_ent.classname != "func_door_secret") traceline (endpos, finaldest, 0, victim);
-	}
-	
-	if (trace_ent.classname == "func_door_secret") SpawnBlood (endpos, pl_v_forward * 300, 80); // Sleeper: Should just spawn blood, not both.
-	else
-	{
-		if (trace_fraction < 1) 
+		else if (trace_ent.classname == "trap_spike_mine")
 		{
-			WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-			WriteByte (MSG_BROADCAST, TE_GUNSHOT);
-			WriteCoord (MSG_BROADCAST, trace_endpos_x);
-			WriteCoord (MSG_BROADCAST, trace_endpos_y);
-			WriteCoord (MSG_BROADCAST, trace_endpos_z);
-		} 
-	}
+			if (cvar("skill") >= 1 && cvar("skill") <= 4) damage /= 2;  // ~50% immunity to Rockets (Emulate 400 health)
+			else if (cvar("skill") == 5)
+			{
+				if (self.super_damage_finished > time) damage /= 2;
+				else damage /= 4;  // ~75% immunity to Rockets (Emulate 800 health)
+			}
+		}
+	}	
+
+	T_Damage (trace_ent, self, self, damage);	
+	SpawnBlood (org, v_forward * 300, 20);		
+};
+
+void(vector dir) FireSlug =
+{
+	local entity attacker = self; // The original player who is firing.
+	local float damage = 125 + random() * 25; // Usually a monster.	
+		
+	makevectors(attacker.v_angle);
+
+	local vector attacker_src = attacker.origin + v_forward * 10; // Location of the player.
+	attacker_src_z = attacker.absmin_z + attacker.size_z * 0.8125;
+	local vector attacker_finaldest = attacker_src + dir * 2048; // Limit of range dependant on direction.
+	local vector pl_v_forward = v_forward; // bmFbr: Cache v_forward locally to make sure it won't be lost during loop shenanigans.
 	
+	traceline2 (attacker_src, attacker_finaldest, attacker, 0); // Trace for primary target.	
+	while (trace_ent.takedamage)
+	{	
+		if (cvar("instagib")) damage = 50000; // Instagib, duh.	
+		else if (trace_ent.classname == "player") damage = 80; // Quake Live style balance.
+		
+		SlugImpact (damage, dir); // Do damage.
+		
+		// bmFbr: Just to make sure, since after a T_Damage call all hell may break loose.
+		local entity targ = trace_ent; // This is our target.   			
+		local vector targ_src = trace_endpos; // This is our target's position.
+		local vector targ_finaldest = trace_endpos + dir * 2048; // This is our target's range to other potential targets who are caught at the end of the traceline.				
+		
+		// Sleeper: Follow up with another trace, but don't pierce through secret doors.	
+		if (targ.classname != "func_door_secret") traceline2 (targ_src, targ_finaldest, targ, 0); // Trace for secondary targets.	
+	}
+		
 	// Sleeper: Create a simple particle trail.
-	local float segments = rint(vlen(src - trace_endpos) / 32) - 0.005;
-	for (float i = 0; i < segments; i++) particle (trace_endpos - pl_v_forward * i * 32, pl_v_forward * 0, 5, 20);	
-};	
+	local float segments = rint(vlen(attacker_src - trace_endpos) / 32) - 0.005;
+	for (float i = 0; i < segments; i++) particle (trace_endpos - pl_v_forward * i * 32, 0, 15, 8);  
+};
 
 void() W_FireCoilgun =
 {
-	local vector dir;
-
 	sound (self, CHAN_WEAPON, "weapons/coilgun.wav", 1, ATTN_NORM);
 
 	self.punchangle_x = -2;
-
+	
 	if (!cvar("instagib")) self.currentammo = self.ammo_slugs = self.ammo_slugs - 1;
 	else self.currentammo = self.ammo_slugs;
-	UpdateAmmoCounts(self);
-	dir = aim (self, 100000);
-	FireSlug ();
+	
+	UpdateAmmoCounts (self);
+	local vector dir = aim(self, 2048);	
+	FireSlug (dir);	
 };
 
 /*
@@ -1052,9 +1075,9 @@ Go to the trouble of combining multiple pellets into a single damage call.
 */
 void(float shotcount, vector dir, vector spread) FireBullets =
 {
-	local	vector direction;
-	local	vector	src;
-	//JIM
+	local vector direction;
+	local vector src;
+	// HIPNOTIC: JIM
 	local float bullet = 0;
 
 	makevectors (self.v_angle);
@@ -1070,13 +1093,11 @@ void(float shotcount, vector dir, vector spread) FireBullets =
 		traceline (src, src + direction * 2048, 0, self);
 		if (trace_fraction != 1.0)
 		{
-			// JIM
+			// HIPNOTIC: JIM
 			TraceAttack (4, direction);
 			
 			// Sleeper: Only make bullet hole sprites on walls if game world is hipnotic
-			if (mapname == "hipstart" || mapname == "hip1m1" || mapname == "hip1m2" || mapname == "hip1m3" || mapname == "hip1m4" || mapname == "hip1m5" ||
-			mapname == "hip2m1" || mapname == "hip2m2" || mapname == "hip2m3" || mapname == "hip2m4" || mapname == "hip2m5" || mapname == "hip2m6" ||
-			mapname == "hip3m1" || mapname == "hip3m2" || mapname == "hip3m3" || mapname == "hip3m4" || mapname == "hipend" || mapname == "hipdm1")
+			if (gameworld == HIPNOTIC)
 			{	
 				if ((!bullet) && (trace_ent == world))
 				{
@@ -1279,37 +1300,51 @@ W_FireRocket
 */
 void() W_FireRocket =
 {
-	local entity missile;
-
 	self.currentammo = self.ammo_rockets1 = self.ammo_rockets1 - 1;
 	UpdateAmmoCounts(self);
-
 	sound (self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
-
 	self.punchangle_x = -2;
 
-	missile = spawn ();
+	local entity missile = spawn ();
 	missile.owner = self;
 	missile.movetype = MOVETYPE_FLYMISSILE;
 	missile.solid = SOLID_BBOX;
 	missile.classname = "missile";
 
-// set missile speed
-
+	// Set missile speed
 	makevectors (self.v_angle);
 	missile.velocity = aim(self, 1000);
-	missile.velocity = missile.velocity * 1000;
+	missile.velocity *= 1000;
 	missile.angles = vectoangles(missile.velocity);
-
 	missile.touch = T_MissileTouch;
 
-// set missile duration
+	// Set missile duration
 	missile.nextthink = time + 5;
 	missile.think = SUB_Remove;
-
 	setmodel (missile, "progs/missile.mdl");
 	setsize (missile, '0 0 0', '0 0 0');
-	setorigin (missile, self.origin + v_forward*8 + '0 0 16');
+	setorigin (missile, self.origin + v_forward * 8 + '0 0 16');
+
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (missile, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}						
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (missile, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (missile, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (missile, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (missile, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+	
 	//MED 11/09/96
 	newmis = missile;
 };
@@ -1342,41 +1377,41 @@ void(vector p1, vector p2, entity from, float damage) LightningDamage =
 	e1 = e2 = world;
 
 	traceline (p1, p2, FALSE, self);
-//JIM
+// HIPNOTIC: JIM
 	if (trace_ent.takedamage && !trace_ent.wetsuit_finished)
 	{
 		if (trace_ent.classname == "trap_spike_mine")
 		{
 			if (cvar("skill") == 5)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage*4);
+				particle (trace_endpos, '0 0 100', 225, damage * 4);
 				T_Damage (trace_ent, from, from, damage * 0.25); // ~75% immunity to the Lightning Gun (Emulate 800 Health)
 			}
 			else if (cvar("skill") >= 1 && cvar("skill") <= 4)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage*4);
+				particle (trace_endpos, '0 0 100', 225, damage * 4);
 				T_Damage (trace_ent, from, from, damage * 0.5); // ~50% immunity to the Lightning Gun (Emulate 400 Health)
 			}
 			else if (cvar("skill") == 0)
 			{
-				particle (trace_endpos, '0 0 100', 225, damage*4);
+				particle (trace_endpos, '0 0 100', 225, damage * 4);
 				T_Damage (trace_ent, from, from, damage); // 0% immunity to the Lightning Gun (Emulate 200 Health)
 			}
 		}
 		else
 		{
-			particle (trace_endpos, '0 0 100', 225, damage*4);
+			particle (trace_endpos, '0 0 100', 225, damage * 4);
 			T_Damage (trace_ent, from, from, damage);
 		}
 		if (self.classname == "player")
 		{
-			if (other.classname == "player") trace_ent.velocity_z = trace_ent.velocity_z + 400;
+			if (other.classname == "player") trace_ent.velocity_z += 400;
 		}
 	}
 	e1 = trace_ent;
 
 	traceline (p1 + f, p2 + f, FALSE, self);
-//JIM
+// HIPNOTIC: JIM
 	if (trace_ent != e1 && trace_ent.takedamage && !trace_ent.wetsuit_finished)
 	{
 		particle (trace_endpos, '0 0 100', 225, damage * 4);
@@ -1385,10 +1420,10 @@ void(vector p1, vector p2, entity from, float damage) LightningDamage =
 	e2 = trace_ent;
 
 	traceline (p1 - f, p2 - f, FALSE, self);
-//JIM
-	if (trace_ent != e1 && trace_ent != e2 && trace_ent.takedamage && !trace_ent.wetsuit_finished )
+// HIPNOTIC: JIM
+	if (trace_ent != e1 && trace_ent != e2 && trace_ent.takedamage && !trace_ent.wetsuit_finished)
 	{
-		particle (trace_endpos, '0 0 100', 225, damage*4);
+		particle (trace_endpos, '0 0 100', 225, damage * 4);
 		T_Damage (trace_ent, from, from, damage);
 	}
 };
@@ -1455,7 +1490,6 @@ void() W_FireLightning =
 					set_suicide_frame();
 					if (self.health < -99) // Doesn't need to show extremely low negative numbers.
 						self.health = -99;
-					self.modelindex = modelindex_nqwplayer;	
 		
 					// Emulate an Obituary
 					bprint (self.netname);
@@ -1700,6 +1734,26 @@ void() W_FireGrenade =
 	setmodel (missile, "progs/grenade.mdl");
 	setsize (missile, '0 0 0', '0 0 0');
 	setorigin (missile, self.origin);
+	
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (missile, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}				
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (missile, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (missile, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (missile, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (missile, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 void() ProximityExplode =
@@ -1897,6 +1951,26 @@ void() W_FireProximityGrenade =
    setmodel (missile, "progs/proxbomb.mdl");
    setorigin (missile, self.origin);
    setsize (missile, '-1 -1 -1', '1 1 1');
+   
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (missile, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}				
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (missile, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (missile, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (missile, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (missile, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
    };
 
 //=============================================================================
@@ -1931,6 +2005,26 @@ void(vector org, vector dir) launch_spike =
 	setorigin (newmis, org);
 
 	newmis.velocity = dir * 1000;
+	
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (newmis, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}						
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (newmis, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (newmis, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (newmis, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (newmis, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else if (self.flags & FL_MONSTER) entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 void(vector org, vector dir) launch_super_spike =
@@ -1951,6 +2045,26 @@ void(vector org, vector dir) launch_super_spike =
 	setorigin (newmis, org);
 
 	newmis.velocity = dir * 1000;
+	
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (newmis, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}				
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (newmis, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (newmis, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (newmis, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (newmis, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 void() W_FireSuperSpikes =
@@ -2818,11 +2932,11 @@ void() CheatCommand =
 	self.ammo_lava_nails    = 200;
 	self.ammo_multi_rockets = 100;
 	self.ammo_plasma 	= 100;	
-//	self.ammo_slugs	        = 100;
+	self.ammo_slugs	        = 100;
 		
 	self.items   |= HUD_WEAPONS;	
-	self.weapons |= ALL_WEAPONS;		
-//	self.weapons |= ALL_WEAPONS | NQW_IT_COILGUN;				
+//	self.weapons |= ALL_WEAPONS;		
+	self.weapons |= ALL_WEAPONS | NQW_IT_COILGUN;				
 	self.weapon   = IT_ROCKET_LAUNCHER;		       
 	self.impulse  = 0;
 	W_SetCurrentAmmo ();
@@ -3076,37 +3190,96 @@ Just for development
 ============
 */
 void() ServerflagsCommand = {serverflags *= 2 + 1;};
-
+void() sphere_spawn;
 void() QuadCheat =
 {
-	if (deathmatch || coop && !cvar("developer")) return;
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
 		
-	self.super_time = 1;
+	self.super_time = TRUE;
 	self.super_damage_finished = time + 30;
 	self.items |= IT_QUAD;
 	sprint (self, "Quad cheat\n");	
 };
 
-//MED
+void() PentCheat =
+{
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
+		
+	self.invincible_time = TRUE;
+	self.invincible_finished = time + 30;
+	self.items |= IT_INVULNERABILITY;
+	sprint (self, "Pentagram cheat\n");	
+};
+
+void() RingCheat =
+{
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
+		
+	self.invisible_time = TRUE;
+	self.invisible_finished = time + 30;
+	self.items |= IT_INVISIBILITY;
+	sprint (self, "Ring cheat\n");	
+};
+
+void() SuitCheat =
+{
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
+		
+	self.rad_time = TRUE;
+	self.radsuit_finished = time + 30;
+	self.items |= IT_SUIT;
+	sprint (self, "Biosuit cheat\n");	
+};
+
+// MED
 void() WetsuitCheat =
 {
-	if (deathmatch || coop && !cvar("developer")) return;
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
 	
-	self.expansionitems |= HIP_IT_WETSUIT;
-	self.wetsuit_time = 1;
+	self.wetsuit_time = TRUE;
 	self.wetsuit_finished = time + 30;
+	self.expansionitems |= HIP_IT_WETSUIT;
 	sprint (self, "Wetsuit Cheat\n");
 };
 
-//MED
+// MED
 void() EmpathyShieldsCheat =
 {
-	if (deathmatch || coop && !cvar("developer")) return;
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
 	
-	self.expansionitems |= HIP_IT_EMPATHY_SHIELDS;
-	self.empathy_time = 1;
+	self.empathy_time = TRUE;
 	self.empathy_finished = time + 30;
+	self.expansionitems |= HIP_IT_EMPATHY_SHIELDS;
 	sprint (self, "Empathy Cheat\n");
+};
+
+void() PowerShieldCheat =
+{
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
+	
+	self.shield_time = TRUE;
+	self.shield_finished = time + 30;
+	self.expansionitems |= DOE_SHIELD;
+	sprint (self, "Power Shield Cheat\n");
+};
+
+void() AntiGravCheat =
+{
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
+	
+	self.antigrav_time = TRUE;
+	self.antigrav_finished = time + 45;
+	self.expansionitems |= DOE_ANTIGRAV;
+	sprint (self, "Anti-Grav Cheat\n");
+};
+
+void() SphereCheat =
+{
+	if ((deathmatch) || (coop && !cvar("developer"))) return;
+
+	sphere_spawn ();	
+	self.expansionitems |= DOE_V_SPHERE;
+	sprint (self, "Sphere Cheat\n");
 };
 
 void() DumpEntities =
@@ -3194,7 +3367,7 @@ void() Skill_Scaled =
 		if (cvar("skill") <= 2 && num_players == 3)
 		{
 			id1_centerprint (cl, "Skill has scaled to Classic Nightmare!", "\n");
-			sound (cl, CHAN_AUTO, "misc/runekey.wav", 1, ATTN_STATIC);
+			sound (cl, CHAN_ANNOUNCER, "misc/runekey.wav", 1, ATTN_STATIC);
 		}
 		cl = find (cl, classname, "player");
 	}
@@ -3209,9 +3382,9 @@ Choose a skill on the fly (Note: Changing a skill on the fly may introduce bugs 
 */
 void() SkillVotables =
 {
-	local float start_maps = (world.model == "maps/start.bsp" || world.model == "maps/hipstart.bsp" || world.model == "maps/rstart.bsp" || world.model == "maps/e5start.bsp" || world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp");
+	local float start_maps = (world.model == "maps/start.bsp" || world.model == "maps/hipstart.bsp" || world.model == "maps/rstart.bsp" || world.model == "maps/e5start.bsp" || world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp" || world.worldtype == WORLDTYPE_HUB);
 	
-	entity cl = find(world, classname, "player");
+	local entity cl = find(world, classname, "player");
 	if (self.impulse == 50)
 	{
 		bprint("Skill changed to Easy", "\n");
@@ -3249,10 +3422,8 @@ void() SkillVotables =
 			}
 			if (cl.health_deflate == 0)
 			{			
-				if (cl.health > cl.max_health)
-					cl.health_deflate = 1;
-				else if (cl.health <= cl.max_health)
-					cl.health_deflate = 0;
+				if (cl.health > cl.max_health) cl.health_deflate = 1;
+				else if (cl.health <= cl.max_health) cl.health_deflate = 0;
 			}			
 			
 			id1_centerprint(cl, "Easy Skill has been set");
@@ -3297,10 +3468,8 @@ void() SkillVotables =
 			}			
 			if (cl.health_deflate == 0)
 			{			
-				if (cl.health > cl.max_health)
-					cl.health_deflate = 1;
-				else if (cl.health <= cl.max_health)
-					cl.health_deflate = 0;
+				if (cl.health > cl.max_health) cl.health_deflate = 1;
+				else if (cl.health <= cl.max_health) cl.health_deflate = 0;
 			}
 			
 			id1_centerprint(cl, "Normal Skill has been set");
@@ -3345,10 +3514,8 @@ void() SkillVotables =
 			}
 			if (cl.health_deflate == 0)
 			{			
-				if (cl.health > cl.max_health)
-					cl.health_deflate = 1;
-				else if (cl.health <= cl.max_health)
-					cl.health_deflate = 0;
+				if (cl.health > cl.max_health) cl.health_deflate = 1;
+				else if (cl.health <= cl.max_health) cl.health_deflate = 0;
 			}		
 			
 			id1_centerprint(cl, "Hard Skill has been set");
@@ -3395,8 +3562,7 @@ void() SkillVotables =
 			{			
 				if (cl.health > cl.max_health)
 					cl.health_deflate = 1;
-				else if (cl.health <= cl.max_health)
-					cl.health_deflate = 0;
+				else if (cl.health <= cl.max_health) cl.health_deflate = 0;
 			}
 			
 			id1_centerprint(cl, "Classic Nightmare! Skill has been set");
@@ -3441,10 +3607,8 @@ void() SkillVotables =
 			}
 			if (cl.health_deflate == 0)
 			{			
-				if (cl.health > cl.max_health)
-					cl.health_deflate = 1;
-				else if (cl.health <= cl.max_health)
-					cl.health_deflate = 0;
+				if (cl.health > cl.max_health) cl.health_deflate = 1;
+				else if (cl.health <= cl.max_health) cl.health_deflate = 0;
 			}
 									
 			id1_centerprint(cl, "Kex Nightmare! Skill has been set");
@@ -3473,7 +3637,7 @@ void() SkillVotables =
 			// Make sure armors are ironed out so they don't appear to be a higher value -- however, if players have rot-able armor values, armors will rot first to their max_armorvalue.
 			if (cl.items & IT_ARMOR1)
 			{
-				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
+				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 5; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.15;   
 				cl.max_armorvalue = 50;
 				cl.fake_armortype = 0.3;
@@ -3481,7 +3645,7 @@ void() SkillVotables =
 			}
 			if (cl.items & IT_ARMOR2)
 			{
-				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
+				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 5; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.19;
 				cl.max_armorvalue = 100;	
 				cl.fake_armortype = 0.6;					
@@ -3489,7 +3653,7 @@ void() SkillVotables =
 			}
 			if (cl.items & IT_ARMOR3)
 			{
-				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 6.66; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
+				if (cl.armorvalue <= cl.max_armorvalue) cl.armorrottime = time + 5; // Rot armor when armorvalue is no longer equal or less than max armorvalue.
 				cl.armortype = 0.245;
 				cl.max_armorvalue = 150;
 				cl.fake_armortype = 0.8;
@@ -3497,10 +3661,8 @@ void() SkillVotables =
 			}
 			if (cl.health_deflate == 0)
 			{			
-				if (cl.health > cl.max_health)
-					cl.health_deflate = 1;
-				else if (cl.health <= cl.max_health)
-					cl.health_deflate = 0;
+				if (cl.health > cl.max_health) cl.health_deflate = 1;
+				else if (cl.health <= cl.max_health) cl.health_deflate = 0;
 			}				
 		
 			id1_centerprint(cl, "Sleeper Must Die! Skill has been set");

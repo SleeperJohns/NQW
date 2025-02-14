@@ -27,15 +27,11 @@ void(float style, string value) lightstyle;
 //============================================================================
 // No special functionality, just to hold dynamic shadowcasting lights for KEX
 const float DYNAMICLIGHT_NOT_IN_COOP = 1;
-void dynamiclight() 
-{
-	if (coop && self.spawnflags & DYNAMICLIGHT_NOT_IN_COOP)
-		remove(self);
-};
+void() dynamiclight = {if (coop && self.spawnflags & DYNAMICLIGHT_NOT_IN_COOP) remove (self);};
 
 //============================================================================
 
-void InitLightStyles()
+void() InitLightStyles =
 {
     //
     // Setup light animation tables. 'a' is total darkness, 'z' is maxbright.

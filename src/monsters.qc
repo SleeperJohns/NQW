@@ -152,6 +152,7 @@ void() walkmonster_start =
 {
 	// delay drop to floor to make sure all doors have been spawned
 	// spread think times so they don't all happen at same time
+	entity_collision (self, MONSTERMASK, PVE_GENERAL, PVE_GENERAL, PVE_GENERAL, EMPTYMASK, 0);
 	self.nextthink += random() * 0.5;
 	self.think = walkmonster_start_go;
 	total_monsters += 1;
@@ -208,6 +209,7 @@ void() flymonster_start_go =
 void() flymonster_start =
 {
 	// spread think times so they don't all happen at same time
+	entity_collision (self, MONSTERMASK, PVE_GENERAL, PVE_GENERAL, PVE_GENERAL, EMPTYMASK, 0);
 	self.nextthink += random() * 0.5;
 	self.think = flymonster_start_go;
 	total_monsters += 1;
@@ -262,6 +264,7 @@ void() swimmonster_start_go =
 void() swimmonster_start =
 {
 	// spread think times so they don't all happen at same time
+	entity_collision (self, MONSTERMASK, PVE_GENERAL, PVE_GENERAL, PVE_GENERAL, EMPTYMASK, 0);
 	self.nextthink += random() * 0.5;
 	self.think = swimmonster_start_go;
 	total_monsters += 1;
@@ -270,12 +273,12 @@ void() swimmonster_start =
 
 // MG1 START ============================================================================================
 
-void monster_begin_walking()
+void() monster_begin_walking =
 {
 	self.use = monster_use;
 	self.pausetime = 0;
-	self.th_walk();
-}
+	self.th_walk ();
+};
 
 void() StartMonster =
 {
@@ -392,7 +395,16 @@ void() StartMonster =
 	}
 };
 
-void InitMonster(string model, float type, float size)
+/*
+float() monster_customizeentityforclient =
+{
+	monster_collision ();
+	
+	return TRUE;
+};
+*/
+
+void(string model, float type, float size) InitMonster =
 {	
 	if (deathmatch)
 	{
@@ -447,12 +459,12 @@ void InitMonster(string model, float type, float size)
 	INHIBIT_COOP
 	if (RemovedOutsideCoop()) return;
 	
+	entity_collision (self, MONSTERMASK, PVE_GENERAL, PVE_GENERAL, PVE_GENERAL, EMPTYMASK, 0);
 	self.flags |= FL_FUTUREMONSTER;
 
 	self.mdl = model;
 	self.lefty = type;
 	self.state = size;
-//	monstermask = pointcontentsmask (self.origin, CONTENTBIT_MONSTERCLIP);
 	
 	// CG: This was removed because it caused the entity alpha to differ from the baseline alpha somehow, causing it to be transmitted over the network every frame for every monster.
 	// self.alpha = 1; 
@@ -474,7 +486,7 @@ void InitMonster(string model, float type, float size)
 	// spread think times so they don't all happen at same time
 	self.nextthink += random() * 0.5;
 	self.think = StartMonster;
-}
+};
 
 // Yoder Sept24 2021, Horde Merge
 // Monster fade, used to fade out the model a few seconds after deathmatch
@@ -487,7 +499,8 @@ void() MonsterFade2 =
 		self.nextthink = time; // think next frame
 	}
 	else remove(self);
-}
+};
+
 void() MonsterFade =
 {
 	if (!cvar("horde"))

@@ -63,11 +63,12 @@ void() FoundTarget; // HIP
 float(entity targ) HasInvisible =
 {
 	if (targ.invisible_finished <= time) return FALSE;
-	if (range (targ) <= RANGE_MELEE) return FALSE;	
+	if (range(targ) <= RANGE_MELEE) return FALSE;	
+	
 	return TRUE;
-}
+};
 
-void makevectorsfixed(vector ang) 
+void(vector ang) makevectorsfixed =
 {
 	ang_x *= -1;
 	makevectors (ang);
@@ -75,8 +76,9 @@ void makevectorsfixed(vector ang)
 
 float(float v) anglemod =
 {
-	while (v >= 360) v = v - 360;
-	while (v < 0) v = v + 360;
+	while (v >= 360) v -= 360;
+	while (v < 0) v += 360;
+
 	return v;
 };
 
@@ -102,8 +104,7 @@ The number of seconds to spend standing or bowing for path_stand or path_bow
 
 void() movetarget_f =
 {
-	if (!self.targetname)
-		objerror ("monster_movetarget: no targetname");
+	if (!self.targetname) objerror ("monster_movetarget: no targetname");
 		
 	self.solid = SOLID_TRIGGER;
 	self.touch = t_movetarget;
@@ -114,10 +115,7 @@ void() movetarget_f =
 /*QUAKED path_corner (0.5 0.3 0) (-8 -8 -8) (8 8 8)
 Monsters will continue walking towards the next target corner.
 */
-void() path_corner =
-{
-	movetarget_f ();
-};
+void() path_corner = {movetarget_f ();};
 
 
 /*
@@ -133,15 +131,14 @@ void() t_movetarget =
 	local entity temp;
 
 	if (other.movetarget != self) return;
-	if (other.enemy) return;		// fighting, not following a path
+	if (other.enemy) return;		// Fighting, not following a path
 
 	// MG1 ------------------------------------------------------------------
-	self.owner = other; //We have a valid visitor!
+	self.owner = other; // We have a valid visitor!
 	if (other.dmg_inflictor && other.dmg_inflictor.classname == "path_corner")
 	{
-		//Clear the previous path corner from owning our new visitor
-		if (other.dmg_inflictor.owner == other.dmg_inflictor)
-			other.dmg_inflictor.owner = world;
+		// Clear the previous path corner from owning our new visitor
+		if (other.dmg_inflictor.owner == other.dmg_inflictor) other.dmg_inflictor.owner = world;
 	}
 	other.dmg_inflictor = self;
 	
@@ -152,8 +149,7 @@ void() t_movetarget =
 	self = other;
 	other = temp;
 
-	if (self.classname == "monster_ogre")
-		sound (self, CHAN_VOICE, "ogre/ogdrag.wav", 1, ATTN_IDLE);// play chainsaw drag sound
+	if (self.classname == "monster_ogre") sound (self, CHAN_VOICE, "ogre/ogdrag.wav", 1, ATTN_IDLE); //Play chainsaw drag sound
 
 	// dprint ("t_movetarget\n");
 	if (other.target) // HIP condition
@@ -209,7 +205,7 @@ void() t_followtarget =
 	if (other.wetsuit_time > time) return;
 	targ = other.enemy;
 
-	// see if any entities are in the way of the shot
+	// See if any entities are in the way of the shot
 	spot1 = other.origin + other.view_ofs;
 	spot2 = targ.origin + targ.view_ofs;
 
@@ -218,7 +214,7 @@ void() t_followtarget =
 
 	if (other.enemy)
 	{
-		// make the monster tame
+		// Make the monster tame
 		other.oldenemy = other.enemy;
 		other.enemy = world;
 		other.think = other.th_walk;
@@ -231,6 +227,7 @@ void() t_followtarget =
 	self.goalentity = self.movetarget = find (world, targetname, other.target);
 	self.ideal_yaw = vectoyaw (self.goalentity.origin - self.origin);
 	self.wetsuit_time = time + 2;
+	
 	if (!self.movetarget)
 	{
 		if (self.oldenemy != world)
@@ -268,10 +265,7 @@ void() followtarget_f =
 Monsters will stop what they are doing and follow to the path
 */
 
-void() path_follow =
-{
-	followtarget_f ();
-};
+void() path_follow = {followtarget_f ();};
 
 /*QUAKED path_follow2 (0.5 0.3 0) (-8 -8 -8) (8 8 8)
 Monsters will stop what they are doing and follow to the path
@@ -293,7 +287,7 @@ void() monster_use;
 
 void() target_cancelpause_use =
 {
-	entity mon = find (world, targetname, self.target);
+	local entity mon = find (world, targetname, self.target);
 	while (mon)
 	{
 		if (mon.flags & FL_MONSTER)
@@ -319,7 +313,7 @@ void() target_cancelpause =
 
 void() target_switchpath_use =
 {
-	entity e = find (world, targetname, self.target);
+	local entity e = find (world, targetname, self.target);
 	while (e)
 	{
 		if (e.classname == "path_corner")
@@ -353,6 +347,7 @@ void() target_switchpath =
 	if (!self.target) objerror ("target_switchtarget with no target given.\n");
 	if (!self.targetname) objerror ("target_switchtarget with no targetname given.\n");
 	if (!self.netname) objerror ("target_switchtarget with no netname given.\n");
+	
 	self.use = target_switchpath_use;
 };
 
@@ -427,11 +422,11 @@ const float VISIONCONE_NEARSIGHTED = 0.866; // ~30 degrees
 =============
 range
 
-returns the range catagorization of an entity reletive to self
-0	melee range, will become hostile even if back is turned
-1	visibility and infront, or visibility and show hostile
-2	infront and show hostile
-3	only triggered by damage
+Returns the range catagorization of an entity reletive to self
+0	Melee range, will become hostile even if back is turned
+1	Visibility and infront, or visibility and show hostile
+2	Infront and show hostile
+3	Only triggered by damage
 =============
 */
 float(entity targ) range =
@@ -449,6 +444,7 @@ float(entity targ) range =
 	if (r < ranges_x) return RANGE_MELEE;
 	if (r < ranges_y) return RANGE_NEAR;
 	if (r < ranges_z) return RANGE_MID;
+	
 	return RANGE_FAR;
 };
 
@@ -461,10 +457,19 @@ returns 1 if the entity is visible to self, even if not infront ()
 */
 float(entity targ, float ignore_water) visible_sk5 =
 {
-	traceline (self.origin + self.view_ofs, targ.origin + targ.view_ofs, 1, self);	// see through other monsters
+	traceline (self.origin + self.view_ofs, targ.origin + targ.view_ofs, TRUE, self);	// see through other monsters
 
-	if (!ignore_water && trace_inopen && trace_inwater)
-		return FALSE;			// sight line crossed contents
+	if (trace_inopen && trace_inwater) 
+	{
+		if (!ignore_water) return FALSE;		// sight line crossed contents
+		return TRUE;
+	}
+	
+	if (trace_fraction == 1) 
+	{
+		visible_distance = vlen((targ.origin + targ.view_ofs) - (self.origin + self.view_ofs));
+		return TRUE;
+	}
 
 	return trace_fraction == 1;
 };
@@ -484,6 +489,7 @@ float(entity targ) visible =
 		visible_distance = vlen(spot2-spot1); // HIP: MED 11/21/96
 		return TRUE;
 	}
+	
 	return FALSE;
 };
 
@@ -525,6 +531,7 @@ void() UpdateCharmerGoal =
 		self.huntingcharmer = 2;
 		self.goalentity = targ;
 	}
+	
 	if (self.huntingcharmer == 2)
 	{
 		targ = self.trigger_field;
@@ -593,54 +600,35 @@ void() SightSound =
 {
 	local float rsnd;
 
-	if (self.classname == "monster_ogre")
-		sound (self, CHAN_VOICE, "ogre/ogwake.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_knight")
-		sound (self, CHAN_VOICE, "knight/ksight.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_shambler")
-		sound (self, CHAN_VOICE, "shambler/ssight.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_demon1")
-		sound (self, CHAN_VOICE, "demon/sight2.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_wizard")
-		sound (self, CHAN_VOICE, "wizard/wsight.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_zombie")
-		sound (self, CHAN_VOICE, "zombie/z_idle.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_dog")
-		sound (self, CHAN_VOICE, "dog/dsight.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_hell_knight")
-		sound (self, CHAN_VOICE, "hknight/sight1.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_tarbaby")
-		sound (self, CHAN_VOICE, "blob/sight1.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_vomit")
-		sound (self, CHAN_VOICE, "vomitus/sight1.wav", 1, ATTN_NORM);
+	if (self.classname == "monster_ogre") sound (self, CHAN_VOICE, "ogre/ogwake.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_knight") sound (self, CHAN_VOICE, "knight/ksight.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_shambler") sound (self, CHAN_VOICE, "shambler/ssight.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_demon1") sound (self, CHAN_VOICE, "demon/sight2.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_wizard") sound (self, CHAN_VOICE, "wizard/wsight.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_zombie") sound (self, CHAN_VOICE, "zombie/z_idle.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_dog") sound (self, CHAN_VOICE, "dog/dsight.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_hell_knight") sound (self, CHAN_VOICE, "hknight/sight1.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_tarbaby") sound (self, CHAN_VOICE, "blob/sight1.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_vomit") sound (self, CHAN_VOICE, "vomitus/sight1.wav", 1, ATTN_NORM);
 	else if (self.classname == "monster_enforcer")
 	{
-		rsnd = rint (random() * 3);
-		if (rsnd == 1)
-			sound (self, CHAN_VOICE, "enforcer/sight1.wav", 1, ATTN_NORM);
-		else if (rsnd == 2)
-			sound (self, CHAN_VOICE, "enforcer/sight2.wav", 1, ATTN_NORM);
-		else if (rsnd == 0)
-			sound (self, CHAN_VOICE, "enforcer/sight3.wav", 1, ATTN_NORM);
-		else
-			sound (self, CHAN_VOICE, "enforcer/sight4.wav", 1, ATTN_NORM);
+		rsnd = rint(random() * 3);
+		if (rsnd == 1) sound (self, CHAN_VOICE, "enforcer/sight1.wav", 1, ATTN_NORM);
+		else if (rsnd == 2) sound (self, CHAN_VOICE, "enforcer/sight2.wav", 1, ATTN_NORM);
+		else if (rsnd == 0) sound (self, CHAN_VOICE, "enforcer/sight3.wav", 1, ATTN_NORM);
+		else sound (self, CHAN_VOICE, "enforcer/sight4.wav", 1, ATTN_NORM);
 	}
-	else if (self.classname == "monster_army")
-		sound (self, CHAN_VOICE, "soldier/sight1.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_shalrath")
-		sound (self, CHAN_VOICE, "shalrath/sight.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_army") sound (self, CHAN_VOICE, "soldier/sight1.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_shalrath") sound (self, CHAN_VOICE, "shalrath/sight.wav", 1, ATTN_NORM);
 	//MED
 	else if (self.classname == "monster_gremlin")
 	{
-		if (self.stoleweapon == 0)
-			sound (self, CHAN_VOICE, "grem/sight1.wav", 1, ATTN_NORM);
+		if (self.stoleweapon == 0) sound (self, CHAN_VOICE, "grem/sight1.wav", 1, ATTN_NORM);
 	}
 	//MED
-	else if (self.classname == "monster_scourge")
-		sound (self, CHAN_VOICE, "scourge/sight.wav", 1, ATTN_NORM);
+	else if (self.classname == "monster_scourge") sound (self, CHAN_VOICE, "scourge/sight.wav", 1, ATTN_NORM);
 	//MED
-	else if (self.classname == "monster_armagon")
-		sound (self, CHAN_VOICE, "armagon/sight.wav", 1, 0.1);
+	else if (self.classname == "monster_armagon") sound (self, CHAN_VOICE, "armagon/sight.wav", 1, 0.1);
 };
 
 /*
@@ -741,6 +729,7 @@ float() FindTarget =
 		{
 			self.enemy = f;
 			FoundTarget ();
+			
 			return TRUE;
 		}
 	}
@@ -762,20 +751,22 @@ float() FindTarget =
 			r = vlen(self.origin - self.goalentity.origin);
 			if (r < MIN_CHARMER_DISTANCE)
 			{
-				if ((self.huntingcharmer == 3) && (r > TOOCLOSE_CHARMER_DISTANCE))
-					return FALSE;
+				if ((self.huntingcharmer == 3) && (r > TOOCLOSE_CHARMER_DISTANCE)) return FALSE;
 				StopHuntingCharmer();
+				
 				return TRUE;
 			}
 		}
 		else if (vlen (self.origin - self.charmer.origin) > MAX_CHARMER_DISTANCE)
 		{
 			HuntCharmer();
+			
 			return FALSE;
 		}
 		else if (vlen (self.origin - self.charmer.origin) < TOOCLOSE_CHARMER_DISTANCE)
 		{
 			FleeCharmer();
+			
 			return FALSE;
 		}
 	}
@@ -831,22 +822,20 @@ float() FindTarget =
 
 	if (client.items & IT_INVISIBILITY) return FALSE;
 
-	r = range (client);
+	r = range(client);
 	if (r == RANGE_FAR) return FALSE;
 		
-	if (!visible (client)) return FALSE;
+	if (!visible(client)) return FALSE;
 
 	if (!self.charmed) // HIP: MED 10/17/96 added charmed stuff
 	{
 		if (r == RANGE_NEAR)
 		{
-			if (client.show_hostile < time && !infront (client))
-				return FALSE;
+			if (client.show_hostile < time && !infront (client)) return FALSE;
 		}
 		else if (r == RANGE_MID)
 		{
-			if (!infront (client))
-				return FALSE;
+			if (!infront (client)) return FALSE;
 		}
 	}
 	
@@ -877,15 +866,9 @@ float() FindTarget =
 
 //=============================================================================
 
-void(float dist) ai_forward =
-{
-	walkmove (self.angles_y, dist);
-};
+void(float dist) ai_forward = {walkmove(self.angles_y, dist);};
 
-void(float dist) ai_back =
-{
-	walkmove ((self.angles_y+180), dist);
-};
+void(float dist) ai_back = {walkmove((self.angles_y + 180), dist);};
 
 
 /*
@@ -895,10 +878,7 @@ ai_pain
 stagger back a bit
 =============
 */
-void(float dist) ai_pain =
-{
-	ai_back (dist);
-};
+void(float dist) ai_pain = {ai_back(dist);};
 
 /*
 =============
@@ -907,10 +887,7 @@ ai_painforward
 stagger back a bit
 =============
 */
-void(float dist) ai_painforward =
-{
-	walkmove (self.ideal_yaw, dist);
-};
+void(float dist) ai_painforward = {walkmove(self.ideal_yaw, dist);};
 
 /*
 =============
@@ -926,16 +903,16 @@ void(float dist) ai_walk =
 	movedist = dist;
 	
 	// check for noticing a player
-	if (FindTarget ()) return;
+	if (FindTarget()) return;
 
 	// HIP: MED 11/02/96 -------------------------------------
 	if (self.huntingcharmer)
 	{
-		movetogoal (dist);
+		movetogoal(dist);
 		self.nextthink = time + ((self.nextthink - time) * 0.5);
 	}
 	// -------------------------------------------------------
-	else movetogoal (dist);
+	else movetogoal(dist);
 };
 
 
@@ -950,7 +927,7 @@ void() ai_stand =
 {
 	RETURN_IF_DIED_FROM_CONTENTS_DAMAGE // MG1
 
-	if (FindTarget ()) return;
+	if (FindTarget()) return;
 	
 	if (time > self.pausetime)
 	{
@@ -983,8 +960,8 @@ don't move, but turn towards ideal_yaw
 void() ai_turn_in_place =
 {
 	self.nextthink = time + 0.1;
-	enemy_yaw = vectoyaw (self.enemy.origin - self.origin);
-	local float delta = fabs (self.angles_y - enemy_yaw);
+	enemy_yaw = vectoyaw(self.enemy.origin - self.origin);
+	local float delta = fabs(self.angles_y - enemy_yaw);
 	if (delta > MIN_ANGLE_DELTA)
 	{
 		self.ideal_yaw = enemy_yaw;
@@ -1022,7 +999,7 @@ void(vector dest3) ChooseTurn =
 	}
 
 	dir_z = 0;
-	self.ideal_yaw = vectoyaw (dir);	
+	self.ideal_yaw = vectoyaw(dir);	
 };
 
 /*
@@ -1034,6 +1011,7 @@ FacingIdeal
 float() FacingIdeal =
 {	
 	local float delta = anglemod (self.angles_y - self.ideal_yaw);
+	
 	if (delta > 45 && delta < 315) return FALSE;
 	return TRUE;
 };
@@ -1080,7 +1058,7 @@ void() ai_run_melee =
 	self.ideal_yaw = enemy_yaw;
 	ChangeYaw ();
 
-	if (FacingIdeal ())
+	if (FacingIdeal())
 	{
 		self.th_melee ();
 		self.attack_state = 1;
@@ -1099,7 +1077,7 @@ void() ai_run_missile =
 {
 	self.ideal_yaw = enemy_yaw;
 	ChangeYaw ();
-	if (FacingIdeal ())
+	if (FacingIdeal())
 	{
 		self.th_missile ();
 		self.attack_state = 1;
@@ -1116,18 +1094,18 @@ Strafe sideways, but stay at aproximately the same range
 */
 void() ai_run_slide =
 {
-	local float	ofs;
+	local float ofs;
 	
 	self.ideal_yaw = enemy_yaw;
 	ChangeYaw ();
 	if (self.lefty) ofs = 90;
 	else ofs = -90;
 	
-	if (walkmove (self.ideal_yaw + ofs, movedist)) return;
+	if (walkmove(self.ideal_yaw + ofs, movedist)) return;
 		
 	self.lefty = 1 - self.lefty;
 	
-	walkmove (self.ideal_yaw - ofs, movedist);
+	walkmove(self.ideal_yaw - ofs, movedist);
 };
 
 // HIP: MED
@@ -1177,7 +1155,7 @@ void() ai_run_dodge =
 	self.ltime = time + 0.8;
 	newyaw = enemy_yaw - ofs;
 	self.ideal_yaw = enemy_yaw;
-	walkmove (newyaw, movedist);
+	walkmove(newyaw, movedist);
 	ChangeYaw ();
 };
 
@@ -1193,7 +1171,7 @@ void(float dist) ai_pathtogoal =
 {
 	if (self.allowPathFind == FALSE) 
 	{
-		movetogoal (dist); // can't use pathfinding, so use normal Quake movement behavior.	
+		movetogoal(dist); // can't use pathfinding, so use normal Quake movement behavior.	
 		return;
 	}
 
@@ -1202,7 +1180,7 @@ void(float dist) ai_pathtogoal =
 		if (self.combat_style == CS_RANGED) 
 		{
 			// do the normal "shoot, walk, shoot" behavior...
-			movetogoal (dist);
+			movetogoal(dist);
 			return;
 		} 
 		else if (self.combat_style == CS_MELEE) 
@@ -1210,8 +1188,7 @@ void(float dist) ai_pathtogoal =
 			// path pretty close to the enemy, then let normal Quake movement take over.
 			if (enemy_range > RANGE_NEAR) 
 			{
-				if (walkpathtogoal (dist, self.enemy.origin) == PATH_IN_PROGRESS) 
-					return;
+				if (walkpathtogoal(dist, self.enemy.origin) == PATH_IN_PROGRESS) return;
 			}
 		} 
 		else if (self.combat_style == CS_MIXED) 
@@ -1219,19 +1196,17 @@ void(float dist) ai_pathtogoal =
 			// most mixed combat AI have fairly short range attacks, so try to path within mid range.
 			if (enemy_range > RANGE_MID) 
 			{
-				if (walkpathtogoal (dist, self.enemy.origin) == PATH_IN_PROGRESS ) 
-					return;
+				if (walkpathtogoal(dist, self.enemy.origin) == PATH_IN_PROGRESS) return;
 			}
 		}
 	} 
 	else 
 	{
 		// we can't see our enemy, let's see if we can path to them
-		if (walkpathtogoal (dist, self.enemy.origin) == PATH_IN_PROGRESS) 
-			return;
+		if (walkpathtogoal(dist, self.enemy.origin) == PATH_IN_PROGRESS) return;
 	}
 
-	movetogoal (dist); // fall back to normal Quake movement behavior.
+	movetogoal(dist); // fall back to normal Quake movement behavior.
 };
 
 /*
@@ -1282,7 +1257,7 @@ void(float dist) ai_run =
 // look for other coop players
 	if (coop && self.search_time < time && !self.charmed) // HIP: MED 10/17/96 added charmed stuff
 	{
-		if (FindTarget ()) return;
+		if (FindTarget()) return;
 	}
 
 	enemy_infront = infront (self.enemy);
@@ -1292,7 +1267,7 @@ void(float dist) ai_run =
 	// HIP: MED ---------------------------------------------
 	if (self.th_turn)
 	{
-		local float angledelta = fabs (self.angles_y - enemy_yaw);
+		local float angledelta = fabs(self.angles_y - enemy_yaw);
 		if (angledelta > MIN_ANGLE_DELTA)
 		{
 			self.th_turn ();
@@ -1312,7 +1287,7 @@ void(float dist) ai_run =
 		return;
 	}
 
-	if (CheckAnyAttack ()) return;					// beginning an attack
+	if (CheckAnyAttack()) return;					// beginning an attack
 		
 	if (self.attack_state == AS_SLIDING)
 	{
@@ -1332,11 +1307,11 @@ void(float dist) ai_run =
 	if (RUN_STRAIGHT && time > self.endtime)
 	{
 		RUN_STRAIGHT = 0;
-		local float axis = walkmove (self.angles_y, movedist); // HIP
+		local float axis = walkmove(self.angles_y, movedist); // HIP
 		if (!axis)
 		{
 			self.endtime = time + 3;
-			movetogoal (dist);      // done in C code...
+			movetogoal(dist);      // done in C code...
 		}
 		return;
 	}
@@ -1345,15 +1320,15 @@ void(float dist) ai_run =
 	// MG1 ---------------------------------------------
 	if (isHordeMode) 
 	{
-		ai_pathtogoal (dist);
+		ai_pathtogoal(dist);
 		return;
 	}
 	// -------------------------------------------------
 
 	// mal: added here for demonstration purposes for mods, but disabled by default in id1...
 #ifdef USE_ADVANCED_PATHING
-	ai_pathtogoal (dist);
+	ai_pathtogoal(dist);
 #else
-	movetogoal (dist); // fall back to normal Quake movement behavior.
+	movetogoal(dist); // fall back to normal Quake movement behavior.
 #endif
 };

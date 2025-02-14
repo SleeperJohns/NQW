@@ -78,6 +78,26 @@ void(float offsetAngle) MiniGrenadeLaunch =
 	setmodel (missile, "progs/mervup.mdl");
 	setsize (missile, '0 0 0', '0 0 0');		
 	setorigin (missile, self.origin);
+	
+	if (self.owner.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (missile, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}					
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.owner.steam == TEAM_RED_4) entity_collision (missile, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.owner.steam == TEAM_BLUE_13) entity_collision (missile, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (missile, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (missile, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 
 	// set missile duration
 	missile.nextthink = time + 1 + (crandom() * 0.5);
@@ -187,6 +207,26 @@ void() W_FireMultiGrenade =
 	setmodel (missile, "progs/mervup.mdl");
 	setsize (missile, '0 0 0', '0 0 0');		
 	setorigin (missile, self.origin);
+	
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (missile, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}						
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (missile, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (missile, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (missile, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (missile, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 //=============================================================================
@@ -410,6 +450,26 @@ void(float offset, float frameNum) MultiRocketLaunch =
 		missile.think = HomingMissileAcquire;
 		missile.nextthink = time + 0.1;
 	}
+	
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (missile, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}					
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (missile, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (missile, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (missile, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (missile, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 //================================
@@ -500,6 +560,28 @@ void() PlasmaGroundOut =
 	local entity start = current;
 	while (monstersHit < 5)
 	{
+		current.deathtype = "plasma_rocket"; // QIP	
+		
+		if (current.classname == "player" && self.owner.classname == "player" && current != self.owner && current.health >= 1)
+		{
+			if (cvar("coop") >= 0 && !cvar("deathmatch"))
+			{
+				if (cvar("player_collision") == FALSE && cvar("teamplay") != TEAM_FF_ON) entity_collision (self, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+				else entity_collision (self, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+			}				
+			else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+			{
+				if (cvar("player_collision") == FALSE && cvar("teamplay") != TEAM_FF_ON) 
+				{
+					if (self.owner.steam == TEAM_RED_4) entity_collision (self, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+					if (self.owner.steam == TEAM_BLUE_13) entity_collision (self, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				}
+				else entity_collision (self, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (self, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+		}		
+		else entity_collision (self, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+						
 		if (!cvar("deathmatch")) // Sleeper: Mainly for a better co-operative experience so players don't tag other players with the plasma gun.
 		{
 			if (cvar("coop") == REIGNITED_COOP || cvar("coop") == ENHANCED_COOP) // Sleeper: Reignited or Enhanced Coop
@@ -518,7 +600,7 @@ void() PlasmaGroundOut =
 							}
 						}
 					}
-					if (self.owner.classname == "monster_dragon") // Sleeper: Only the dragon can tag players.
+					else if (self.owner.classname == "monster_dragon") // Sleeper: Only the dragon can tag players.
 					{
 						if (current != self.owner && current.health >= 1)
 						{
@@ -532,7 +614,7 @@ void() PlasmaGroundOut =
 					}
 				}
 			}
-			if (!cvar("coop") || cvar("coop") == CLASSIC_COOP) // Sleeper: Single Player or Classic Coop (to stay vanilla mainly).
+			else if (!cvar("coop") || cvar("coop") == CLASSIC_COOP) // Sleeper: Single Player or Classic Coop (to stay vanilla mainly).
 			{
 				if (current.flags & FL_MONSTER || current.classname == "player") // Sleeper: As vanilla.
 				{
@@ -565,7 +647,7 @@ void() PlasmaGroundOut =
 					}
 				}
 			}			
-			if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF) // Sleeper: Tag only the players aren't on your team.
+			else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF) // Sleeper: Tag only the players aren't on your team.
 			{
 				if (cvar("teamplay") == TEAM_FF_DISABLED || cvar("teamplay") == TEAM_FF_ON) // Sleeper: Because it makes sense to be careful???
 				{
@@ -582,7 +664,7 @@ void() PlasmaGroundOut =
 						}
 					}
 				}
-				if (cvar("teamplay") == TEAM_FF_OFF)
+				else if (cvar("teamplay") == TEAM_FF_OFF)
 				{
 					if (current.classname == "player" && current.team != self.owner.team)
 					{
@@ -599,6 +681,7 @@ void() PlasmaGroundOut =
 				}
 			}
 		}
+				
 		current = current.chain;
 		if (start == current || !current) return;
 	}
@@ -625,7 +708,7 @@ void() PlasmaTouch =
 	
 	if (other.health)
 	{
-		other.deathtype = "plasma_rocket";
+		other.deathtype = "plasma_rocket"; // QIP	
 		if (other.classname == "monster_shambler")
 		{
 			if (cvar("skill") == 5)
@@ -698,7 +781,7 @@ void() PlasmaTouch =
 	WriteCoord (MSG_BROADCAST, self.origin_y);
 	WriteCoord (MSG_BROADCAST, self.origin_z);
 	WriteByte (MSG_BROADCAST, 244);
-	WriteByte (MSG_BROADCAST, 3);
+	WriteByte (MSG_BROADCAST, 3);	
 	PlasmaGroundOut ();
 	remove (self);
 };
@@ -734,12 +817,32 @@ void(vector org, vector dir) launch_plasma =
 	setsize (missile, '0 0 0', '0 0 0');		
 	setorigin (missile, org);
 
-	sound (missile, CHAN_WEAPON, "plasma/flight.wav", 1, ATTN_NORM);
-	if (!deathmatch && !coop) missile.effects = EF_BRIGHTLIGHT;
+	sound (self, CHAN_OTHER, "plasma/flight.wav", 1, ATTN_NORM);
+	missile.effects = EF_BRIGHTLIGHT;
 	
 	// set missile duration
 	missile.think = PlasmaLaunch;
 	missile.nextthink = time + 0.1;
+	
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (missile, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}				
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (missile, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (missile, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (missile, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (missile, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 //================================
@@ -804,8 +907,7 @@ void() W_FirePlasma =
 					set_suicide_frame();
 					if (self.health < -99) // Doesn't need to show extremely low negative numbers.
 						self.health = -99;
-					self.modelindex = modelindex_nqwplayer;	
-											
+																	
 					// Emulate an Obituary
 					bprint (self.netname);
 					rnum = random();

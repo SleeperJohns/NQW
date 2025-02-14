@@ -47,6 +47,7 @@ void() finale_4 =
 		z = (z + 96);
 	}
 	
+	/*
 	if (coop && (cvar("skill") <= 4) && num_players == 2)
 	{
 		killed_monsters = (killed_monsters + AS_STRAIGHT);
@@ -103,6 +104,9 @@ void() finale_4 =
 		WriteByte(MSG_ALL, SVC_FINALE);
 		WriteString(MSG_ALL, "Congratulations and well done! You have\nbeaten the hideous Shub-Niggurath, and\nher hundreds of ugly changelings and\nmonsters. You have proven that your\nskill and your cunning are greater than\nall the powers of Quake. You are the\nmaster now. Id Software salutes you.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue\n\n Scourge of Armagon!");
 	}
+	*/
+	
+	ExitIntermission ();
 
 	// put a player model down
 	pl = find (world, classname, "player");
@@ -273,10 +277,12 @@ void() finale_4 =
 	} // Sleeper: Thanks bmFbr for adding most of the bits of code in this loop that I wasn't able to understand -- I appreciate it. 
 	
 	remove(self);
+	/*
 	nextmap = "hipstart";
 	WriteByte(MSG_ALL, SVC_CDTRACK);
 	WriteByte(MSG_ALL, 2); // Sleeper: Play Quake Theme instead of Aftermath when beating Shub Niggurath.
 	WriteByte(MSG_ALL, 3);
+	*/
 	lightstyle(realnull, "m");
 };
 
@@ -683,24 +689,24 @@ void() finale_1 =
 	local entity pl;
 	local entity timer;
 
-	intermission_exittime = (time + 1);
-	intermission_running = AS_STRAIGHT;
+//	intermission_exittime = time + 1;
+//	intermission_running = 1;
 	
-	pos = find(world, classname, "info_intermission");
-	if (!pos)
-	{
-		error("no info_intermission");
-	}
-	pl = find(world, classname, "misc_teleporttrain");
-	if (!pl)
-	{
-		error("no teleporttrain");
-	}
-	remove(pl);
-	WriteByte(MSG_ALL, SVC_FINALE);
-	WriteString(MSG_ALL, "");
+	pos = find (world, classname, "info_intermission");
+	if (!pos) error ("no info_intermission");
+	
+	pl = find (world, classname, "misc_teleporttrain");
+	if (!pl) error ("no teleporttrain");
+	
+	remove (pl);
+	
+//	WriteByte (MSG_ALL, SVC_FINALE);
+//	WriteString (MSG_ALL, "");
+	
+	ExitIntermission ();
+	
 	pl = find(world, classname, "player");
-	while ((pl != world))
+	while (pl != world)
 	{
 		pl.view_ofs = VEC_ORIGIN;
 		other.v_angle = pos.mangle;
@@ -713,12 +719,12 @@ void() finale_1 =
 		pl.movetype = MOVETYPE_NONE;
 		pl.modelindex = realnull;
 		setorigin(pl, pos.origin);
-		pl = find(pl, classname, "player");
+		pl = find (pl, classname, "player");
 		
-	timer = spawn();
-	timer.nextthink = time + 0.1;
-	timer.think = finale_2;
-	timer.owner = self;
+		timer = spawn();
+		timer.nextthink = time + 0.1;
+		timer.think = finale_2;
+		timer.owner = self;
 	}
 };
 
@@ -731,7 +737,7 @@ void() monster_oldone =
 {
 	if (deathmatch)
 	{
-		remove(self);
+		remove (self);
 		return;
 	}
 
@@ -747,11 +753,13 @@ void() monster_oldone =
 	
 	setmodel (self, "progs/oldone.mdl");
 	/*
-	if (ExtSupported("EX_SPRINT")) {
+	if (ExtSupported("EX_SPRINT")) 
+	{
 		self.netname = "$qc_shub";
 		self.killstring = "$qc_ks_shub";
 	}
-	else {
+	else 
+	{
 		self.netname = "Shub-Niggurath";
 		self.killstring = " became one with Shub-Niggurath\n";
 	}

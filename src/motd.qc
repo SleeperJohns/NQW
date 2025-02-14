@@ -1,19 +1,23 @@
 // Greeting Sound Controller
 void() playsnd = 
 {
-	local entity cl = find (world, classname, "player"); 
-	while (cl) 
+	local entity client = find (world, classname, "player"); 
+	while (client != world) 
 	{
-		sound (cl, CHAN_VOICE, self.noise, 1, 3.9999); 
+		sound (client, CHAN_OTHER, self.noise, 1, 3.9999); // Sleeper: With limited ability to make an announcer local to the player only that tracks the origin of player, this is the only best way.
 		self.nextthink = time + 3;
 		self.think = SUB_Remove;	
-		cl = find (cl, classname, "player");
+		client = find (client, classname, "player");
 	}
+//	sound (world, CHAN_OTHER, self.noise, 1, ATTN_NONE);
+//	remove (self);
 };
-
 void(string soundToPlay, float delay) greet_announcer = 
 {
-	if (speaker) remove (speaker); // no multiple sounds  
+	local entity speaker;
+	
+	if (speaker) remove (speaker); // No multiple sounds  
+	
 	speaker = spawn ();
 	speaker.noise = soundToPlay;
 	speaker.nextthink = time + delay;
@@ -39,9 +43,29 @@ string() Write_Official_GameWorld_Names =
 	if (gameworld == HIPNOTIC) return "!\n\nGame World: Hipnotic     ";		
 	if (gameworld == ROGUE) return "!\n\nGame World: Rogue        ";		
 	if (gameworld == DOPA) return "!\n\nGame World: DOPA         ";		
-	if (gameworld == MG1) return "!\n\nGame World: MG1          ";		
+	if (gameworld == MG1) return "!\n\nGame World: MG1          ";	
+	if (gameworld == APOTHEOSIS) return "!\n\nGame World: Apotheosis   ";	
 	if (gameworld == CUSTOM) return "!\n\nGame World: Custom       ";
+	
 	return "!\n\nGame World: Error        ";
+};
+
+string() Write_Campaign_Names = 
+{
+	if (cvar("deathmatch") || gameworld == CUSTOM || gameworld == APOTHEOSIS) return "";
+	
+	if (gameworld == ID1) return "\n        Campaign: Quake: The Offering";		
+	if (gameworld == HIPNOTIC) return "\n        Campaign: Scourage Of Armagon";		
+	if (gameworld == ROGUE) return "\n      Campaign: Dissolution Of Eternity";		
+	if (gameworld == DOPA) return "\n        Campaign: Dimension Of The Past";		
+	if (gameworld == MG1) 
+	{
+		if (cvar("horde")) return "";
+		return "\n      Campaign: Dimension Of The Machine";	
+	}	
+	if (gameworld == CUSTOM) return "";	
+	
+	return "\n Campaign: Unknown";
 };
 
 string() Write_Gametypes =
@@ -103,7 +127,8 @@ string() Write_Gametypes =
 			if (cvar("instagib") == INSTAGIB_RAILWARZ) return "\nGame Type: One Flag RWZ CTF    ";
 			return "\nGame Type: One Flag CTF";
 		}
-	}			
+	}
+				
 	return "\nGame Type: Error       ";
 };
 
@@ -115,6 +140,7 @@ string() Write_Difficulty =
 	if (cvar("skill") == 3) return "\n       Skill(3): Classic Nightmare!";
 	if (cvar("skill") == 4) return "\n   Skill(4): KEX Nightmare!";
 	if (cvar("skill") == 5) return "\n      Skill(5): Sleeper Must Die!";
+	
 	return "\nSkill(?): Error      ";
 };
 
@@ -124,6 +150,7 @@ string() Write_Coop_Team_And_Self_Damage =
 	if (cvar("teamplay") == COOP_FF_ALT) return "\nSelf Damage: On            \nAlly Damage: Off           ";
 	if (cvar("teamplay") == COOP_FF_DISABLED || cvar("teamplay") == COOP_FF_ON)
 		return "\nSelf Damage: On            \nAlly Damage: On            ";
+		
 	return "\nSelf Damage: Error         \nAlly Damage: Error        ";
 };
 
@@ -133,21 +160,8 @@ string() Write_DM_Team_Damage =
 	if (cvar("teamplay") == TEAM_FF_NO_HEALTH_ARMOR_DMG) return "\nTeam Damage: Off           ";
 	if (cvar("teamplay") == TEAM_FF_ON) return "\nTeam Damage: On            ";
 	if (cvar("teamplay") == TEAM_FF_NO_ARMOR_DMG) return "\n      Team Damage: On (Armor Protected)";
+	
 	return "\nTeam Damage: Error         ";
-};
-
-string() Write_Coop_Teamknockback =
-{
-	if (cvar("teamknockback") == 0) return "\nAlly Knockback: Off              ";
-	if (cvar("teamknockback") == 1) return "\nAlly Knockback: On               ";
-	return "\nAlly Knockback: Error            ";
-};
-
-string() Write_DM_Teamknockback =
-{
-	if (cvar("teamknockback") == 0) return "\nTeam Knockback: Off              ";
-	if (cvar("teamknockback") == 1) return "\nTeam Knockback: On               ";
-	return "\nTeam Knockback: Error            ";
 };
 
 string() Write_Runes =
@@ -155,14 +169,32 @@ string() Write_Runes =
 	if (cvar("gamecfg") == GAMECFG_ORIGINAL_RUNES) return "\n     Runes: On (Original)";
 	if (cvar("gamecfg") == GAMECFG_NQW_RUNES) return "\n       Runes: On (Team Arena)";
 	if (cvar("gamecfg") == 0) return "\nRunes: Off     ";
+	
 	return "\nRunes: Error      ";
+};
+
+string() Write_DM_Teamknockback =
+{
+	if (cvar("teamknockback") == 0) return "\nTeam Knockback: Off              ";
+	if (cvar("teamknockback") == 1) return "\nTeam Knockback: On               ";
+	
+	return "\nTeam Knockback: Error            ";
 };
 
 string() Write_Bunnyhop =
 {
 	if (cvar("allow_bunnyhopping") == 0) return "\nBunnyhopping: Off            ";
 	if (cvar("allow_bunnyhopping") == 1) return "\nBunnyhopping: On             ";
+	
 	return "\nBunnyhopping: Error          ";
+};
+
+string() Write_Coop_Teamknockback =
+{
+	if (cvar("teamknockback") == 0) return "\nAlly Knockback: Off              ";
+	if (cvar("teamknockback") == 1) return "\nAlly Knockback: On               ";
+	
+	return "\nAlly Knockback: Error            ";
 };
 
 string() Write_Player_Physics =
@@ -173,8 +205,17 @@ string() Write_Player_Physics =
 		if (cvar("qw_physics_capped") == 1) return "\n Player Physics: QuakeWorld(Capped)";
 	}
 	if (cvar("sv_nqplayerphysics") == 1) 	    return "\nPlayer Physics: Net Quake        ";
-//	if (cvar("sv_nqplayerphysics") == 2) return "\nPlayer Physics: Quake II		";	
+//	if (cvar("sv_nqplayerphysics") == -1) return "\nPlayer Physics: Quake II		";	
+
 	return "\nPlayer Physics: Error            ";
+};
+
+string() Write_Player_Collision =
+{
+	if (cvar("player_collision") == FALSE) return "\nPlayer Collision: Off                ";
+	if (cvar("player_collision") == TRUE) return "\nPlayer Collision: On                 ";
+	
+	 return "\nPlayer Collision: Error              ";
 };
 
 string() Write_Current_Num_Players_Coop =
@@ -509,6 +550,7 @@ void() Write_MOTD =
 {		
 	// Sleeper: Perhaps overdone, but this makes MOTD-making a whole lot more easier.
 	string motd_gameworld        = Write_Official_GameWorld_Names (),
+	       motd_campaign_name    = Write_Campaign_Names (),
 	       motd_gametypes        = Write_Gametypes (),
 	       motd_runes            = Write_Runes (),
 	       motd_team_self_dmg    = Write_Coop_Team_And_Self_Damage (),
@@ -518,6 +560,7 @@ void() Write_MOTD =
 	       motd_difficulty       = Write_Difficulty (),	
 	       motd_bunnyhop	     = Write_Bunnyhop (),
 	       motd_physics          = Write_Player_Physics (),
+	       motd_player_collision = Write_Player_Collision (),
 	       motd_ally_coop_cnt    = Write_Current_Num_Players_Coop (),
 	       motd_plyr_dm_cnt	     = Write_Current_Num_Players_DM (),
 	       motd_red_members_cnt  = Write_Red_Members_Count (),
@@ -531,11 +574,11 @@ void() Write_MOTD =
 	// Sleeper: For Co-operative and Public Single Player (for solo speedrunning) modes.
 	if (!cvar("deathmatch"))
 	{
-		motd_extra_string = sprintf ("%s%s%s%s", motd_ally_coop_cnt, motd_team_self_dmg, motd_team_coop_knock, motd_bunnyhop);
+		motd_extra_string = sprintf ("%s%s%s%s%s", motd_ally_coop_cnt, motd_team_self_dmg, motd_team_coop_knock, motd_bunnyhop, motd_player_collision);
 		if (!cvar("coop") && cvar("sv_public") == 1)
-			motd_main_string = sprintf ("\n\nWelcome to Net QuakeWorld,\n%s%s%s%s", self.netname, motd_gameworld, motd_difficulty, motd_physics);
+			motd_main_string = sprintf ("\n\nWelcome to Net QuakeWorld,\n%s%s%s%s%s", self.netname, motd_gameworld, motd_campaign_name, motd_difficulty, motd_physics);
 		if (cvar("coop") >= REIGNITED_COOP && cvar("coop") <= ENHANCED_COOP)
-			motd_main_string = sprintf ("\n\nWelcome to Net QuakeWorld,\n%s%s%s%s%s%s", self.netname, motd_gameworld, motd_gametypes, motd_difficulty, motd_extra_string, motd_physics);
+			motd_main_string = sprintf ("\n\nWelcome to Net QuakeWorld,\n%s%s%s%s%s%s%s", self.netname, motd_gameworld, motd_campaign_name, motd_gametypes, motd_difficulty, motd_extra_string, motd_physics);
 	}	
 	
 	// Sleeper: For Deathmatch Modes.
@@ -574,6 +617,7 @@ string() sprint_skill =
 	if (cvar("skill") == 3) return "Classic Nightmare!";
 	if (cvar("skill") == 4) return "KEX Nightmare!";	
 	if (cvar("skill") == 5) return "'Sleeper Must Die!'";
+	
 	return "a Unknown ";
 };
 
@@ -593,17 +637,14 @@ void() Send_MOTD =
 	if (warmup_engaged) return;
 	
 	// Turn off MOTD with an input.
-	if (self.greet == 1)
-	{	
-		// Interchangeable MOTD.
-		Write_MOTD ();
+	// Interchangeable MOTD.
+	Write_MOTD ();
 		
-		// If the player hits any of these inputs, the centerprint will disappear.
-		if (self.button0 || self.button1 || self.button2)
-		{
-			id1_centerprint (self, "", "\n"); // Immediately remove current centerprint from screen (hopefully isn't repeating). 			
-			self.greet = 0;			
-		}
+	// If the player hits any of these inputs, the centerprint will disappear.
+	if (self.button0 || self.button1 || self.button2)
+	{
+		id1_centerprint (self, "", "\n"); // Immediately remove current centerprint from screen (hopefully isn't repeating).
+		self.motdgreeting = DISABLE_MOTD;			
 	}
 };
 

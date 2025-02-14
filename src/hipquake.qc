@@ -24,77 +24,65 @@
 float hip_earthquake;
 float quakeactive;
 
-void() StopEarthQuake =
-{
-	hip_earthquake = 0;
-};
+void() StopEarthQuake = {hip_earthquake = 0;};
 
 void(float value) EarthQuakeTime =
 {
-   value = value + time;
-   if (value > hip_earthquake)
-   {
-	hip_earthquake = value;
-   }
+	value += time;
+	if (value > hip_earthquake) hip_earthquake = value;
 };
 
 void() earthquake_prethink =
 {
-//   if ( lastearthquake )
+//   	if (lastearthquake)
 //      {
-//      self.view_ofs_z = self.savedz;
-//      lastearthquake = 0;
+//     		 self.view_ofs_z = self.savedz;
+//      	lastearthquake = 0;
 //      }
 };
 
 void() earthquake_postthink =
 {
-      if (hip_earthquake > time)
-      {
-	      if (quakeactive == 0)
-	      {
-		   sound (self, CHAN_VOICE, "misc/quake.wav", 1, ATTN_NONE);
-		   quakeactive = 1;
-	      }
-	//      lastearthquake = 1;
-	//      self.savedz = self.view_ofs_z;
-	      if (self.flags & FL_ONGROUND)
-	      {
-	//         self.view_ofs_z = self.view_ofs_z - 5 + random() * 10;
-		   self.velocity = self.velocity + (random() * '0 0 150');
-	      }
-      }
-      else
-      {
-	      if (quakeactive == 1)
-	      {
-		   sound (self, CHAN_VOICE, "misc/quakeend.wav", 1, ATTN_NONE);
-		   quakeactive = 0;
-	      }
-      }
+	if (hip_earthquake > time)
+	{
+		if (quakeactive == FALSE)
+		{
+			sound (self, CHAN_VOICE, "misc/quake.wav", 1, ATTN_NONE);
+			quakeactive = TRUE;
+		}
+//    	      	lastearthquake = TRUE;
+//     	      	self.savedz = self.view_ofs_z;
+		if (self.flags & FL_ONGROUND)
+		{
+//         		self.view_ofs_z -= 5 + random() * 10;
+			self.velocity += random() * '0 0 150';
+		}
+	}
+	else
+	{
+		if (quakeactive == TRUE)
+		{
+			sound (self, CHAN_VOICE, "misc/quakeend.wav", 1, ATTN_NONE);
+			quakeactive = FALSE;
+		}
+	}
 };
 
-void() earthquake_use =
-{
-	EarthQuakeTime(self.dmg);
-};
+void() earthquake_use = {EarthQuakeTime(self.dmg);};
 
 /*QUAKED func_earthquake (0 0 0.5) (0 0 0) (32 32 32)
 Causes an earthquake.  Triggers targets.
 
 "dmg" is the duration of the earthquake.  Default is 0.8 seconds.
 */
-
 void() func_earthquake =
 {
-	quakeactive = 0;
-	precache_sound("misc/quake.wav");
-	precache_sound("misc/quakeend.wav");
+	quakeactive = FALSE;
+	precache_sound ("misc/quake.wav");
+	precache_sound ("misc/quakeend.wav");
 	self.classname = "earthquake";
 	self.use = earthquake_use;
 	self.think = SUB_Null;
-	if (!self.dmg)
-	{
-		self.dmg = 0.8;
-	}
+	
+	if (!self.dmg) self.dmg = 0.8;
 };

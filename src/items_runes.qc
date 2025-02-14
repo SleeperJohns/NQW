@@ -35,8 +35,8 @@ float SIGIL_E6 = 512; //32;
 float SIGIL_NUMBITS = 6;
 */
 
-float SIGIL_ALL 	  = SIGIL_E1 | SIGIL_E2 | SIGIL_E3 | SIGIL_E4 | SIGIL_E5;
-float SIGIL_ALL_ALL_ALLLL = SIGIL_E1 | SIGIL_E2 | SIGIL_E3 | SIGIL_E4 | SIGIL_E5 | SIGIL_E6;
+float SIGIL_MG1_ALL 	      = SIGIL_MG1_E1 | SIGIL_MG1_E2 | SIGIL_MG1_E3 | SIGIL_MG1_E4 | SIGIL_MG1_E5;
+float SIGIL_MG1_ALL_ALL_ALLLL = SIGIL_MG1_E1 | SIGIL_MG1_E2 | SIGIL_MG1_E3 | SIGIL_MG1_E4 | SIGIL_MG1_E5 | SIGIL_MG1_E6;
 
 void() sigil_touch_mg1 =
 {
@@ -44,30 +44,16 @@ void() sigil_touch_mg1 =
 	if (other.classname != "player") return;
 	if (other.health <= 0) return;
 
-//	centerprint_all (self.netname); // Netname is localized
-	
-	id1_centerprint (other, "You got the ", self.netname, "!\n");
-	
-	// Broadcast a centerprint to all players with the player's nickname added to the message, unless it's a single player game.
-	if (coop >= REIGNITED_COOP)
-	{
-		local entity all_players = find (world, classname, "player");
-		while (all_players)
-		{	
-			if (all_players != other) id1_centerprint (all_players, other.netname, " got the\n", self.netname, "!\n");
-			all_players = find (all_players, classname, "player");
-		}
-	}
-	
+	centerprint_all (other, sprintf("You got the %s!", self.netname), sprintf("%s got the %s!", other.netname, self.netname)); 
 	sound (other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
 	self.solid = SOLID_NOT;
 	self.model = string_null;
 	
-	local float lastPickup = SUB_LeftShift (self.spawnflags & SIGIL_ALL, SIGIL_NUMBITS);
-	serverflags |= (self.spawnflags & SIGIL_ALL) | lastPickup;
+	local float lastPickup = SUB_LeftShift (self.spawnflags & SIGIL_MG1_ALL, SIGIL_MG1_NUMBITS);
+	serverflags |= (self.spawnflags & SIGIL_MG1_ALL) | lastPickup;
 	
-	if (cvar("horde") && (self.spawnflags & SIGIL_E2)) // Hunger
+	if (cvar("horde") && (self.spawnflags & SIGIL_MG1_E2)) // Hunger
 	{
 		local entity e = find (world, classname, "player");
 		while (e)
@@ -85,13 +71,9 @@ void() sigil_touch_mg1 =
 };
 
 
-float() sigil_getLastPickup =
-{
-	local float lastPickup = SUB_RightShift (serverflags, SIGIL_NUMBITS) & SIGIL_ALL;
-	return lastPickup;
-};
+float() sigil_getLastPickup = {return SUB_RightShift (serverflags, SIGIL_MG1_NUMBITS) & SIGIL_MG1_ALL;};
 
-void() sigil_clearLastPickup = {serverflags &= ~SUB_LeftShift (SIGIL_ALL, SIGIL_NUMBITS);};
+void() sigil_clearLastPickup = {serverflags &= ~SUB_LeftShift (SIGIL_MG1_ALL, SIGIL_MG1_NUMBITS);};
 
 /*QUAKED item_sigil_mg1 (0 .5 .8) (-16 -16 -24) (16 16 32) E1 E2 E3 E4 E5 E6
 End of level sigil_mg1, pick up to end episode and return to jrhub.
@@ -102,46 +84,46 @@ void() item_sigil_mg1 =
 	dprint ("SPAWNING SIGIL: ");
 	dprint (ftos(self.spawnflags));
 	dprint ("\n");
-	if (!self.spawnflags) self.spawnflags |= SIGIL_E1;
-
+	if (!self.spawnflags) self.spawnflags |= SIGIL_MG1_E1;
+	
 	precache_sound ("misc/runekey.wav");
 	self.noise = "misc/runekey.wav";
 
 	local string tempmdl = string_null;
 
-	if (self.spawnflags & SIGIL_E1)
+	if (self.spawnflags & SIGIL_MG1_E1)
 	{
-		self.spawnflags = SIGIL_E1;
+		self.spawnflags = SIGIL_MG1_E1;
 		tempmdl = "progs/mg1_rune1.mdl";
 		self.netname = "Rune of Machinists";
 	}
-	else if (self.spawnflags & SIGIL_E2)
+	else if (self.spawnflags & SIGIL_MG1_E2)
 	{
-		self.spawnflags = SIGIL_E2;
+		self.spawnflags = SIGIL_MG1_E2;
 		tempmdl = "progs/mg1_rune2.mdl";
 		self.netname = "Rune of Blacksmiths";
 	}
-	else if (self.spawnflags & SIGIL_E3)
+	else if (self.spawnflags & SIGIL_MG1_E3)
 	{
-		self.spawnflags = SIGIL_E3;
+		self.spawnflags = SIGIL_MG1_E3;
 		tempmdl = "progs/mg1_rune3.mdl";
 		self.netname = "Rune of Stonemasons";
 	}
-	else if (self.spawnflags & SIGIL_E4)
+	else if (self.spawnflags & SIGIL_MG1_E4)
 	{
-		self.spawnflags = SIGIL_E4;
+		self.spawnflags = SIGIL_MG1_E4;
 		tempmdl = "progs/mg1_rune4.mdl";
 		self.netname = "Rune of Cultists";
 	}
-	else if (self.spawnflags & SIGIL_E5)
+	else if (self.spawnflags & SIGIL_MG1_E5)
 	{
-		self.spawnflags = SIGIL_E5;
+		self.spawnflags = SIGIL_MG1_E5;
 		tempmdl = "progs/mg1_rune5.mdl";
 		self.netname = "Rune of Astrologers";
 	}
-	else if (self.spawnflags & SIGIL_E6)
+	else if (self.spawnflags & SIGIL_MG1_E6)
 	{
-		self.spawnflags = SIGIL_E6;
+		self.spawnflags = SIGIL_MG1_E6;
 		tempmdl = "progs/mg1_rune6.mdl";
 		self.netname = "Secret Rune";
 	}
@@ -158,52 +140,49 @@ void() item_sigil_mg1 =
 
 // ===============================================================================
 
-const float RUNE_INDICATOR_ACTIVE = 1024;
+const float RUNE_INDICATOR_ACTIVE = 1048576;
 
-void() misc_rune_indicator_use =
-{
-	self.alpha = 1.0;
-	SUB_UseTargets ();
-};
+void() misc_rune_indicator_use = {self.alpha = 1.0; SUB_UseTargets ();};
 
 void() misc_rune_indicator =
 {
 	local float active = self.spawnflags & RUNE_INDICATOR_ACTIVE ? TRUE : FALSE;
 	self.spawnflags (-) RUNE_INDICATOR_ACTIVE;
-	if (!self.spawnflags) self.spawnflags |= SIGIL_E1;
+
+	if (!self.spawnflags) self.spawnflags = SIGIL_MG1_E1;
 		
-	self.spawnflags &= SIGIL_ALL_ALL_ALLLL;
+	self.spawnflags &= SIGIL_MG1_ALL_ALL_ALLLL;
 
-	string mdl = string_null;
+	local string mdl = string_null;
 
-	if (self.spawnflags & SIGIL_E1)
+	if (self.spawnflags & SIGIL_MG1_E1)
 	{
-		self.spawnflags = SIGIL_E1;
+		self.spawnflags = SIGIL_MG1_E1;
 		mdl = "progs/mg1_rune1.mdl";
 	}
-	else if (self.spawnflags & SIGIL_E2)
+	if (self.spawnflags & SIGIL_MG1_E2)
 	{
-		self.spawnflags = SIGIL_E2;
+		self.spawnflags = SIGIL_MG1_E2;
 		mdl = "progs/mg1_rune2.mdl";
 	}
-	else if (self.spawnflags & SIGIL_E3)
+	if (self.spawnflags & SIGIL_MG1_E3)
 	{
-		self.spawnflags = SIGIL_E3;
+		self.spawnflags = SIGIL_MG1_E3;
 		mdl = "progs/mg1_rune3.mdl";
 	}
-	else if (self.spawnflags & SIGIL_E4)
+	if (self.spawnflags & SIGIL_MG1_E4)
 	{
-		self.spawnflags = SIGIL_E4;
+		self.spawnflags = SIGIL_MG1_E4;
 		mdl = "progs/mg1_rune4.mdl";
 	}
-	else if (self.spawnflags & SIGIL_E5)
+	if (self.spawnflags & SIGIL_MG1_E5)
 	{
-		self.spawnflags = SIGIL_E5;
+		self.spawnflags = SIGIL_MG1_E5;
 		mdl = "progs/mg1_rune5.mdl";
 	}
-	else if (self.spawnflags & SIGIL_E6)
+	if (self.spawnflags & SIGIL_MG1_E6)
 	{
-		self.spawnflags = SIGIL_E6;
+		self.spawnflags = SIGIL_MG1_E6;
 		mdl = "progs/mg1_rune6.mdl";
 	}
     
@@ -217,9 +196,9 @@ void() misc_rune_indicator =
 		self.think = SUB_UseTargets;
 		self.nextthink = time + 0.2;
 	}
-	else
+	else 
 	{
 		// Show a ghost of the rune before you collect it.
-		if (!(self.spawnflags & SIGIL_E6)) self.alpha = 0.2; // Sleeper: Secret Rune should be at a full opacity.
+		if (!(self.spawnflags & SIGIL_MG1_E6)) self.alpha = 0.2; // Sleeper: Secret Rune should be at a full opacity.
 	}
 };

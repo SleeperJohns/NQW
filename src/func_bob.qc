@@ -55,7 +55,7 @@ void() func_bob_blocked =
 // Used by non-solid bobbers
 void(float dt) func_bob_tick =
 {
-	vector offs = func_bob_GetPositionForAngle (self.avelocity_x * dt);
+	vector offs = func_bob_GetPositionForAngle (self.velocity_x * dt);
 	setorigin (self, offs);
 };
 

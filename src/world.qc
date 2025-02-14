@@ -417,45 +417,15 @@ float startingserverflags;
 
 void() Server_Hostname_Change;
 void() worldspawn =
-{
-//	local float mg1_horde_maps_pool  = (world.model == "maps/horde1.bsp" || world.model == "maps/horde2.bsp" || world.model == "maps/horde3.bsp" || world.model == "maps/horde4.bsp" || world.model == "maps/horde5.bsp" || world.model == "maps/horde6.bsp" || world.model == "maps/horde7.bsp");
-
-	local float id1_maps_pool        = (world.model == "maps/start.bsp" || world.model == "maps/e1m1.bsp" || world.model == "maps/e1m2.bsp" || world.model == "maps/e1m3.bsp" || world.model == "maps/e1m4.bsp" || world.model == "maps/e1m5.bsp" || world.model == "maps/e1m6.bsp" || world.model == "maps/e1m7.bsp" || world.model == "maps/e1m8.bsp" || 
-			                    world.model == "maps/e2m1.bsp" || world.model == "maps/e2m2.bsp" || world.model == "maps/e2m3.bsp" || world.model == "maps/e2m4.bsp" || world.model == "maps/e2m4_qe.bsp" || world.model == "maps/e2m5.bsp" || world.model == "maps/e2m6_qe.bsp" || world.model == "maps/e2m6.bsp" || world.model == "maps/e2m7.bsp" ||
-			                    world.model == "maps/e3m1.bsp" || world.model == "maps/e3m2.bsp" || world.model == "maps/e3m3.bsp" || world.model == "maps/e3m4.bsp" || world.model == "maps/e3m5.bsp" || world.model == "maps/e3m6.bsp" || world.model == "maps/e3m7.bsp" ||
-			                    world.model == "maps/e4m1.bsp" || world.model == "maps/e4m2.bsp" || world.model == "maps/e4m3.bsp" || world.model == "maps/e4m4.bsp" || world.model == "maps/e4m5.bsp" || world.model == "maps/e4m6.bsp" || world.model == "maps/e4m7.bsp" || world.model == "maps/e4m8.bsp" ||
-			                    world.model == "maps/end.bsp" || world.model == "maps/dm1.bsp" || world.model == "maps/dm2.bsp" || world.model == "maps/dm3.bsp" || world.model == "maps/dm4.bsp" || world.model == "maps/dm5.bsp" || world.model == "maps/dm6.bsp" || world.model == "maps/dm7.bsp" || world.model == "maps/dm8.bsp" || world.model == "maps/base32b.bsp" || world.model == "maps/death32c.bsp" ||
-			                    world.model == "maps/dm1sp.bsp" || world.model == "maps/dm2sp.bsp" || world.model == "maps/dm3sp.bsp" || world.model == "maps/dm4sp.bsp" || world.model == "maps/dm5sp.bsp" || world.model == "maps/dm6sp.bsp" || world.model == "maps/dm7sp.bsp" || world.model == "maps/dm8sp.bsp");
-			   
-	local float hipnotic_maps_pool   = (world.model == "maps/hipstart.bsp" || world.model == "maps/hip1m1.bsp" || world.model == "maps/hip1m2.bsp" || world.model == "maps/hip1m3.bsp" || world.model == "maps/hip1m4.bsp" || world.model == "maps/hip1m5.bsp" ||
-			                    world.model == "maps/hip2m1.bsp" || world.model == "maps/hip2m2.bsp" || world.model == "maps/hip2m3.bsp" || world.model == "maps/hip2m4.bsp" || world.model == "maps/hip2m5.bsp" || world.model == "maps/hip2m6.bsp" ||
-			                    world.model == "maps/hip3m1.bsp" || world.model == "maps/hip3m2.bsp" || world.model == "maps/hip3m3.bsp" || world.model == "maps/hip3m4.bsp" || world.model == "maps/hipend.bsp" || world.model == "maps/hipdm1.bsp");
-			     
-	local float rogue_maps_pool      = (world.model == "maps/rstart.bsp" || world.model == "maps/r1m1.bsp" || world.model == "maps/r1m2.bsp" || world.model == "maps/r1m3.bsp" || world.model == "maps/r1m4.bsp" || world.model == "maps/r1m5.bsp" || world.model == "maps/r1m6.bsp" || world.model == "maps/r1m7.bsp" || 
-			                    world.model == "maps/r2m1.bsp" || world.model == "maps/r2m2.bsp" || world.model == "maps/r2m3.bsp" || world.model == "maps/r2m4.bsp" || world.model == "maps/r2m5.bsp" || world.model == "maps/r2m6.bsp" || world.model == "maps/r2m7.bsp" || world.model == "maps/rend.bsp" || 
-			                    world.model == "maps/ctf1.bsp");
-			       
-	local float dopa_maps_pool       = (world.model == "maps/e5start.bsp" || world.model == "maps/e5m1.bsp" || world.model == "maps/e5m2.bsp" || world.model == "maps/e5m3.bsp" || world.model == "maps/e5m4.bsp" || world.model == "maps/e5m5.bsp" || world.model == "maps/e5m6.bsp" || world.model == "maps/e5m7.bsp" || 
-			                    world.model == "maps/e5end.bsp" || world.model == "maps/e5dm.bsp" || world.model == "maps/e5sm1.bsp" || world.model == "maps/e5sm2.bsp");
-			       
-	local float mg1_main_maps_pool   = (world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp" || world.model == "maps/mge1m1.bsp" || world.model == "maps/mge1m2.bsp" || world.model == "maps/mge1m3.bsp" ||
-			                    world.model == "maps/mge2m1.bsp" || world.model == "maps/mge2m2.bsp" || 
-			                    world.model == "maps/mge3m1.bsp" || world.model == "maps/mge3m2.bsp" ||
-			                    world.model == "maps/mge4m1.bsp" || world.model == "maps/mge4m2.bsp" || world.model == "maps/mge4m2b.bsp" || world.model == "maps/mge4arena.bsp" ||
-			                    world.model == "maps/mge5m1.bsp" || world.model == "maps/mge5m2.bsp" ||
-			                    world.model == "maps/mgend.bsp" || world.model == "maps/mgdm1.bsp" || world.model == "maps/mgdm2.bsp" || world.model == "maps/mgdm3.bsp" || world.model == "maps/mgdm4.bsp");
-	
-	local float apotheosis_map_pool  = (world.model == "maps/apotheosis_sleeper.bsp");
-	
-//	local float custom_maps_pool;
-
-	
+{	
 	precache_sound ("misc/runekey.wav"); // Latched sound for voting
 	precache_sound ("misc/sleepermustdie.wav"); // Sleeper Must Die! Skill Sound
 	startingserverflags = serverflags;
 	skill = cvar("skill");
 	isHordeMode = cvar("horde");	
 	lastspawn = world;	
+	
+	if (cvar("pr_checkextension") && checkextension("QUAKE_EX")) isKex = TRUE;	
 	
 	send_ssqc_to_csqc ();
 	
@@ -471,20 +441,23 @@ void() worldspawn =
 	// JIM
 	InitBulletHoles();
 	
-	if (id1_maps_pool) gameworld = ID1;
-	else if (hipnotic_maps_pool) gameworld = HIPNOTIC;
-	else if (rogue_maps_pool) gameworld = ROGUE;
-	else if (dopa_maps_pool) gameworld = DOPA;
-	else if (mg1_main_maps_pool || world.model == RandomHordeMode_MapsList_World[HordeMaps()]) gameworld = MG1;
-//	else if (mg1_main_maps_pool || mg1_horde_maps_pool) gameworld = MG1;
-	else if (apotheosis_map_pool) gameworld = APOTHEOSIS;
-//	else if (custom_maps_pool) gameworld = CUSTOM;
-//	else gameworld = UNKNOWN;
-	else gameworld = CUSTOM;	
+	     if (self.model == Start_Maplist_World[1] || self.model == ID1_Maplist_World[ID1_Maps_Finder()]) gameworld = ID1;
+	else if (self.model == Start_Maplist_World[2] || self.model == HIP_Maplist_World[HIP_Maps_Finder()]) gameworld = HIPNOTIC;
+	else if (self.model == Start_Maplist_World[3] || self.model == ROGUE_Maplist_World[ROGUE_Maps_Finder()]) gameworld = ROGUE;
+	else if (self.model == Start_Maplist_World[4] || self.model == DOPA_Maplist_World[DOPA_Maps_Finder()]) gameworld = DOPA;
+	else if ((self.model == Start_Maplist_World[5]) || (self.model == Start_Maplist_World[6] && self.worldtype == WORLDTYPE_HUB) || (self.model == MG1_Maplist_World[MG1_Maps_Finder()]) || (self.model == HordeMode_MapsList_World[HordeMaps_Finder()])) gameworld = MG1;
+	else if (self.model == CustomCoop_MapsList_World[CustomCoopMaps_Finder()] || self.model == CustomDM_Maplist_World[CustomDMMaps_Finder()]) gameworld = CUSTOM;
+	else if (self.model == "maps/apotheosis_sleeper.bsp") gameworld = APOTHEOSIS;
+	else gameworld = UNKNOWN;	
 					      	
-// custom map attributes
-	if (self.model == "maps/e1m8.bsp") cvar_set ("sv_gravity", "100");
-	else cvar_set ("sv_gravity", "800");
+	// Custom map attributes
+	if (!self.gravity) 
+	{
+		if (self.model == "maps/e1m8.bsp") self.gravity = 100;
+		else self.gravity = 800;
+	}
+
+	cvar_set ("sv_gravity", ftos(self.gravity));
 
 // the area based ambient sounds MUST be the first precache_sounds
 
@@ -684,11 +657,9 @@ void() worldspawn =
 	if (cvar("crosshair") == 2) footsteps = 1;
 	else footsteps = 0;	
 	*/
-	if (!deathmatch)
-	{
-		if (gameworld == HIPNOTIC) footsteps = 1;
-		else footsteps = 0;
-	}
+	
+	if ((gameworld == HIPNOTIC && !deathmatch) || (cvar("instagib") == INSTAGIB_RAILWARZ && deathmatch)) footsteps = 1;
+	else footsteps = 0;
 	
 	precache_model ("progs/missile.mdl");
 	precache_model ("progs/grenade.mdl");
@@ -783,7 +754,7 @@ void() StartFrame =
 	}
 				
 	// Disable Horde Mode when not playing horde mode maps.
-	if (!mg1_horde_maps_pool) cvar_set("horde", "0");
+	if (!mg1_horde_maps_pool && gameworld != APOTHEOSIS) cvar_set("horde", "0");
 	
 	if (cvar("deathmatch"))
 	{
@@ -844,9 +815,8 @@ void() StartFrame =
 	if (!Halt_GameWorld_Traffic)
 	{
 		// Determine what Game World we are in.
-		localcmd ("serverinfo ");
-		localcmd (Campaign_Name());
-		localcmd ("\n");						
+		forceinfokey (world, "GameWorld", GameWorld_Name());
+		forceinfokey (world, "Campaign", Campaign_Name());						
 		Halt_GameWorld_Traffic = TRUE; // Safety against traffic spam
 	}		
 	// Net QuakeWorld ------------------------------------

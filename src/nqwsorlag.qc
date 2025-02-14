@@ -13,9 +13,9 @@ void() NQW_SorlagPrecache =
 void() NQW_Sorlag =
 {
 	// Model
-	setmodel (self, "progs/player_sorlag.mdl");
+	self.nqwMdlChar = "progs/player_sorlag.mdl";
 //	setsize(self, '-16 -20 -24', '16 20 40');
-//    	self.view_ofs = '0 0 26';
+   	self.view_ofs = '0 0 26';
 	self.nqwCharGib = "progs/h_player_sorlag.mdl";
 	self.nqwMeleeMdl = "progs/v_sorclaw.mdl";
 	self.nqwHammerMdl = "progs/v_hammer.mdl";

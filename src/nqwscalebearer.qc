@@ -13,7 +13,8 @@ void() NQW_ScalebearerPrecache =
 void() NQW_Scalebearer =
 {
 	// Model
-	setmodel (self, "progs/player_scalebearer.mdl");
+	self.nqwMdlChar = "progs/player_scalebearer.mdl";
+	self.view_ofs = '0 0 26';
 	self.nqwCharGib = "progs/h_player_scalebearer.mdl";
 	self.nqwMeleeMdl = "progs/v_gaunt.mdl";
 	self.nqwHammerMdl = "progs/v_hammer.mdl";

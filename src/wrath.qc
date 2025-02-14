@@ -355,6 +355,8 @@ void(float AttackNumber) WrathMissile =
 	missile.nextthink = time + 0.1;
 	missile.think = WrathHome;
 	
+	entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+	
 	self.attack_finished = time + 2;
 };
 

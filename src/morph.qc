@@ -74,7 +74,7 @@ void() morph_teleport;
 // ========================
 // standing
 // ========================
-void() morph_stand1 = [ $mfstand1, morph_stand1 ] { ai_stand(); };
+void() morph_stand1 = [ $mfstand1, morph_stand1 ] {ai_stand();};
 
 // ========================
 // movement
@@ -103,23 +103,23 @@ void() morph_walk13 = [ $mfwlk13, morph_walk1  ] {ai_walk(3);};
 // 8 6 4 10 13 13 11 10
 // 11 15 10 10 8 15 10 8 8 8 8
 // 6 9 13 13 9 6 9 13 15 13 9
-void() morph_run1 = [ $mfrun01, morph_run2 ] { ai_run( 7);};
+void() morph_run1 = [ $mfrun01, morph_run2 ] {ai_run( 7);};
 	// 33
-void() morph_run2 = [ $mfrun02, morph_run3 ] { ai_run(11);};
-void() morph_run3 = [ $mfrun03, morph_run4 ] { ai_run(16);};
-void() morph_run4 = [ $mfrun04, morph_run5 ] { ai_run(16);};
+void() morph_run2 = [ $mfrun02, morph_run3 ] {ai_run(11);};
+void() morph_run3 = [ $mfrun03, morph_run4 ] {ai_run(16);};
+void() morph_run4 = [ $mfrun04, morph_run5 ] {ai_run(16);};
 	// 36
-void() morph_run5 = [ $mfrun05, morph_run6 ] { ai_run(11);};
-void() morph_run6 = [ $mfrun06, morph_run7 ] { ai_run( 7);};
+void() morph_run5 = [ $mfrun05, morph_run6 ] {ai_run(11);};
+void() morph_run6 = [ $mfrun06, morph_run7 ] {ai_run( 7);};
 	// 38
-void() morph_run7 = [ $mfrun07, morph_run8 ] { ai_run(11);};
-void() morph_run8 = [ $mfrun08, morph_run9 ] { ai_run(15);};
+void() morph_run7 = [ $mfrun07, morph_run8 ] {ai_run(11);};
+void() morph_run8 = [ $mfrun08, morph_run9 ] {ai_run(15);};
 	// 40
 void() morph_run9 = [ $mfrun09, morph_run10 ] {ai_run(19);};
 		
 void() morph_run10 =[ $mfrun10, morph_run11 ] {ai_run(15);};
 		
-void() morph_run11 =[ $mfrun11, morph_run1 ] { ai_run(11);};
+void() morph_run11 =[ $mfrun11, morph_run1 ] {ai_run(11);};
 	// 43
 
 // ========================
@@ -127,43 +127,41 @@ void() morph_run11 =[ $mfrun11, morph_run1 ] { ai_run(11);};
 // ========================
 void() morph_stab2 =
 {
-	local float		dist;
-	local float		attackDamage;
-	local vector	org, dir;
+	local float dist;
+	local float attackDamage;
+	local vector org, dir;
 	
-	if (!self.enemy)
-		return;
-	if (!CanDamage (self.enemy, self))
-		return;
+	if (!self.enemy) return;
+	if (!CanDamage(self.enemy, self)) return;
 
-	ai_face();
+	ai_face ();
 
 	dir = self.enemy.origin - self.origin + self.enemy.view_ofs;
-	dist = vlen ( dir );
-	dir = normalize ( dir );
+	dist = vlen(dir);
+	dir = normalize(dir);
 	makevectors (self.angles);
 
-	if ( dist <= 90 )
+	if (dist <= 90)
 	{
 		sound (self, CHAN_WEAPON, "enforcer/enfstop.wav", 1, ATTN_STATIC);
-	    attackDamage = (random() * 10) + 20;
+		attackDamage = (random() * 10) + 20;
 		T_Damage (self.enemy, self, self, attackDamage);
-		SpawnBlood ( self.enemy.origin, v_forward * 150, 14);
+		SpawnBlood (self.enemy.origin, v_forward * 150, 14);
 	}
 	else
 	{
-		self.effects = self.effects | EF_MUZZLEFLASH;
+		self.effects |= EF_MUZZLEFLASH;
 		org = self.origin + v_forward * 80 + v_right * 4 + '0 0 4';
-		LaunchLaser(org, dir);
-		if ( dist )
+		LaunchLaser (org, dir);
+		if (dist)
 		{
-			LaunchLaser(org, (dir + v_right * 0.04));
-			LaunchLaser(org, (dir - v_right * 0.04));
+			LaunchLaser (org, (dir + v_right * 0.04));
+			LaunchLaser (org, (dir - v_right * 0.04));
 		}
 		else
 		{
-			LaunchLaser(org, (dir + v_right * 0.10));
-			LaunchLaser(org, (dir - v_right * 0.10));	
+			LaunchLaser (org, (dir + v_right * 0.10));
+			LaunchLaser (org, (dir - v_right * 0.10));	
 		}
 	}	
 };
@@ -185,73 +183,62 @@ void() morph_attack10 = [ $mfatb10, morph_attack11 ] {ai_face();};
 void() morph_attack11 = [ $mfatb11, morph_attack12 ] {ai_face();};
 void() morph_attack12 = [ $mfatb01, morph_run1     ] {ai_face();};
 
-void() morph_bigattack01 = [ $mfatc01, morph_bigattack02 ] { ai_face(); };
-void() morph_bigattack02 = [ $mfatc02, morph_bigattack03 ] { ai_face(); };
-void() morph_bigattack03 = [ $mfatc03, morph_bigattack04 ] { ai_face(); };
-void() morph_bigattack04 = [ $mfatc04, morph_bigattack05 ] { ai_face(); };
-void() morph_bigattack05 = [ $mfatc05, morph_bigattack06 ] { ai_face(); };
-void() morph_bigattack06 = [ $mfatc06, morph_bigattack07 ] { ai_face(); };
-void() morph_bigattack07 = [ $mfatc07, morph_bigattack08 ] { ai_face(); };
-void() morph_bigattack08 = [ $mfatc08, morph_bigattack09 ] { ai_face(); };
-void() morph_bigattack09 = [ $mfatc09, morph_bigattack10 ] { ai_face(); };
-void() morph_bigattack10 = [ $mfatc10, morph_bigattack11 ] { morph_stab2();};
-void() morph_bigattack11 = [ $mfatc11, morph_bigattack12 ] { ai_face(); };
-void() morph_bigattack12 = [ $mfatc12, morph_bigattack13 ] { ai_face(); };
-void() morph_bigattack13 = [ $mfatc13, morph_bigattack14 ] { ai_face(); };
-void() morph_bigattack14 = [ $mfatc14, morph_bigattack15 ] { ai_face(); };
-void() morph_bigattack15 = [ $mfatc15, morph_bigattack16 ] { ai_face(); };
-void() morph_bigattack16 = [ $mfatc16, morph_bigattack17 ] { ai_face(); };
-void() morph_bigattack17 = [ $mfatc01, morph_run1        ] { ai_face(); };
+void() morph_bigattack01 = [ $mfatc01, morph_bigattack02 ] {ai_face();};
+void() morph_bigattack02 = [ $mfatc02, morph_bigattack03 ] {ai_face();};
+void() morph_bigattack03 = [ $mfatc03, morph_bigattack04 ] {ai_face();};
+void() morph_bigattack04 = [ $mfatc04, morph_bigattack05 ] {ai_face();};
+void() morph_bigattack05 = [ $mfatc05, morph_bigattack06 ] {ai_face();};
+void() morph_bigattack06 = [ $mfatc06, morph_bigattack07 ] {ai_face();};
+void() morph_bigattack07 = [ $mfatc07, morph_bigattack08 ] {ai_face();};
+void() morph_bigattack08 = [ $mfatc08, morph_bigattack09 ] {ai_face();};
+void() morph_bigattack09 = [ $mfatc09, morph_bigattack10 ] {ai_face();};
+void() morph_bigattack10 = [ $mfatc10, morph_bigattack11 ] {morph_stab2();};
+void() morph_bigattack11 = [ $mfatc11, morph_bigattack12 ] {ai_face();};
+void() morph_bigattack12 = [ $mfatc12, morph_bigattack13 ] {ai_face();};
+void() morph_bigattack13 = [ $mfatc13, morph_bigattack14 ] {ai_face();};
+void() morph_bigattack14 = [ $mfatc14, morph_bigattack15 ] {ai_face();};
+void() morph_bigattack15 = [ $mfatc15, morph_bigattack16 ] {ai_face();};
+void() morph_bigattack16 = [ $mfatc16, morph_bigattack17 ] {ai_face();};
+void() morph_bigattack17 = [ $mfatc01, morph_run1        ] {ai_face();};
 
 void() morph_smack = 
 {
-    local vector    delta;
-    local float     ldmg;
+	if (!self.enemy) return;
+	if (!CanDamage(self.enemy, self)) return;
 
-	if (!self.enemy)
-		return;
-	if (!CanDamage (self.enemy, self))
-		return;
+	ai_face ();
 
-	ai_face();
+	local vector delta = self.enemy.origin - self.origin;
 
-	delta = self.enemy.origin - self.origin;
-
-	if (vlen(delta) > 100)
-		return;
+	if (vlen(delta) > 100) return;
 		
-    ldmg = (random() * 10) + 10;
+	local float ldmg = (random() * 10) + 10;
 	T_Damage (self.enemy, self, self, ldmg);
 	
 	makevectors (self.angles);
 	self.enemy.velocity = v_forward * 100 + '0 0 100';
 };
 
-void() morph_knockback01 = [ $mfknck01, morph_knockback02 ] { ai_face(); };
-void() morph_knockback02 = [ $mfknck02, morph_knockback03 ] { ai_face(); };
-void() morph_knockback03 = [ $mfknck03, morph_knockback04 ] { ai_face(); };
-void() morph_knockback04 = [ $mfknck04, morph_knockback05 ] { ai_face(); };
-void() morph_knockback05 = [ $mfknck05, morph_knockback06 ] { ai_face(); };
-void() morph_knockback06 = [ $mfknck06, morph_knockback07 ] { ai_face(); };
-void() morph_knockback07 = [ $mfknck07, morph_knockback08 ] { ai_face(); };
-void() morph_knockback08 = [ $mfknck08, morph_knockback09 ] { ai_face(); };
-void() morph_knockback09 = [ $mfknck09, morph_knockback10 ] { morph_smack(); };
-void() morph_knockback10 = [ $mfknck10, morph_knockback11 ] { ai_face(); };
-void() morph_knockback11 = [ $mfknck11, morph_knockback12 ] { ai_face(); };
-void() morph_knockback12 = [ $mfknck12, morph_run1        ] { ai_face(); };
+void() morph_knockback01 = [ $mfknck01, morph_knockback02 ] {ai_face();};
+void() morph_knockback02 = [ $mfknck02, morph_knockback03 ] {ai_face();};
+void() morph_knockback03 = [ $mfknck03, morph_knockback04 ] {ai_face();};
+void() morph_knockback04 = [ $mfknck04, morph_knockback05 ] {ai_face();};
+void() morph_knockback05 = [ $mfknck05, morph_knockback06 ] {ai_face();};
+void() morph_knockback06 = [ $mfknck06, morph_knockback07 ] {ai_face();};
+void() morph_knockback07 = [ $mfknck07, morph_knockback08 ] {ai_face();};
+void() morph_knockback08 = [ $mfknck08, morph_knockback09 ] {ai_face();};
+void() morph_knockback09 = [ $mfknck09, morph_knockback10 ] {morph_smack();};
+void() morph_knockback10 = [ $mfknck10, morph_knockback11 ] {ai_face();};
+void() morph_knockback11 = [ $mfknck11, morph_knockback12 ] {ai_face();};
+void() morph_knockback12 = [ $mfknck12, morph_run1        ] {ai_face();};
 
 void() morph_attack =
 {
-	local float 	attackChoice;
+	local float attackChoice = random ();
 	
-	attackChoice = random();
-	
-	if (attackChoice < 0.50)
-		morph_bigattack01();
-	else if (attackChoice < 0.75)
-		morph_attack01();
-	else
-		morph_knockback01();
+	if (attackChoice < 0.50) morph_bigattack01 ();
+	else if (attackChoice < 0.75) morph_attack01 ();
+	else morph_knockback01 ();
 };
 
 // ========================
@@ -261,23 +248,23 @@ void() morph_fire =
 {
 	local vector org, dir;
 
-	ai_face();
+	ai_face ();
 	
-	self.effects = self.effects | EF_MUZZLEFLASH;
+	self.effects |= EF_MUZZLEFLASH;
 	
 	makevectors (self.angles);
 	org = self.origin + v_forward * 30 + v_right * 8.5 + '0 0 16';
-	dir = normalize ( self.enemy.origin - self.origin ) ;
-	LaunchLaser(org, dir);
-	if ( vlen (self.enemy.origin - self.origin) > 400 )
+	dir = normalize (self.enemy.origin - self.origin) ;
+	LaunchLaser (org, dir);
+	if (vlen(self.enemy.origin - self.origin) > 400)
 	{
-		LaunchLaser(org, (dir + v_right * 0.04));
-		LaunchLaser(org, (dir - v_right * 0.04));
+		LaunchLaser (org, (dir + v_right * 0.04));
+		LaunchLaser (org, (dir - v_right * 0.04));
 	}
 	else
 	{
-		LaunchLaser(org, (dir + v_right * 0.10));
-		LaunchLaser(org, (dir - v_right * 0.10));	
+		LaunchLaser (org, (dir + v_right * 0.10));
+		LaunchLaser (org, (dir - v_right * 0.10));	
 	}
 
 };
@@ -289,22 +276,22 @@ void() morph_fire4 = [ $mfata04, morph_fire5 ] {morph_fire();};
 void() morph_fire5 = [ $mfata05, morph_fire6 ] {ai_face();};
 void() morph_fire6 = [ $mfata06, morph_fire7 ] {ai_face();};
 void() morph_fire7 = [ $mfata07, morph_fire8 ] {ai_face();};
-void() morph_fire8 = [ $mfata08, morph_fire9] {ai_face();};
-void() morph_fire9 = [ $mfata09, morph_run1 ] {ai_face();};
+void() morph_fire8 = [ $mfata08, morph_fire9 ] {ai_face();};
+void() morph_fire9 = [ $mfata09, morph_run1  ] {ai_face();};
 
 // ========================
 // pain
 // ========================
-void() morph_painA1 = [ $mfpain01, morph_painA2 ] {};
-void() morph_painA2 = [ $mfpain02, morph_painA3 ] {};
-void() morph_painA3 = [ $mfpain03, morph_painA4 ] {};
-void() morph_painA4 = [ $mfpain04, morph_painA5 ] {};
-void() morph_painA5 = [ $mfpain05, morph_painA6 ] {};
-void() morph_painA6 = [ $mfpain06, morph_painA7 ] {};
-void() morph_painA7 = [ $mfpain07, morph_painA8 ] {};
-void() morph_painA8 = [ $mfpain08, morph_painA9 ] {};
-void() morph_painA9 = [ $mfpain09, morph_painA10 ] {};
-void() morph_painA10 = [ $mfpain10, morph_run1 ] {morph_teleport();};
+void() morph_painA1 =  [ $mfpain01, morph_painA2  ] {};
+void() morph_painA2 =  [ $mfpain02, morph_painA3  ] {};
+void() morph_painA3 =  [ $mfpain03, morph_painA4  ] {};
+void() morph_painA4 =  [ $mfpain04, morph_painA5  ] {};
+void() morph_painA5 =  [ $mfpain05, morph_painA6  ] {};
+void() morph_painA6 =  [ $mfpain06, morph_painA7  ] {};
+void() morph_painA7 =  [ $mfpain07, morph_painA8  ] {};
+void() morph_painA8 =  [ $mfpain08, morph_painA9  ] {};
+void() morph_painA9 =  [ $mfpain09, morph_painA10 ] {};
+void() morph_painA10 = [ $mfpain10, morph_run1    ] {morph_teleport();};
 
 void() morph_painB1 = [ $mfpbin01, morph_painB2 ] {};
 void() morph_painB2 = [ $mfpbin02, morph_painB3 ] {};
@@ -312,35 +299,28 @@ void() morph_painB3 = [ $mfpbin03, morph_painB4 ] {};
 void() morph_painB4 = [ $mfpbin04, morph_painB5 ] {};
 void() morph_painB5 = [ $mfpbin05, morph_painB6 ] {};
 void() morph_painB6 = [ $mfpbin06, morph_painB7 ] {};
-void() morph_painB7 = [ $mfpbin07, morph_run1 ] {morph_teleport();};
+void() morph_painB7 = [ $mfpbin07, morph_run1   ] {morph_teleport();};
 
 void() morph_pain =
 {
-	local float painChoice;
-
 	if (cvar("skill") >= 3)
 	{
-		if (random() > 0.5)
-			morph_teleport();
+		if (random() > 0.5) morph_teleport ();
 		return;
 	}
 	
-	if (self.pain_finished > time)
-		return;
-	if (random() > 0.25)
-		return;
+	if (self.pain_finished > time) return;
+	if (random() > 0.25) return;
 	
-	painChoice = random();
+	local float painChoice = random ();
 	self.pain_finished = time + 2;
 
-	sound (self, CHAN_VOICE, "guard/pain1.wav", 1, ATTN_NORM );
+	sound (self, CHAN_VOICE, "guard/pain1.wav", 1, ATTN_NONE);
 
 	if (cvar("skill") <= 4)
 	{
-		if (painChoice > 0.6)
-			self.think = morph_painB1;
-		else
-			self.think = morph_painA1;
+		if (painChoice > 0.6) self.think = morph_painB1;
+		else self.think = morph_painA1;
 	}
 	
 	self.nextthink = time + 0.1;
@@ -349,15 +329,15 @@ void() morph_pain =
 // ========================
 // die
 // ========================
-void() morph_die1 = [ $mfdth01, morph_die2 ] {};		// 122
-void() morph_die2 = [ $mfdth02, morph_die3 ] {};
-void() morph_die3 = [ $mfdth03, morph_die4 ] {};
-void() morph_die4 = [ $mfdth04, morph_die5 ] {};
-void() morph_die5 = [ $mfdth05, morph_die6 ] {};		// 126
-void() morph_die6 = [ $mfdth06, morph_die7 ] {};
-void() morph_die7 = [ $mfdth07, morph_die8 ] {};
-void() morph_die8 = [ $mfdth08, morph_die9 ] {};		// 129
-void() morph_die9 = [ $mfdth09, morph_die10 ] { self.skin = self.skin + 1; };
+void() morph_die1 =  [ $mfdth01, morph_die2  ] {};		// 122
+void() morph_die2 =  [ $mfdth02, morph_die3  ] {};
+void() morph_die3 =  [ $mfdth03, morph_die4  ] {};
+void() morph_die4 =  [ $mfdth04, morph_die5  ] {};
+void() morph_die5 =  [ $mfdth05, morph_die6  ] {};		// 126
+void() morph_die6 =  [ $mfdth06, morph_die7  ] {};
+void() morph_die7 =  [ $mfdth07, morph_die8  ] {};
+void() morph_die8 =  [ $mfdth08, morph_die9  ] {};		// 129
+void() morph_die9 =  [ $mfdth09, morph_die10 ] {self.skin += 1;};
 void() morph_die10 = [ $mfdth10, morph_die11 ] {};
 void() morph_die11 = [ $mfdth11, morph_die12 ] {};
 void() morph_die12 = [ $mfdth12, morph_die13 ] {};		// 132
@@ -369,60 +349,57 @@ void() morph_die17 = [ $mfdth17, morph_die18 ] {};
 void() morph_die18 = [ $mfdth18, morph_die19 ] {};
 void() morph_die19 = [ $mfdth19, morph_die20 ] {};
 void() morph_die20 = [ $mfdth20, morph_die21 ] {};		// 140
-void() morph_die21 = [ $mfdth21, morph_die21 ] 
-{
-	remove(self);
-};
+void() morph_die21 = [ $mfdth21, morph_die21 ] {remove (self);};
 
 void() morph_die =
 {
- 	sound ( self, CHAN_VOICE, "guard/death.wav", 1, ATTN_NORM);
-    self.solid = SOLID_NOT;
-    self.think = morph_die1;
-    self.nextthink = time + 0.1;
+ 	sound (self, CHAN_VOICE, "guard/death.wav", 1, ATTN_NONE);
+	self.solid = SOLID_NOT;
+	self.think = morph_die1;
+	self.nextthink = time + 0.1;
 };
 
 
 // ========================
 // hide in floor
 // ========================
-void() morph_wake1 = [ $start01, morph_wake2 ] 
+void() morph_wake1 = [ $start01, morph_wake2   ] 
 {
-	sound ( self, CHAN_VOICE, "guard/see1.wav", 1, ATTN_NORM );
-	if(self.owner)
+	sound (self, CHAN_VOICE, "guard/see1.wav", 1, ATTN_NONE);
+	
+	if (self.owner)
 	{
 //		self.solid = SOLID_SLIDEBOX;
 //		self.takedamage = DAMAGE_NO;
 
-		total_monsters = total_monsters + 1;
+		total_monsters += 1;
   
-		self.owner.childrenSpawned = self.owner.childrenSpawned + 1;
+		self.owner.childrenSpawned += 1;
 		
 		WriteByte (MSG_BROADCAST, SVC_UPDATESTAT);
 		WriteByte (MSG_BROADCAST, STAT_TOTALMONSTERS);
 		WriteLong (MSG_BROADCAST, total_monsters);
 	}
 };
-void() morph_wake2 = [ $start02, morph_wake3 ] {};
-void() morph_wake3 = [ $start03, morph_wake4 ] {};
-void() morph_wake4 = [ $start04, morph_wake5 ] {};
-void() morph_wake5 = [ $start05, morph_wake6 ] {};
-void() morph_wake6 = [ $start06, morph_wake7 ] {};
-void() morph_wake7 = [ $start07, morph_wake8 ] {};
-void() morph_wake8 = [ $start08, morph_wake9 ] {};
-void() morph_wake9 = [ $start09, morph_wake10 ] {};
+void() morph_wake2 =  [ $start02, morph_wake3  ] {};
+void() morph_wake3 =  [ $start03, morph_wake4  ] {};
+void() morph_wake4 =  [ $start04, morph_wake5  ] {};
+void() morph_wake5 =  [ $start05, morph_wake6  ] {};
+void() morph_wake6 =  [ $start06, morph_wake7  ] {};
+void() morph_wake7 =  [ $start07, morph_wake8  ] {};
+void() morph_wake8 =  [ $start08, morph_wake9  ] {};
+void() morph_wake9 =  [ $start09, morph_wake10 ] {};
 void() morph_wake10 = [ $start10, morph_wake11 ] {};
 void() morph_wake11 = [ $start11, morph_wake12 ] {};
 void() morph_wake12 = [ $start12, morph_wake13 ] {};
 void() morph_wake13 = [ $start13, morph_wake14 ] {};
 void() morph_wake14 = [ $start14, morph_wake15 ] {};
-void() morph_wake15 = [ $start15, morph_wake16 ]
-	{ self.skin = 1; };
+void() morph_wake15 = [ $start15, morph_wake16 ] {self.skin = 1;};
 void() morph_wake16 = [ $start16, morph_wake17 ] {};
 void() morph_wake17 = [ $start17, morph_wake18 ] {};
 void() morph_wake18 = [ $start18, morph_wake20 ] {};
-//void() morph_wake18 = [ $start18, morph_wake19 ] {};
-//void() morph_wake19 = [ $start19, morph_wake20 ] {};
+// void() morph_wake18 = [ $start18, morph_wake19 ] {};
+// void() morph_wake19 = [ $start19, morph_wake20 ] {};
 void() morph_wake20 = [ $start20, morph_wake21 ] {};
 void() morph_wake21 = [ $start21, morph_wake22 ] {};
 void() morph_wake22 = [ $start22, morph_wake23 ] {};
@@ -438,8 +415,9 @@ void() morph_wake31 = [ $start31, morph_stand1 ]
 {
 	self.solid = SOLID_SLIDEBOX;
 	self.takedamage = DAMAGE_AIM;		
-	self.skin = self.skin - 1;
-	if ( self.owner )
+	self.skin -= 1;
+	
+	if (self.owner)
 	{
 		self.think = morph_run1;
 		self.nextthink = time + 0.1;
@@ -451,13 +429,13 @@ void(entity theMorph) morph_setup =
 	theMorph.solid = SOLID_SLIDEBOX;
 	theMorph.movetype = MOVETYPE_STEP;
 	theMorph.takedamage = DAMAGE_NO;
-	theMorph.flags = theMorph.flags | FL_MONSTER;
+	theMorph.flags |= FL_MONSTER;
 	theMorph.ideal_yaw = theMorph.angles * '0 1 0';
-	if (!theMorph.yaw_speed)
-		theMorph.yaw_speed = 20;
+	
+	if (!theMorph.yaw_speed) theMorph.yaw_speed = 20;
+	
 	theMorph.view_ofs = '0 0 25';
 	theMorph.frame = $start01;
-
 
 	theMorph.netname = "Guardian";
 	setmodel (theMorph, theMorph.model);
@@ -472,8 +450,7 @@ void(entity theMorph) morph_setup =
 	theMorph.th_pain = morph_pain;
 	theMorph.th_die = morph_die;
 	
-
-	if ( theMorph.owner )
+	if (theMorph.owner)
 	{
 		theMorph.effects = 0;
 		theMorph.health = 200;
@@ -481,8 +458,8 @@ void(entity theMorph) morph_setup =
 	}
 	else
 	{
-		theMorph.effects = theMorph.effects | EF_DIMLIGHT;
-	    theMorph.health = 2000;
+		theMorph.effects |= EF_DIMLIGHT;
+		theMorph.health = 2000;
 	}
 	
 //	theMorph.frame = $start01;
@@ -491,58 +468,50 @@ void(entity theMorph) morph_setup =
 
 void() morph_wake =
 {
-	if (isSpawnPointEmpty(self))
+	if (isSpawnPointEmpty(self)) // Sleeper: Spawnpoint empty, wake up the Guardian.
 	{
-		morph_setup(self);
-		self.think = morph_wake1;
+		morph_setup (self); // Sleeper: Setup wake-up animation.
+		self.think = morph_wake1; // Sleeper: Wake 'em up.
 	}
-	else
-	{
-		self.think = morph_wake;
-	}
-	
+	else self.think = morph_wake; // Sleeper: Think to the same function to loop until spawnpoint is isn't blocked.
+
 	self.nextthink = time + 0.1;
 };
 
 void() morph_use =
 {
-//  self.enemy = activator;
-    if (!self.cnt) 
-    {
-	other.enemy = activator;
-        activator = other;
-        self.cnt = 1;
-	SUB_UseTargets();
-    }
-    if ( self.delay )
-    {
-        self.think = morph_wake;
-        self.nextthink = time + self.delay;
-    }
-    else
-    {
-        self.think = morph_wake;
-        self.nextthink = time + 0.1;
-    }
+//	self.enemy = activator;
+	if (!self.cnt_trig) 
+	{
+//		SUB_UseTargets (); 			// Sleeper: Using this is safer since it avoids softlocks if the Guardian doesn't spawn. The elevator comes down prematurely.
+		SUB_CallAsSelf (activator, SUB_UseTargets); // Sleeper: Makes the elevator come down after the Guardian's death. More accurate.
+		self.cnt_trig = TRUE; 
+	}
+	
+	if (self.delay)
+	{
+		self.think = morph_wake;
+		self.nextthink = time + self.delay;
+	}
+	else
+	{
+		self.think = morph_wake;
+		self.nextthink = time + 0.1;
+	}
 };
-
 
 void() morph_teleport =
 {
-	local entity    theDest;
-	local entity	theChild;
+	local entity theChild;
 	
-	if (self.owner)
-		return;
+	if (self.owner) return;
 
-	if (self.childrenSpawned > (1+skill))
-		return;
+	if (self.childrenSpawned > (1 + skill)) return;
 		
-    theDest = overlord_find_dest3();
-    if (theDest == world)
-        return;
+	local entity theDest = overlord_find_dest3 ();
+	if (theDest == world) return;
 
-	theChild = spawn();
+	theChild = spawn ();
 	theChild.model = self.model;
 	theChild.angles = theDest.mangle;
 	theChild.owner = self;
@@ -554,7 +523,7 @@ void() morph_teleport =
 	theChild.netname = "Guardian";
 	morph_setup (theChild);
 	setorigin (theChild, theDest.origin);
-	droptofloor();
+	droptofloor ();
 
 	theChild.think = morph_wake1;
 	theChild.nextthink = time + 0.3;
@@ -563,14 +532,14 @@ void() morph_teleport =
 /*QUAKED monster_morph (1 0 0) (-16 -16 -24) (16 16 32) Ambush Aztec Egyptian Greek
 The morphing monster.
 
-Select the look of the monster (Aztec,Greek,Egyptian).
+Select the look of the monster (Aztec, Greek, Egyptian).
 If the monster has a targetname (triggered by something) he will rise up out of the floor when triggered.
-*/
+*/ // Sleeper: Sound effects played will be on the ATTN_NONE attenuation. Reason because it's a boss, and the sound effect sounds loud enough for all players to hear.
 void() monster_morph =
 {
 	if (deathmatch)
 	{
-		remove(self);
+		remove (self);
 		return;
 	}
 
@@ -590,8 +559,7 @@ void() monster_morph =
 		precache_model ("progs/morph_gr.mdl");
 		self.model = "progs/morph_gr.mdl";
 	}
-	else
-		objerror ( "monster_morph: no skin selection!");
+	else objerror ("monster_morph: no skin selection!");
 	
 	precache_model2 ("progs/laser.mdl");
 	precache_sound2 ("enforcer/enfire.wav");
@@ -599,11 +567,9 @@ void() monster_morph =
 	precache_sound2 ("guard/pain1.wav");
 	precache_sound2 ("guard/see1.wav");
 	
-	total_monsters = total_monsters + 1;
+	total_monsters += 1;
 	
-	if (self.targetname)
-		self.use = morph_use;
-	else
-		morph_wake ();
+	if (self.targetname) self.use = morph_use;
+	else morph_wake ();
 };
 

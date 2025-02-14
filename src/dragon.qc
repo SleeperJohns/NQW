@@ -78,20 +78,17 @@ float FIRE_FIREBALL =	2;
 // ===================================
 void() dragon_stop_attack =
 {
-	if (self.dragonAttacking == FALSE)
-		return;
+	if (self.dragonAttacking == FALSE) return;
 
 //	skill ramp?
-    self.attack_finished = time + (random() * 2 ) + 4;
-	self.attack_finished = self.attack_finished - skill;
+	self.attack_finished = time + (random() * 2 ) + 4;
+	self.attack_finished -= skill;
 	
 	self.dragonAttacking = FALSE;
 	traceline (self.origin, self.movetarget.origin, TRUE, world);
 
-	if (trace_fraction == 1)
-		return;
-	else
-		bprint ("Error: Dragon cannot get to next target!\n");
+	if (trace_fraction == 1) return;
+	else bprint ("Error: Dragon cannot get to next target!\n");
 };
 
 // ===================================
@@ -99,35 +96,29 @@ void() dragon_stop_attack =
 // ===================================
 void() dragon_check_attack =
 {
-	local vector	vec;
-	local float		dot;
+	local vector vec;
+	local float  dot;
 
-	if ( self.dragonAttacking == TRUE)
-		return;
-	if ( self.th_missile == SUB_Null)
-		return;
-	if ( self.attack_finished > time )
-		return;
-	if ( self.enemy.health < 0)
-		self.enemy = world;
-	if ( self.enemy.flags & FL_NOTARGET )
-		return;
+	if (self.dragonAttacking == TRUE) return;
+	if (self.th_missile == SUB_Null) return;
+	if (self.attack_finished > time) return;
+	if (self.enemy.health < 0) self.enemy = world;
+	if (self.enemy.flags & FL_NOTARGET) return;
 	
-	if (self.enemy == world)
-		FindTarget();
+	if (self.enemy == world) FindTarget();
 	else
 	{
 		makevectors (self.angles);
-		vec = normalize (self.enemy.origin - self.origin);
+		vec = normalize(self.enemy.origin - self.origin);
 		dot = vec * v_forward;
-//        if ( dot > 0.55 )
-        if ( dot > 0.3 )
+//        	if (dot > 0.55)
+		if (dot > 0.3)
 		{
 			traceline (self.origin, self.enemy.origin, TRUE, world);
 			if (trace_fraction == 1)
 			{
-				dot = vlen ( self.enemy.origin - self.origin );
-                if (dot < 350)
+				dot = vlen (self.enemy.origin - self.origin);
+				if (dot < 350)
 				{
 					self.dragonAttacking = TRUE;
 					self.think = dragon_melee1;
@@ -139,8 +130,7 @@ void() dragon_check_attack =
 					self.think = self.th_missile;
 				}
 			}
-//			else
-//				bprint ("can't see player!\n");
+//			else bprint ("can't see player!\n");
 		}
 	}
 };
@@ -155,95 +145,81 @@ void(float dist) dragon_move =
 	local float  leftTurn, rightTurn, turnOffset;
 	local entity oldEnemy;
 
-	if ( self.health < 1 )
+	if (self.health < 1)
 	{
-		remove(self);
+		remove (self);
 		return;
 	}
 	
-	if (self.dragonAttacking == FALSE) // && self.dragonInTransit == FALSE)
-		dragon_check_attack();
+	if (self.dragonAttacking == FALSE/* && self.dragonInTransit == FALSE*/) dragon_check_attack ();
 	
 	oldEnemy = self.enemy;
-	if ( self.dragonAttacking == FALSE )
+	if (self.dragonAttacking == FALSE)
 	{
 		moveDir = self.movetarget.origin - self.origin;
-		moveAngles = vectoangles ( moveDir );
+		moveAngles = vectoangles (moveDir);
 		self.enemy = self.movetarget;
 	}
 	else
 	{
 		moveDir = self.enemy.origin - self.origin;
-		moveAngles = vectoangles ( moveDir );
+		moveAngles = vectoangles (moveDir);
 	}
 	
 	turnOffset = self.angles_y - moveAngles_y;
 	if (turnOffset != 0)
 	{
 		turnOffset = 180 - self.angles_y;
-		leftTurn = anglemod ( moveAngles_y + turnOffset ) - 180;
-		rightTurn = 180 - anglemod ( moveAngles_y + turnOffset );
+		leftTurn = anglemod (moveAngles_y + turnOffset) - 180;
+		rightTurn = 180 - anglemod (moveAngles_y + turnOffset);
 		
-		if (leftTurn < 0)
-			leftTurn = 360;
-		else if (rightTurn < 0)
-			rightTurn = 360;
+		if (leftTurn < 0) leftTurn = 360;
+		else if (rightTurn < 0) rightTurn = 360;
 	
 		self.yaw_speed = 10;
 		if (rightTurn < 180)
 		{
-			if ( self.yaw_speed < rightTurn )
-				self.angles_y = self.angles_y - self.yaw_speed;
-			else
-				self.angles_y = moveAngles_y;
+			if (self.yaw_speed < rightTurn) self.angles_y -= self.yaw_speed;
+			else self.angles_y = moveAngles_y;
 	
-			if ( rightTurn > 5 )
+			if (rightTurn > 5)
 			{
-				self.angles_z = self.angles_z + 5;
-				if (self.angles_z > 30)
-					self.angles_z = 30;
+				self.angles_z += 5;
+				if (self.angles_z > 30) self.angles_z = 30;
 			}
-            turnOffset = rightTurn;
+			turnOffset = rightTurn;
 		}
 		else 
 		{
-			if ( self.yaw_speed < rightTurn )
-				self.angles_y = self.angles_y + self.yaw_speed;
-			else
-				self.angles_y = moveAngles_y;
+			if (self.yaw_speed < rightTurn) self.angles_y += self.yaw_speed;
+			else self.angles_y = moveAngles_y;
 	
-			if ( leftTurn > 5 )
+			if (leftTurn > 5)
 			{
-				self.angles_z = self.angles_z - 5;
-				if (self.angles_z < -30)
-					self.angles_z = -30;
+				self.angles_z -= 5;
+				if (self.angles_z < -30) self.angles_z = -30;
 			}
-            turnOffset = leftTurn;
+			turnOffset = leftTurn;
 		}
 	}
 	else if (self.angles_z != 0)
 	{
-		if (self.angles_z < -5)
-			self.angles_z = self.angles_z + 5;
-		else if (self.angles_z < 5)
-			self.angles_z = 0;
-		else if (self.angles_z > 5)
-			self.angles_z = self.angles_z - 5;
+		if (self.angles_z < -5) self.angles_z += 5;
+		else if (self.angles_z < 5) self.angles_z = 0;
+		else if (self.angles_z > 5) self.angles_z -= 5;
 	}
 
-	if ( moveDir_z > 5)
-		setorigin ( self, self.origin + '0 0 5');
-	else if ( moveDir_z < -5) 
-		setorigin ( self, self.origin - '0 0 5');
+	if (moveDir_z > 5) setorigin (self, self.origin + '0 0 5');
+	else if (moveDir_z < -5) setorigin (self, self.origin - '0 0 5');
 
 
 	moveAngles = self.origin;
-    walkmove ( self.angles_y, dist );
+	walkmove (self.angles_y, dist);
 
 	if (moveAngles == self.origin)
 	{
-//        bprint ( "Cannot move smoothly. movetogoal..\n");
-        movetogoal ( dist );
+//        	bprint ("Cannot move smoothly. movetogoal..\n");
+		movetogoal (dist);
 	}
 	self.enemy = oldEnemy;
 };
@@ -251,120 +227,69 @@ void(float dist) dragon_move =
 // ===================================
 // movement
 // ===================================
-void() dragon_stand1 = [ $drgfly01, dragon_walk1 ] 
-	{ 
-//		bprint ( "dragon_stand1: ERROR - got to stand frame!\n");
-	};
+void() dragon_stand1 = [ $drgfly01, dragon_walk1 ] {/*bprint ( "dragon_stand1: ERROR - got to stand frame!\n");*/};
 
 // attack A: start - walk1  stop - walk 5
 // ================
-void() dragon_atk_a1=[$drgfix1a, dragon_atk_a2 ] 
-	{ dragon_move(17); };
-void() dragon_atk_a2=[$drgfix1b, dragon_atk_a3 ]  
-	{ dragon_move(17);dragon_fireball();};
-void() dragon_atk_a3=[$drgfix1c, dragon_walk5 ] 
-	{ dragon_move(17);dragon_stop_attack();};
+void() dragon_atk_a1 = [$drgfix1a, dragon_atk_a2 ] {dragon_move(17);};
+void() dragon_atk_a2 = [$drgfix1b, dragon_atk_a3 ] {dragon_move(17);dragon_fireball();};
+void() dragon_atk_a3 = [$drgfix1c, dragon_walk5  ] {dragon_move(17);dragon_stop_attack();};
 
 // attack B: start - walk3  stop - walk7
 // ================
-void() dragon_atk_b1=[$drgfix2a, dragon_atk_b2 ] 
-	{ dragon_move(17); };
-void() dragon_atk_b2=[$drgfix2b, dragon_atk_b3 ]  
-	{ dragon_move(17);dragon_fireball();};
-void() dragon_atk_b3=[$drgfix2c, dragon_walk7 ]  
-	{ dragon_move(17);dragon_stop_attack();};
+void() dragon_atk_b1 = [$drgfix2a, dragon_atk_b2 ] {dragon_move(17);};
+void() dragon_atk_b2 = [$drgfix2b, dragon_atk_b3 ] {dragon_move(17);dragon_fireball();};
+void() dragon_atk_b3 = [$drgfix2c, dragon_walk7  ] {dragon_move(17);dragon_stop_attack();};
 
 // attack C: start - walk5  stop - walk9
 // ================
-void() dragon_atk_c1=[$drgfix3a, dragon_atk_c2 ]  
-	{dragon_move(17); };
-void() dragon_atk_c2=[$drgfix3b, dragon_atk_c3 ]  
-	{ dragon_move(17);dragon_fireball();};
-void() dragon_atk_c3=[$drgfix3c, dragon_walk9 ]  
-	{ dragon_move(17);dragon_stop_attack();};
+void() dragon_atk_c1 = [$drgfix3a, dragon_atk_c2 ] {dragon_move(17);};
+void() dragon_atk_c2 = [$drgfix3b, dragon_atk_c3 ] {dragon_move(17);dragon_fireball();};
+void() dragon_atk_c3 = [$drgfix3c, dragon_walk9  ] {dragon_move(17);dragon_stop_attack();};
 
 // attack d: start - walk7  stop - walk11
 // ================
-void() dragon_atk_d1=[$drgfix4a, dragon_atk_d2 ]  
-	{ dragon_move(17); };
-void() dragon_atk_d2=[$drgfix4b, dragon_atk_d3 ]  
-	{ dragon_move(17);dragon_fireball();};
-void() dragon_atk_d3=[$drgfix4c, dragon_walk11 ]  
-	{ dragon_move(17);dragon_stop_attack();};
+void() dragon_atk_d1 = [$drgfix4a, dragon_atk_d2 ] {dragon_move(17);};
+void() dragon_atk_d2 = [$drgfix4b, dragon_atk_d3 ] {dragon_move(17);dragon_fireball();};
+void() dragon_atk_d3 = [$drgfix4c, dragon_walk11 ] {dragon_move(17);dragon_stop_attack();};
 
 // attack E: start - walk9  stop - walk13
 // ================
-void() dragon_atk_e1=[$drgfix5a, dragon_atk_e2 ]  
-	{ dragon_move(17); };
-void() dragon_atk_e2=[$drgfix5b, dragon_atk_e3 ]  
-	{ dragon_move(17);dragon_fireball();};
-void() dragon_atk_e3=[$drgfix5c, dragon_walk13 ]  
-	{ dragon_move(17);dragon_stop_attack();};
+void() dragon_atk_e1 = [$drgfix5a, dragon_atk_e2 ] {dragon_move(17);};
+void() dragon_atk_e2 = [$drgfix5b, dragon_atk_e3 ] {dragon_move(17);dragon_fireball();};
+void() dragon_atk_e3 = [$drgfix5c, dragon_walk13 ] {dragon_move(17);dragon_stop_attack();};
 
 // attack F: start - walk11  stop - walk3
 // ================
-void() dragon_atk_f1=[$drgfix6a, dragon_atk_f2 ]  
-	{dragon_move(17); };
-void() dragon_atk_f2=[$drgfix6b, dragon_atk_f3 ]  
-	{ dragon_move(17);dragon_fireball();};
-void() dragon_atk_f3=[$drgfix6c, dragon_atk_f4 ]  
-	{ dragon_move(17); };
-void() dragon_atk_f4=[$drgfix6c, dragon_walk3 ]  
-	{ dragon_move(17);dragon_stop_attack();};
+void() dragon_atk_f1 = [$drgfix6a, dragon_atk_f2 ] {dragon_move(17);};
+void() dragon_atk_f2 = [$drgfix6b, dragon_atk_f3 ] {dragon_move(17);dragon_fireball();};
+void() dragon_atk_f3 = [$drgfix6c, dragon_atk_f4 ] {dragon_move(17);};
+void() dragon_atk_f4 = [$drgfix6c, dragon_walk3  ] {dragon_move(17);dragon_stop_attack();};
 
 // ===================================
 // dragon walk frames
 // ===================================
-void() dragon_walk1 =[ $drgfly01, dragon_walk2 ] 
-	{
-		if (self.dragonAttacking)
-			dragon_stop_attack();
+void() dragon_walk1  = [ $drgfly01, dragon_walk2  ] 
+{
+	if (self.dragonAttacking) dragon_stop_attack ();
 			
-		self.th_missile=dragon_atk_a1;
-		self.dragonPainSequence = 1;
-		dragon_move(17);
-		if (random() < 0.2)
-            sound (self, CHAN_VOICE, "dragon/active.wav", 0.6, ATTN_IDLE);
-	};
-void() dragon_walk2 =[ $drgfly02, dragon_walk3 ]
-	{ self.th_missile=SUB_Null; dragon_move(17);};
-void() dragon_walk3 =[ $drgfly03, dragon_walk4 ]
-	{ 
-		self.th_missile=dragon_atk_b1; dragon_move(17);
-		self.dragonPainSequence=2;
-	};
-void() dragon_walk4 =[ $drgfly04, dragon_walk5 ]
-	{ self.th_missile=SUB_Null; dragon_move(17);};
-void() dragon_walk5 =[ $drgfly05, dragon_walk6 ]
-	{ 
-		self.th_missile=dragon_atk_c1; dragon_move(17);
-		self.dragonPainSequence=3;
-	};
-void() dragon_walk6 =[ $drgfly06, dragon_walk7 ]
-	{ self.th_missile=SUB_Null; dragon_move(17); };
-void() dragon_walk7 =[ $drgfly07, dragon_walk8 ]
-	{
-		self.th_missile=dragon_atk_d1; dragon_move(17);
-		self.dragonPainSequence=4;
-	};
-void() dragon_walk8 =[ $drgfly08, dragon_walk9 ]
-	{ self.th_missile=SUB_Null; dragon_move(17); };
-void() dragon_walk9 =[ $drgfly09, dragon_walk10 ]
-	{
-		self.th_missile=dragon_atk_e1; dragon_move(17);
-		self.dragonPainSequence=5;
-	};
-void() dragon_walk10 =[ $drgfly10, dragon_walk11 ]
-	{ self.th_missile=SUB_Null; dragon_move(17); };
-void() dragon_walk11 =[ $drgfly11, dragon_walk12 ]
-	{
-		self.th_missile=dragon_atk_f1; dragon_move(17);
-		self.dragonPainSequence=6;
-	};
-void() dragon_walk12 =[ $drgfly12, dragon_walk13 ]
-	{ self.th_missile=SUB_Null; dragon_move(17); };
-void() dragon_walk13 =[ $drgfly13, dragon_walk1 ]
-	{ self.th_missile=SUB_Null; dragon_move(17); self.dragonPainSequence=1;};
+	self.th_missile = dragon_atk_a1;
+	self.dragonPainSequence = 1;
+	dragon_move(17);
+	if (random() < 0.2) sound (self, CHAN_VOICE, "dragon/active.wav", 0.6, ATTN_NONE);
+};
+void() dragon_walk2  = [ $drgfly02, dragon_walk3  ] {self.th_missile = SUB_Null; dragon_move(17);};
+void() dragon_walk3  = [ $drgfly03, dragon_walk4  ] {self.th_missile=dragon_atk_b1; dragon_move(17); self.dragonPainSequence = 2;};
+void() dragon_walk4  = [ $drgfly04, dragon_walk5  ] {self.th_missile = SUB_Null; dragon_move(17);};
+void() dragon_walk5  = [ $drgfly05, dragon_walk6  ] {self.th_missile = dragon_atk_c1; dragon_move(17); self.dragonPainSequence = 3;};
+void() dragon_walk6  = [ $drgfly06, dragon_walk7  ] {self.th_missile = SUB_Null; dragon_move(17);};
+void() dragon_walk7  = [ $drgfly07, dragon_walk8  ] {self.th_missile = dragon_atk_d1; dragon_move(17); self.dragonPainSequence = 4;};
+void() dragon_walk8  = [ $drgfly08, dragon_walk9  ] {self.th_missile = SUB_Null; dragon_move(17);};
+void() dragon_walk9  = [ $drgfly09, dragon_walk10 ] {self.th_missile = dragon_atk_e1; dragon_move(17); self.dragonPainSequence = 5;};
+void() dragon_walk10 = [ $drgfly10, dragon_walk11 ] {self.th_missile = SUB_Null; dragon_move(17);};
+void() dragon_walk11 = [ $drgfly11, dragon_walk12 ] {self.th_missile = dragon_atk_f1; dragon_move(17); self.dragonPainSequence = 6;};
+void() dragon_walk12 = [ $drgfly12, dragon_walk13 ] {self.th_missile = SUB_Null; dragon_move(17);};
+void() dragon_walk13 = [ $drgfly13, dragon_walk1  ] {self.th_missile = SUB_Null; dragon_move(17); self.dragonPainSequence = 1;};
 
 // ===================================
 // attack
@@ -388,21 +313,25 @@ void() FireballTouch =
 	WriteByte (MSG_BROADCAST, 228);  // 247
 	WriteByte (MSG_BROADCAST, 5);
 	remove (self);
-//	BecomeExplosion();
+//	BecomeExplosion ();
 };
 
 void(vector org, vector dir) launch_fireball =
 {	
 	self.effects |= EF_MUZZLEFLASH;
-	local entity fireball = spawn ();	
+	
+	local entity fireball = spawn ();
+		
 	fireball.owner = self;
 	fireball.movetype = MOVETYPE_FLYMISSILE;
 	fireball.solid = SOLID_BBOX;
 	fireball.classname = "fireball";
 	setmodel (fireball, "progs/fireball.mdl");
 	setorigin (fireball, org);
-	setsize (fireball, '0 0 0', '0 0 0');		
+	setsize (fireball, '0 0 0', '0 0 0');	
+		
 	local float fireSpeed = random() * 300 + 900;
+	
 	fireball.velocity = dir * fireSpeed;
 	fireball.avelocity = '0 0 300';
 	fireball.angles = vectoangles (fireball.velocity);
@@ -410,6 +339,8 @@ void(vector org, vector dir) launch_fireball =
 	fireball.touch = FireballTouch;
 	fireball.nextthink = time + 6;
 	fireball.think = SUB_Remove;
+	
+	entity_collision (fireball, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
 };
 
 // ===========================================
@@ -420,7 +351,7 @@ void() dragon_fireball =
 	local float fireCount, distortion, fireType;
 	local vector dir;
 		
-	sound (self, CHAN_VOICE, "dragon/attack.wav", 1, ATTN_NORM);
+	sound (self, CHAN_VOICE, "dragon/attack.wav", 1, ATTN_NONE);
 	makevectors (self.angles);
 	local vector org = self.origin + v_forward * 112 + v_up * 32;
 	if (random() > 0.66)
@@ -433,8 +364,9 @@ void() dragon_fireball =
 	{
 		fireType = FIRE_FIREBALL;
 		fireCount = random() * skill;	  // easy 0, med 0-1, hard 0-2	
-   		fireCount = rint (fireCount) + 1; // easy 1, med 1-2, hard 1-3
-	}	
+   		fireCount = rint(fireCount) + 1; // easy 1, med 1-2, hard 1-3
+	}
+		
 	while (fireCount > 0)
 	{
 		distortion = (random() - 0.5) * 0.25;
@@ -454,10 +386,14 @@ void() dragon_tail_touch =
 {
 	if (!self.enemy) return;
 	if (!CanDamage(self.enemy, self)) return;
+	
 	ai_charge (10);
+	
 	local vector delta = self.enemy.origin - self.origin;
-	local float tailDamage = vlen (delta);
+	local float tailDamage = vlen(delta);
+	
 	if (vlen(delta) > 150) return;
+	
 	tailDamage = (random() * 30) + 30;
 	T_Damage (self.enemy, self, self, tailDamage);
 };
@@ -466,48 +402,50 @@ void() dragon_tail =
 {	
 	if (!self.enemy) return;
 	if (!CanDamage(self.enemy, self)) return;
-	dragon_move (10);	
+	
+	dragon_move (10);
+		
 	local vector dir = self.enemy.origin - self.origin;
-	local float dist = vlen (dir);
+	local float dist = vlen(dir);
+	
 	if (dist < 250)
 	{
 		T_Damage (self.enemy, self, self, 30);
-		dir = normalize (dir);
+		dir = normalize(dir);
 		self.enemy.velocity = dir * 500;
 		self.enemy.velocity_z = 350;
 	}	
-	dragon_stop_attack();
+	dragon_stop_attack ();
 };
 
-void() dragon_melee1=[$drgslh01, dragon_melee2 ] { dragon_move(12);};
-void() dragon_melee2=[$drgslh02, dragon_melee3 ] { dragon_move(12);};
-void() dragon_melee3=[$drgslh03, dragon_melee4 ] { dragon_move(12);};
-void() dragon_melee4=[$drgslh04, dragon_melee5 ] { dragon_move(12);};
-void() dragon_melee5=[$drgslh05, dragon_melee6 ] { dragon_move(12);};
-void() dragon_melee6=[$drgslh06, dragon_melee7 ] { dragon_move(12);};
-void() dragon_melee7=[$drgslh07, dragon_melee8 ] { dragon_move(12);};
-void() dragon_melee8=[$drgslh08, dragon_melee9 ] { dragon_move(12);};
-void() dragon_melee9=[$drgslh09, dragon_melee10] { dragon_move(12);};
-void() dragon_melee10=[$drgslh10, dragon_melee11] { dragon_tail();};
-void() dragon_melee11=[$drgslh11, dragon_melee12] { dragon_move(10);};
-void() dragon_melee12=[$drgslh12, dragon_melee13] { dragon_move(10);};
-void() dragon_melee13=[$drgslh13, dragon_walk1 ] 
-{ dragon_move(10);};
+void() dragon_melee1  = [$drgslh01, dragon_melee2 ] {dragon_move(12);};
+void() dragon_melee2  = [$drgslh02, dragon_melee3 ] {dragon_move(12);};
+void() dragon_melee3  = [$drgslh03, dragon_melee4 ] {dragon_move(12);};
+void() dragon_melee4  = [$drgslh04, dragon_melee5 ] {dragon_move(12);};
+void() dragon_melee5  = [$drgslh05, dragon_melee6 ] {dragon_move(12);};
+void() dragon_melee6  = [$drgslh06, dragon_melee7 ] {dragon_move(12);};
+void() dragon_melee7  = [$drgslh07, dragon_melee8 ] {dragon_move(12);};
+void() dragon_melee8  = [$drgslh08, dragon_melee9 ] {dragon_move(12);};
+void() dragon_melee9  = [$drgslh09, dragon_melee10] {dragon_move(12);};
+void() dragon_melee10 = [$drgslh10, dragon_melee11] {dragon_tail  ();};
+void() dragon_melee11 = [$drgslh11, dragon_melee12] {dragon_move(10);};
+void() dragon_melee12 = [$drgslh12, dragon_melee13] {dragon_move(10);};
+void() dragon_melee13 = [$drgslh13, dragon_walk1  ] {dragon_move(10);};
 
 // ===================================
 // pain
 // ===================================
 void() dragon_painA1 = [ $drgpan1a, dragon_painA2 ] {dragon_move(12);};
 void() dragon_painA2 = [ $drgpan1b, dragon_painA3 ] {dragon_move(12);};
-void() dragon_painA3 = [ $drgpan1c, dragon_walk5 ] {dragon_move(12);};
+void() dragon_painA3 = [ $drgpan1c, dragon_walk5  ] {dragon_move(12);};
 
 void() dragon_painB1 = [ $drgpan2a, dragon_painB2 ] {dragon_move(12);};
 void() dragon_painB2 = [ $drgpan2b, dragon_painB3 ] {dragon_move(12);};
-void() dragon_painB3 = [ $drgpan2c, dragon_walk7 ] {dragon_move(12);};
+void() dragon_painB3 = [ $drgpan2c, dragon_walk7  ] {dragon_move(12);};
 
 void() dragon_painC1 = [ $drgpan3a, dragon_painC2 ] {dragon_move(12);};
 void() dragon_painC2 = [ $drgpan3b, dragon_painC3 ] {dragon_move(12);};
-void() dragon_painC3 = [ $drgpan3c, dragon_walk9 ] {dragon_move(12);};
+void() dragon_painC3 = [ $drgpan3c, dragon_walk9  ] {dragon_move(12);};
 
 void() dragon_painD1 = [ $drgpan4a, dragon_painD2 ] {dragon_move(12);};
 void() dragon_painD2 = [ $drgpan4b, dragon_painD3 ] {dragon_move(12);};
@@ -519,32 +457,26 @@ void() dragon_painE3 = [ $drgpan5c, dragon_walk13 ] {dragon_move(12);};
 
 void() dragon_painF1 = [ $drgpan6a, dragon_painF2 ] {dragon_move(12);};
 void() dragon_painF2 = [ $drgpan6b, dragon_painF3 ] {dragon_move(12);};
-void() dragon_painF3 = [ $drgpan6c, dragon_walk2 ] {dragon_move(12);};
+void() dragon_painF3 = [ $drgpan6c, dragon_walk2  ] {dragon_move(12);};
 
 void() dragon_pain =
 {
 	if (self.pain_finished > time) return;
 
-	local float r = random();
+	local float r = random ();
 	if (r < 0.25)
 	{
-		dragon_stop_attack();
-		sound (self, CHAN_VOICE, "dragon/pain.wav", 1, ATTN_NORM);
+		dragon_stop_attack ();
+		sound (self, CHAN_VOICE, "dragon/pain.wav", 1, ATTN_NONE);
 		self.pain_finished = time + 2;		
 		if (cvar("skill") <= 4)
 		{
-			if (self.dragonPainSequence == 1)
-				self.think = dragon_painA1;
-			else if (self.dragonPainSequence == 2)
-				self.think = dragon_painF1;
-			else if (self.dragonPainSequence == 3)
-				self.think = dragon_painE1;
-			else if (self.dragonPainSequence == 4)
-				self.think = dragon_painD1;
-			else if (self.dragonPainSequence == 5)
-				self.think = dragon_painC1;
-			else if (self.dragonPainSequence == 6)
-				self.think = dragon_painB1;
+			if (self.dragonPainSequence == 1) self.think = dragon_painA1;
+			else if (self.dragonPainSequence == 2) self.think = dragon_painF1;
+			else if (self.dragonPainSequence == 3) self.think = dragon_painE1;
+			else if (self.dragonPainSequence == 4) self.think = dragon_painD1;
+			else if (self.dragonPainSequence == 5) self.think = dragon_painC1;
+			else if (self.dragonPainSequence == 6) self.think = dragon_painB1;
 		}
 	}
 };
@@ -563,8 +495,7 @@ void() dragon_boom2 =
 
 void() dragon_boom1 =
 {
-	if ( self.dragonDeathState > DDIE_STOPPED )
-//		objerror ( "dragon_boom1");
+	if (self.dragonDeathState > DDIE_STOPPED) /*objerror ("dragon_boom1");*/
 		return;
 		
 	self.dragonDeathState = DDIE_EXPLODED;
@@ -578,19 +509,18 @@ void() dragon_boom1 =
 
 void() dragon_explode = 
 {
-	if ( self.dragonDeathState > DDIE_FALLING )
-//		objerror ( "dragon_explode");
+	if (self.dragonDeathState > DDIE_FALLING) /*objerror ("dragon_explode");*/
 		return;
 		
 	if (vlen(self.velocity) < 100 || self.flags & FL_INWATER)
 	{	
 		self.dragonDeathState = DDIE_STOPPED;
-		dragon_boom1();
+		dragon_boom1 ();
 	}
 	else
 	{
-		makevectors ( self.angles );
-		self.velocity = self.velocity - 40 * v_up;
+		makevectors (self.angles);
+		self.velocity -= 40 * v_up;
 		self.dragonLastVelocity = self.velocity;
 	}
 };
@@ -600,40 +530,40 @@ void() dragon_squish =
 	if (other.classname == "player")
 	{
 		self.classname = "monster_dragon_dead";
-		T_Damage( other, self, self, 200);
+		T_Damage (other, self, self, 200);
 	}
+	
 	if (other == world)
 	{
 		self.velocity = '0 0 0';
-		dragon_explode();
+		dragon_explode ();
 	}
 };
 
 void() dragon_death1 = [ $drgdth01, dragon_death2 ]
-	{
-	if ( self.dragonDeathState > 0)
-//		objerror ( "dragon_death1");
+{
+	if (self.dragonDeathState > 0) /*objerror ("dragon_death1");*/
 		return;
 	
 	self.dragonDeathState = DDIE_FALLING;	
 	self.use = SUB_Null;
-	makevectors ( self.angles );
+	makevectors (self.angles);
 	self.velocity = 300 * v_forward - 40 * v_up;
-	self.flags = self.flags - (self.flags & FL_ONGROUND);
+	self.flags -= self.flags & (FL_ONGROUND);
 	setsize (self, VEC_HULL_MIN, VEC_HULL_MAX);
 	self.touch = dragon_squish;
 
 	sound (self, CHAN_VOICE, "dragon/death.wav", 1, ATTN_NONE);
 	self.dragonAttacking = FALSE;
-	};
-void() dragon_death2 = [ $drgdth02, dragon_death3 ] {dragon_explode();};
-void() dragon_death3 = [ $drgdth03, dragon_death4 ] {dragon_explode();};
-void() dragon_death4 = [ $drgdth04, dragon_death5 ] {dragon_explode();};
-void() dragon_death5 = [ $drgdth05, dragon_death6 ] {dragon_explode();};
-void() dragon_death6 = [ $drgdth06, dragon_death7 ] {dragon_explode();};
-void() dragon_death7 = [ $drgdth07, dragon_death8 ] {dragon_explode();};
-void() dragon_death8 = [ $drgdth08, dragon_death9 ] {dragon_explode();};
-void() dragon_death9 = [ $drgdth09, dragon_death10 ] {dragon_explode();};
+};
+void() dragon_death2  = [ $drgdth02, dragon_death3  ] {dragon_explode();};
+void() dragon_death3  = [ $drgdth03, dragon_death4  ] {dragon_explode();};
+void() dragon_death4  = [ $drgdth04, dragon_death5  ] {dragon_explode();};
+void() dragon_death5  = [ $drgdth05, dragon_death6  ] {dragon_explode();};
+void() dragon_death6  = [ $drgdth06, dragon_death7  ] {dragon_explode();};
+void() dragon_death7  = [ $drgdth07, dragon_death8  ] {dragon_explode();};
+void() dragon_death8  = [ $drgdth08, dragon_death9  ] {dragon_explode();};
+void() dragon_death9  = [ $drgdth09, dragon_death10 ] {dragon_explode();};
 void() dragon_death10 = [ $drgdth10, dragon_death11 ] {dragon_explode();};
 void() dragon_death11 = [ $drgdth11, dragon_death12 ] {dragon_explode();};
 void() dragon_death12 = [ $drgdth12, dragon_death13 ] {dragon_explode();};
@@ -649,8 +579,8 @@ void() dragon_death21 = [ $drgdth21, dragon_death21 ]
 {
 	ViolentDeath(39);
 	self.target = "dragondoor";
-	SUB_UseTargets();			
-	remove(self);
+	SUB_UseTargets ();			
+	remove (self);
 };
 
 // ===================================
@@ -677,8 +607,7 @@ void() dragon_activate =
 {
 	self.takedamage = DAMAGE_AIM;
 	self.ideal_yaw = self.angles * '0 1 0';
-	if (!self.yaw_speed)
-		self.yaw_speed = 10;
+	if (!self.yaw_speed) self.yaw_speed = 10;
 	self.view_ofs = '0 0 25';
 
 	self.flags |= FL_FLY;
@@ -695,7 +624,7 @@ void() dragon_activate =
 	
 	if (self.target)
 	{
-		self.movetarget = find(world, targetname, self.target);
+		self.movetarget = find (world, targetname, self.target);
 		self.goalentity = self.movetarget;
 		if (!self.movetarget)
 		{
@@ -705,11 +634,8 @@ void() dragon_activate =
 		}
 	}
 
-	if (self.targetname)
-		self.use = dragon_use;
-	else
-		dragon_use();	
-
+	if (self.targetname) self.use = dragon_use;
+	else dragon_use ();	
 };
 
 /*QUAKED monster_dragon (1 0 0) (-32 -32 -24) (32 32 64) Ambush
@@ -721,6 +647,7 @@ void() monster_dragon =
 		remove(self);
 		return;
 	}
+	
 	precache_model ("progs/dragon.mdl");
 	precache_model ("progs/fireball.mdl");
 	precache_model ("progs/drggib01.mdl");
@@ -772,31 +699,22 @@ Point the trigger towards the room. If the player is going
 the direction the trigger points, he is entering the room.
 If not, he is leaving.
 */
-void() trigger_dragon =
-{	
-	remove(self);
-};
-
+void() trigger_dragon = {remove (self);};
 
 // =================================================
 // dragon corners
 // =================================================
 void() dragon_corner_touch =
 {
-	if (other.movetarget != self)
-		return;
+	if (other.movetarget != self) return;
 	
-	if (other.classname != "monster_dragon")
-		return;
+	if (other.classname != "monster_dragon") return;
 
 	other.movetarget = find (world, targetname, self.target);
 	other.goalentity = other.movetarget;
 	other.target = self.target;
 	
-	if (!other.movetarget)
-	{
-		objerror ("dragon_corner: no target found");
-	}
+	if (!other.movetarget) objerror ("dragon_corner: no target found");
 };
 
 /*QUAKED dragon_corner (0.5 0.3 0) (-16 -16 -16) (16 16 16)
@@ -805,8 +723,7 @@ between rooms.
 */
 void() dragon_corner =
 {
-	if (!self.targetname)
-		objerror ("dragon_corner: no targetname");
+	if (!self.targetname) objerror ("dragon_corner: no targetname");
 
 	self.solid = SOLID_TRIGGER;
 	self.movetype = MOVETYPE_NONE;

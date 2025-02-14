@@ -9,6 +9,14 @@
 #define PROTOCOL_VERSION_FTE2		(('F'<<0) + ('T'<<8) + ('E'<<16) + ('2' << 24))
 #define PEXT2_REPLACEMENTDELTAS		0x00000008
 
+#define DP_REGISTERCVAR
+
+#define DP_QC_ETOS
+
+#define EXT_DIMENSION_VISIBILITY
+#define EXT_DIMENSION_PHYSICS
+#define EXT_DIMENSION_GHOST
+
 #ifdef _ACCESSORS
 accessor strbuf : float;
 accessor searchhandle : float;
@@ -125,6 +133,7 @@ string(float) argv = #59; 			  /* Part of KRIMZON_SV_PARSECLIENTCOMMAND Returns 
 float(string s1, string s2) strcasecmp = #229; /* Part of FTE_STRINGS Compares the two strings without case sensitivity. Returns 0 if they are equal. The sign of the return value may be significant, but should not be depended upon. */
 		
 #ifdef SSQC
+
 float SVC_SETVIEWPORT = 5;
 .float hull;	/* Overrides the hull used by the entity for walkmove/movetogoal and not traceline/tracebox. */
 .void() customphysics;	/* Called once each physics frame, overriding the entity's .movetype field and associated logic. You'll probably want to use tracebox to move it through the world. Be sure to call .think as appropriate. */
@@ -139,26 +148,12 @@ const float MOVE_WORLDONLY = 3;	/* The trace will ignore everything but the worl
 const float MOVE_HITMODEL = 4;	/* Traces will impact the actual mesh of the model instead of merely their bounding box. Should generally only be used for tracelines. Note that this flag is unreliable as an object can animate through projectiles. The bounding box MUST be set to completely encompass the entity or those extra areas will be non-solid (leaving a hole for things to go through). */
 const float MOVE_TRIGGERS = 16;	/* This trace type will impact only triggers. It will ignore non-solid entities. */
 const float MOVE_EVERYTHING = 32;	/* This type of trace will hit solids and triggers alike. Even non-solid entities. */
-const int CONTENTBIT_NONE = 0x00000000i;
-const int CONTENTBIT_SOLID = 0x00000001i;
-const int CONTENTBIT_LAVA = 0x00000008i;
-const int CONTENTBIT_SLIME = 0x00000010i;
-const int CONTENTBIT_WATER = 0x00000020i;
-const int CONTENTBIT_FTELADDER = 0x00004000i;	/* Content bit used for .skin = CONTENT_LADDER entities. */
-const int CONTENTBIT_PLAYERCLIP = 0x00010000i;
-const int CONTENTBIT_MONSTERCLIP = 0x00020000i;
-const int CONTENTBIT_BODY = 0x02000000i;	/* Content bit that indicates collisions against SOLID_BBOX/SOLID_SLIDEBOX entities. */
-const int CONTENTBIT_CORPSE = 0x04000000i;	/* Content bit that indicates collisions against SOLID_CORPSE entities. */
-const int CONTENTBIT_Q2LADDER = 0x20000000i;	/* Content bit specific to q2bsp (conflicts with q3bsp contents so use with caution). */
-const int CONTENTBIT_SKY = 0x80000000i;	/* Content bit somewhat specific to q1bsp (aliases to NODROP in q3bsp), but you should probably check surfaceflags&SURF_SKY as well for q2+q3bsp too. */
-const int CONTENTBITS_POINTSOLID = CONTENTBIT_SOLID|0x00000002i|CONTENTBIT_BODY;	/* Bits that traceline would normally consider solid */
-const int CONTENTBITS_BOXSOLID = CONTENTBIT_SOLID|0x00000002i|CONTENTBIT_BODY|CONTENTBIT_PLAYERCLIP;	/* Bits that tracebox would normally consider solid */
-const int CONTENTBITS_FLUID = CONTENTBIT_WATER|CONTENTBIT_SLIME|CONTENTBIT_LAVA|CONTENTBIT_SKY;
+const float MOVE_LAGGED = 64;
+const float FL_LAGGEDMOVE = 65536;
+
 float(vector pos) pointcontents = #41; /*
 		Checks the given point to see what is there. Returns one of the CONTENTS_* constants. Just because a point is empty does not mean that the player can stand there due to the size of the player - use tracebox for such tests. */
-__uint(vector pos, optional float worldonly = 1) pointcontentsmask = #0:pointcontentsmask; /*
-		Checks the given point to see what is there. Returns a mask of the CONTENTBIT_* constants. Just because a point is empty does not mean that the player can stand there due to the size of the player - use tracebox for such tests. */	
-		
+			
 void(vector start, vector mins, vector maxs, vector end, float nomonsters, entity ent) tracebox = #90; /* Part of DP_QC_TRACEBOX
 		Exactly like traceline, but a box instead of a uselessly thin point. Acceptable sizes are limited by bsp format, q1bsp has strict acceptable size values. */			
 
@@ -215,7 +210,12 @@ DEP_CSQC .float() customizeentityforclient;	/* Called just before an entity is s
 
 void(entity player, string key, string value) forceinfokey = #213; /* Part of FTE_FORCEINFOKEY
 		Directly changes a user's info without pinging off the client. Also allows explicitly setting * keys, including *spectator. Does not affect the user's config or other servers. */
+		
+string(entity ent) etos = #65; /* Part of DP_QC_ETOS*/
 
+// Plays a sound that only "client" can hear. Useful for announcers...
+// void(entity client, string sample) localsound = #0:qex_localsound;
+// void(string soundname, optional float channel, optional float volume) localsound = #0:ex_localsound;
 #endif
 
 #define DP_QC_SPRINTF 
@@ -259,3 +259,14 @@ void(float num, float type, .__variant fld) clientstat = #232; /* Part of EXT_CS
 		fld must be a reference to the field used, each player will be sent only their own copy of these fields. */
 		
 .float scale;
+
+#ifdef MENU
+float(string name, string value, float flags) registercvar = #42; /* Part of DP_REGISTERCVAR
+		Creates the cvar if it didn't already exist. This presents issues for setting those cvars via startup configs of course, and autocvars are easier but I suppose they don't get any flags (which are ignored anyway, of course). */
+
+string(entity) etos = #20; /* Part of DP_QC_ETOS*/
+#endif
+
+#ifdef CSQC
+void(string sample, optional float channel, optional float volume) localsound = #65;
+#endif

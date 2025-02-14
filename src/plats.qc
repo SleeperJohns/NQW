@@ -29,13 +29,12 @@ float PLAT_LOW_TRIGGER = 1;
 
 void() plat_spawn_inside_trigger =
 {
-	local entity	trigger;
-	local vector	tmin, tmax;
-
+	local entity trigger;
+	local vector tmin, tmax;
 //
 // middle trigger
 //	
-	trigger = spawn();
+	trigger = spawn ();
 	trigger.touch = plat_center_touch;
 	trigger.movetype = MOVETYPE_NONE;
 	trigger.solid = SOLID_TRIGGER;
@@ -44,8 +43,7 @@ void() plat_spawn_inside_trigger =
 	tmin = self.mins + '25 25 0';
 	tmax = self.maxs - '25 25 -8';
 	tmin_z = tmax_z - (self.pos1_z - self.pos2_z + 8);
-	if (self.spawnflags & PLAT_LOW_TRIGGER)
-		tmax_z = tmin_z + 8;
+	if (self.spawnflags & PLAT_LOW_TRIGGER) tmax_z = tmin_z + 8;
 	
 	if (self.size_x <= 50)
 	{
@@ -91,38 +89,28 @@ void() plat_go_up =
 
 void() plat_center_touch =
 {
-	if (other.classname != "player")
-		return;
-		
-	if (other.health <= 0)
-		return;
+	if (other.classname != "player") return;	
+	if (other.health <= 0) return;
 
 	self = self.enemy;
-	if (self.state == STATE_BOTTOM)
-		plat_go_up ();
-	else if (self.state == STATE_TOP)
-		self.nextthink = self.ltime + 1;	// delay going down
+	if (self.state == STATE_BOTTOM) plat_go_up ();
+	else if (self.state == STATE_TOP) self.nextthink = self.ltime + 1;	// Delay going down
 };
 
 void() plat_outside_touch =
 {
-	if (other.classname != "player")
-		return;
-
-	if (other.health <= 0)
-		return;
+	if (other.classname != "player") return;
+	if (other.health <= 0) return;
 		
-//dprint ("plat_outside_touch\n");
+	// dprint ("plat_outside_touch\n");
 	self = self.enemy;
-	if (self.state == STATE_TOP)
-		plat_go_down ();
+	if (self.state == STATE_TOP) plat_go_down ();
 };
 
 void() plat_trigger_use =
 {
-	if (self.think)
-		return;		// allready activated
-	plat_go_down();
+	if (self.think) return;	// Already activated
+	plat_go_down ();
 };
 
 
@@ -133,20 +121,16 @@ void() plat_crush =
 	other.deathtype = "squish";	// QIP
 	T_Damage (other, self, self, 1);
 	
-	if (self.state == STATE_UP)
-		plat_go_down ();
-	else if (self.state == STATE_DOWN)
-		plat_go_up ();
-	else
-		objerror ("plat_crush: bad self.state\n");
+	if (self.state == STATE_UP) plat_go_down ();
+	else if (self.state == STATE_DOWN) plat_go_up ();
+	else objerror ("plat_crush: bad self.state\n");
 };
 
 void() plat_use =
 {
 	self.use = SUB_Null;
-	if (self.state != STATE_UP)
-		objerror ("plat_use: not in up state");
-	plat_go_down();
+	if (self.state != STATE_UP) objerror ("plat_use: not in up state");
+	plat_go_down ();
 };
 
 
@@ -165,15 +149,11 @@ Set "sounds" to one of the following:
 
 
 void() func_plat =
-
 {
-	if (!self.t_length)
-		self.t_length = 80;
-	if (!self.t_width)
-		self.t_width = 10;
+	if (!self.t_length) self.t_length = 80;
+	if (!self.t_width) self.t_width = 10;
 
-	if (self.sounds == 0)
-		self.sounds = 2;
+	if (self.sounds == 0) self.sounds = 2;
 // FIX THIS TO LOAD A GENERIC PLAT SOUND
 
 	if (self.sounds == 1)
@@ -204,20 +184,17 @@ void() func_plat =
 	setsize (self, self.mins , self.maxs);
 
 	self.blocked = plat_crush;
-	if (!self.speed)
-		self.speed = 150;
+	if (!self.speed) self.speed = 150;
 
-// pos1 is the top position, pos2 is the bottom
+	// pos1 is the top position, pos2 is the bottom
 	self.pos1 = self.origin;
 	self.pos2 = self.origin;
-	if (self.height)
-		self.pos2_z = self.origin_z - self.height;
-	else
-		self.pos2_z = self.origin_z - self.size_z + 8;
+	if (self.height) self.pos2_z = self.origin_z - self.height;
+	else self.pos2_z = self.origin_z - self.size_z + 8;
 
 	self.use = plat_trigger_use;
 
-	plat_spawn_inside_trigger ();	// the "start moving" trigger	
+	plat_spawn_inside_trigger ();	// The "start moving" trigger	
 
 	if (self.targetname)
 	{
@@ -238,17 +215,16 @@ void() func_train_find;
 
 void() train_blocked =
 {
-	if (time < self.attack_finished)
-		return;
+	if (time < self.attack_finished) return;
+	
 	self.attack_finished = time + 0.5;
 	other.deathtype = "squish";	// QIP
 	T_Damage (other, self, self, self.dmg);
 };
 void() train_use =
 {
-	if (self.think != func_train_find)
-		return;		// already activated
-	train_next();
+	if (self.think != func_train_find) return;		// Already activated
+	train_next ();
 };
 
 void() train_wait =
@@ -258,38 +234,35 @@ void() train_wait =
 		self.nextthink = self.ltime + self.wait;
 		sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	}
-	else
-		self.nextthink = self.ltime + 0.1;
+	else self.nextthink = self.ltime + 0.1;
 	
 	self.think = train_next;
 };
 
 void() train_next =
 {
-	local entity	targ;
-
-	targ = find (world, targetname, self.target);
+	local entity targ = find (world, targetname, self.target);
+	
 	self.target = targ.target;
-	if (!self.target)
-		objerror ("train_next: no next target");
-	if (targ.wait)
-		self.wait = targ.wait;
-	else
-		self.wait = 0;
+	if (!self.target) objerror ("train_next: no next target");
+	
+	if (targ.wait) self.wait = targ.wait;
+	else self.wait = 0;
+	
 	sound (self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
 	SUB_CalcMove (targ.origin - self.mins, self.speed, train_wait);
 };
 
 void() func_train_find =
-
 {
-	local entity	targ;
-
-	targ = find (world, targetname, self.target);
+	local entity targ = find (world, targetname, self.target);
+	
 	self.target = targ.target;
 	setorigin (self, targ.origin - self.mins);
+	
 	if (!self.targetname)
-	{	// not triggered, so start immediately
+	{	
+		// Not triggered, so start immediately
 		self.nextthink = self.ltime + 0.1;
 		self.think = train_next;
 	}
@@ -311,12 +284,9 @@ const float FUNC_TRAIN_NONSOLID = 1;
 
 void() func_train =
 {	
-	if (!self.speed)
-		self.speed = 100;
-	if (!self.target)
-		objerror ("func_train without a target");
-	if (!self.dmg)
-		self.dmg = 2;
+	if (!self.speed) self.speed = 100;
+	if (!self.target) objerror ("func_train without a target");
+	if (!self.dmg) self.dmg = 2;
 
 	if (self.sounds == 0)
 	{
@@ -339,7 +309,7 @@ void() func_train =
 //	self.movetype = MOVETYPE_PUSH;
 //	self.blocked = train_blocked;
 	// MG1 ==========================================
-	if (self.spawnflags & FUNC_TRAIN_NONSOLID && world.model != "maps/e3m6.bsp" && world.model != "maps/e3m3.bsp") // apparently one of the func_trains in E3M6 has a spawnflag set for some reason? // Sleeper: The crusher traps shouldn't be SOLID_NOT.
+	if (self.spawnflags & FUNC_TRAIN_NONSOLID && world.model != "maps/e3m6.bsp" && world.model != "maps/e3m3.bsp") // Apparently one of the func_trains in E3M6 has a spawnflag set for some reason? // Sleeper: The crusher traps shouldn't be SOLID_NOT.
 	{
 		self.solid = SOLID_NOT;
 		self.movetype = MOVETYPE_PUSH;
@@ -370,10 +340,8 @@ This is used for the final bos
 */
 void() misc_teleporttrain =
 {	
-	if (!self.speed)
-		self.speed = 100;
-	if (!self.target)
-		objerror ("func_train without a target");
+	if (!self.speed) self.speed = 100;
+	if (!self.target) objerror ("func_train without a target");
 
 	self.cnt = 1;
 	self.solid = SOLID_NOT;
@@ -397,4 +365,3 @@ void() misc_teleporttrain =
 	self.nextthink = self.ltime + 0.1;
 	self.think = func_train_find;
 };
-

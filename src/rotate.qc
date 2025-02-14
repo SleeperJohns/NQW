@@ -61,7 +61,8 @@ self.delay     = editor field for how long the acceleration should take
 ===============================================================================
 */
 
-enum : int
+// enum : int
+enum : float
 {
 	RotateStateOff,
 	RotateStateAccelUp,

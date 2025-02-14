@@ -1208,6 +1208,8 @@ void() Gremlin_FireRocket =
 	setmodel (missile, "progs/missile.mdl");
 	setsize (missile, '0 0 0', '0 0 0');
 	setorigin (missile, self.origin + v_forward*8 + '0 0 16');
+	
+	entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 //   GremlinRecoil(dir,-1000);
 };
 
@@ -1410,6 +1412,8 @@ void() GremlinFireProximityGrenade =
    setmodel (missile, "progs/proxbomb.mdl");
    setorigin (missile, self.origin);
    setsize (missile, '-1 -1 -1', '1 1 1');
+   
+   entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 /*
@@ -1457,7 +1461,7 @@ float() GremlinWeaponAttack =
 	else if (self.weapon == IT_GRENADE_LAUNCHER)
       {
       gremlin_rocket1();
-      OgreFireGrenade();
+      OgreFireGrenade_Vanilla();
       self.currentammo = self.ammo_rockets = self.ammo_rockets - 1;
       SUB_AttackFinished(1);
       }

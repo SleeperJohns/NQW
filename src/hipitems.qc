@@ -43,24 +43,9 @@ void() hip_powerup_touch =
 		if (self.powerup_lockout[other.colormap] > time || self.powerup_lockout[other.colormap] == -1) return; // Lockout
 	}
 	
-	local float seconds_left = rint (self.delay);
-		
-	if (!self.droppable_item) sprint(other, "You got the ", self.netname, "\n");
-	else
-	{
-		if (coop) sprint (other, "You recovered a fallen ally's decaying ", self.netname, " ");
-		else sprint (other, "You recovered a decaying ", self.netname, " ");
-		if (seconds_left >= 2)
-		{
-			sprint (other, "(", ftos(seconds_left), " seconds remaining)");
-			sprint (other, "\n");
-		}
-		else
-		{
-			sprint (other, "(", ftos(seconds_left), " second remaining)");
-			sprint (other, "\n");
-		}
-	}
+	self.storetime = 0;
+	
+	local float seconds_left = 0;
 
 	if (deathmatch && !coop)
 	{
@@ -74,21 +59,16 @@ void() hip_powerup_touch =
 		self.think = SUB_regen;
 	}
 	
-	if (coop == 1 && !deathmatch)
+	if (coop == REIGNITED_COOP && !deathmatch)
 	{
 		if (self.classname == "item_artifact_wetsuit") self.powerup_lockout_selective = 1; // This is a minor powerup item, let it respawn and have players grab it an infinite amount of times	
 		if (self.classname == "item_artifact_empathy_shields" && world.model == "maps/hip1m3.bsp" && !self.droppable_item)
 		{
 			self.alpha = 0.85;
-			self.powerup_lockout_selective = 1;							
+			self.powerup_lockout_selective = TRUE;							
 		} // This is a major powerup item, don't let it respawn, unless it's hip1m3. Then let everyone get this item.
 	}
-
-	sound (other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
-	stuffcmd (other, "bf\n");
-	if (!self.powerup_lockout_selective) self.solid = SOLID_NOT;
-	other.expansionitems |= self.expansionitems;
-        if (!self.powerup_lockout_selective) self.model = string_null;
+	
 	if (self.powerup_lockout_selective == 1)
 	{
 		if (!deathmatch)
@@ -105,41 +85,71 @@ void() hip_powerup_touch =
 	// do the apropriate action
 	if (self.classname == "item_artifact_wetsuit")
 	{
-		other.wetsuit_time = 1;
+		other.wetsuit_time = TRUE;
 		
 		// Sleeper: Don't need this, but it's good for consistent item behavior.
 		if (other.wetsuit_finished > time) self.storetime = other.wetsuit_finished - time;
 		
-		if (self.droppable_item == 1)
-		{
-			if (other.wetsuit_finished > time && self.fresh_powerup == TRUE) other.wetsuit_finished = time + self.delay + self.storetime;
-			else other.wetsuit_finished = time + self.delay;
+		if (self.droppable_item == TRUE)
+		{ 	
+			// Sleeper: If we picked up a dropped pre-decayed Ring, make sure to add it's delay to the next Ring's pickup. Whether it was dropped, or an untouched Ring.
+			other.wetsuit_finished = time + self.delay + self.storetime;															
+			if (other.wetsuit_finished > time + 30) // Sleeper: Don't overstack the timer.	
+			{
+				seconds_left = 30;
+				other.wetsuit_finished = time + 30;
+			}		
+			else seconds_left = rint(self.delay + self.storetime);		
 			
-			if (other.wetsuit_finished > time + 30) other.wetsuit_finished = time + 30; // Sleeper: Don't overstack the timer.	
-		}	
-		else other.wetsuit_finished = time + 30;
+			sprint (other, "You have recovered a decaying ", self.netname);
+			if (seconds_left != 1) sprint (other, " (", ftos(seconds_left), " seconds remaining)");
+			else sprint (other, " (", ftos(seconds_left), " second remaining)");
+		}		
+		else 
+		{
+			other.wetsuit_time = time + 30;
+			sprint (other, "You got the ", self.netname);
+		}
 	}
 	if (self.classname == "item_artifact_empathy_shields")
 	{
-		other.empathy_time = 1;
+		other.empathy_time = TRUE;
 		
 		if (other.empathy_finished > time) self.storetime = other.empathy_finished - time;
 		
 		if (horde_ent) other.empathy_finished = time + 12;
-		else if (self.droppable_item == 1)
-		{
-			if (other.empathy_finished > time && self.fresh_powerup == TRUE) other.empathy_finished = time + self.delay + self.storetime;
-			else other.empathy_finished = time + self.delay;
+		else if (self.droppable_item == TRUE)
+		{ 	
+			// Sleeper: If we picked up a dropped pre-decayed Ring, make sure to add it's delay to the next Ring's pickup. Whether it was dropped, or an untouched Ring.
+			other.empathy_finished = time + self.delay + self.storetime;								
+			if (other.empathy_finished > time + 30) // Sleeper: Don't overstack the timer.	
+			{
+				seconds_left = 30;
+				other.empathy_finished = time + 30;
+			}		
+			else seconds_left = rint(self.delay + self.storetime);		
 			
-			if (other.empathy_finished > time + 30) other.empathy_finished = time + 30; // Sleeper: Don't overstack the timer.		
+			sprint (other, "You have recovered a decaying ", self.netname);
+			if (seconds_left != 1) sprint (other, " (", ftos(seconds_left), " seconds remaining)");
+			else sprint (other, " (", ftos(seconds_left), " second remaining)");
+		}		
+		else 
+		{
+			other.wetsuit_time = time + 30;
+			sprint (other, "You got the ", self.netname);
 		}
-		else other.empathy_finished = time + 30;
-	}
+	}	
+
+	sound (other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+	stuffcmd (other, "bf\n");
+	if (!self.powerup_lockout_selective) self.solid = SOLID_NOT;
+	other.expansionitems |= self.expansionitems;
+        if (!self.powerup_lockout_selective) self.model = string_null;
 
 	activator = other;
 	SUB_UseTargets ();				// fire all targets / killtargets
 	
-	if (self.droppable_item == 1) remove (self);	
+	if (self.droppable_item == TRUE) remove (self);	
 };
 
 

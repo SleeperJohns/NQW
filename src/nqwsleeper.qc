@@ -7,8 +7,9 @@ NQW: SLEEPER
 void() NQW_Sleeper =
 {
 	// Player Model
-	setmodel 	       (self, "progs/player_sleeper.mdl"); // Sleeper's Player Model
+	self.nqwMdlChar      = "progs/player_sleeper.mdl";    // Sleeper's Player Model
 	self.nqwCharGib      = "progs/h_player.mdl";      // Ranger's Head when gibbed (Temporary)
+	self.view_ofs 	     = '0 0 22';
 	
 	// Melee Weapon Models
 	self.nqwMeleeMdl     = "progs/v_sleeper_axe.mdl"; // Sleeper's Bloodstained Axe ((Temporary) Melee weapon)

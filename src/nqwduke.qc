@@ -6,7 +6,7 @@ NQW: DUKE NUKEM
 void() NQW_DukeNukem =
 {
 	// Model
-	setmodel (self, "progs/player_dukenukem.mdl");
+	self.nqwMdlChar = "progs/player_dukenukem.mdl";
 	self.nqwCharGib = "progs/h_player_dukenukem.mdl";
 	self.nqwMeleeMdl = "progs/v_mfoot.mdl";
 	self.nqwHammerMdl = "progs/v_hammer.mdl";
@@ -249,11 +249,11 @@ void() NQW_DukeSpawn =
 void() NQW_DukeModel =
 {
 //  	self.nqwSkin = self.nqwSkin % self.nqwMaxSkins;
-	if (self.nqwSkin != 6) setmodel (self, "progs/player_dukenukem.mdl");
-	else setmodel (self, "progs/player_olddukenukem.mdl");
+	if (self.nqwSkin != 6) self.nqwMdlChar = "progs/player_dukenukem.mdl";
+	else self.nqwMdlChar = "progs/player_olddukenukem.mdl";
 	self.modelindex_nqwplayer = self.modelindex;
 	self.view_ofs = '0 0 22';
-	self.velocity = '0 0 0';	// 1998-07-21 Player moves after respawn fix by Xian
+//	self.velocity = '0 0 0';	// 1998-07-21 Player moves after respawn fix by Xian
 	setsize (self, VEC_HULL_MIN, VEC_HULL_MAX);
     
 	self.skin = self.nqwSkin;

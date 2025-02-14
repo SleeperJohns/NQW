@@ -13,7 +13,8 @@ void() NQW_DoomguyPrecache =
 void() NQW_Doomguy =
 {
 	// Model
-	setmodel (self, "progs/player_doomguy.mdl");
+	self.nqwMdlChar = "progs/player_doomguy.mdl";
+	self.view_ofs = '0 0 22';	
 	self.nqwCharGib = "progs/h_player_doomguy.mdl";
 	self.nqwMeleeMdl = "progs/v_punch.mdl";
 	self.nqwHammerMdl = "progs/v_hammer.mdl";

@@ -40,13 +40,13 @@ void() light_use =
 {
 	if (self.spawnflags & START_OFF)
 	{
-		lightstyle(self.style, "m");
-		self.spawnflags = self.spawnflags - START_OFF;
+		lightstyle (self.style, "m");
+		self.spawnflags -= START_OFF;
 	}
 	else
 	{
-		lightstyle(self.style, "a");
-		self.spawnflags = self.spawnflags + START_OFF;
+		lightstyle (self.style, "a");
+		self.spawnflags += START_OFF;
 	}
 };
 */
@@ -63,17 +63,15 @@ void() light =
 	if (!self.targetname)
 	{	
 		// inert light
-		remove(self);
+		remove (self);
 		return;
 	}
 
 	if (self.style >= 32)
 	{
 		self.use = light_use;
-		if (self.spawnflags & START_OFF)
-			lightstyle(self.style, "a");
-		else
-			lightstyle(self.style, "m");
+		if (self.spawnflags & START_OFF) lightstyle (self.style, "a");
+		else lightstyle (self.style, "m");
 	}
 };
 */
@@ -90,10 +88,8 @@ void() light_fluoro =
 	if (self.style >= 32)
 	{
 		self.use = light_use;
-		if (self.spawnflags & START_OFF)
-			lightstyle(self.style, "a");
-		else
-			lightstyle(self.style, "m");
+		if (self.spawnflags & START_OFF) lightstyle (self.style, "a");
+		else lightstyle (self.style, "m");
 	}
 
 	precache_sound ("ambience/fl_hum1.wav");
@@ -110,8 +106,7 @@ Makes sparking, broken fluorescent sound
 /*
 void() light_fluorospark =
 {
-	if (!self.style)
-		self.style = 10;
+	if (!self.style) self.style = 10;
 
 	precache_sound ("ambience/buzz1.wav");
 	ambientsound (self.origin, "ambience/buzz1.wav", 0.5, ATTN_STATIC);
@@ -135,7 +130,7 @@ void() light_globe =
 void() FireAmbient =
 {
 	precache_sound ("ambience/fire1.wav");
-// attenuate fast
+	// attenuate fast
 	ambientsound (self.origin, "ambience/fire1.wav", 0.5, ATTN_STATIC);
 };
 */
@@ -209,16 +204,12 @@ void() misc_fireball =
 	precache_model ("progs/lavaball.mdl");
 	self.classname = "fireball";
 
-	if (!self.speed)
-		self.speed = 1000;
+	if (!self.speed) self.speed = 1000;
 	// MG1 -----------------------------------
-	if (self.noise)
-		precache_sound (self.noise);
-	if (self.noise2)
-		precache_sound (self.noise2);
+	if (self.noise) precache_sound (self.noise);
+	if (self.noise2) precache_sound (self.noise2);
 	
-	if (self.targetname)
-		self.use = fire_fly;
+	if (self.targetname) self.use = fire_fly;
 	else
 	{
 		self.nextthink = time + (random() * 5);
@@ -235,8 +226,7 @@ void() misc_fireball =
 	self.classname = "fireball";
 	self.nextthink = time + (random() * 5);
 	self.think = fire_fly;
-	if (!self.speed)
-		self.speed = 1000;
+	if (!self.speed) self.speed = 1000;
 };
 */
 
@@ -268,8 +258,7 @@ void() fire_fly =
 		fireball.velocity_z = self.speed + (random() * 200);
 	}
 
-	if (self.noise)
-		sound (self, CHAN_VOICE, self.noise, 1.0, ATTN_NORM);
+	if (self.noise) sound (self, CHAN_VOICE, self.noise, 1.0, ATTN_NORM);
 	fireball.noise2 = self.noise2;
 	// --------------------------------------------------------------
 	
@@ -373,9 +362,9 @@ void() barrel_explode_mg1 =
 	
 	// yoder add, 27/09/2020 to make barrels fire targets on explode
 	activator = self.enemy;
-	dprint("enemy name: ");
-	dprint(self.enemy.classname);
-	dprint("\n");
+	dprint ("enemy name: ");
+	dprint (self.enemy.classname);
+	dprint ("\n");
 	SUB_UseTargets ();
 	
 	BecomeExplosion ();
@@ -395,9 +384,9 @@ void() barrel_detonate_mg1 =
 
 void() misc_explobox_mg1 =
 {
-	local float	oldz;
+	local float oldz;
 	
-	if(!self.mdl) self.mdl = "maps/b_explob.bsp";
+	if (!self.mdl) self.mdl = "maps/b_explob.bsp";
 
 	self.solid = SOLID_BSP;
 	self.movetype = MOVETYPE_PUSH;
@@ -408,15 +397,15 @@ void() misc_explobox_mg1 =
 	self.th_die = barrel_detonate_mg1;
 	self.takedamage = DAMAGE_AIM;
 
-	self.origin_z = self.origin_z + 2;
+	self.origin_z += 2;
 	oldz = self.origin_z;
-	droptofloor();
+	droptofloor ();
 	if (oldz - self.origin_z > 250)
 	{
 		dprint ("explobox fell out of level at ");
 		dprint (vtos(self.origin));
 		dprint ("\n");
-		remove(self);
+		remove (self);
 	}
 	self.classname = "explo_box"; // Used by ClientObituary to print death message
 };
@@ -437,10 +426,10 @@ void() func_explode_detonate_mg1
 {
 	vector pos = self.mins + (self.size * 0.5);
 	pos_z -= 32;
-	setmodel(self, string_null);
-	setorigin(self, pos);
+	setmodel (self, string_null);
+	setorigin (self, pos);
 
-	barrel_explode_mg1();
+	barrel_explode_mg1 ();
 }
 
 void() func_explode_die_mg1 =
@@ -471,7 +460,7 @@ void() func_explode =
 /*
 void() func_explode =
 {
-	local float	oldz;
+	local float oldz;
 
 	self.solid = SOLID_BBOX;
 	self.movetype = MOVETYPE_NONE;
@@ -482,9 +471,9 @@ void() func_explode =
 	self.th_die = barrel_explode;
 	self.takedamage = DAMAGE_AIM;
 
-	self.origin_z = self.origin_z + 2;
+	self.origin_z += 2;
 	oldz = self.origin_z;
-	droptofloor();
+	droptofloor ();
 	if (oldz - self.origin_z > 250)
 	{
 		dprint ("item fell out of level at ");
@@ -503,7 +492,7 @@ Smaller exploding box, REGISTERED ONLY
 
 void() misc_explobox2 =
 {
-	local float	oldz;
+	local float oldz;
 
 	if (mapname == "mge5m2") // Shouldn't be using the original exploding box.
 	{
@@ -520,7 +509,7 @@ void() misc_explobox2 =
 	self.th_die = barrel_explode;
 	self.takedamage = DAMAGE_AIM;
 
-	self.origin_z = self.origin_z + 2;
+	self.origin_z += 2;
 	oldz = self.origin_z;
 	droptofloor();
 	if (oldz - self.origin_z > 250)
@@ -528,7 +517,7 @@ void() misc_explobox2 =
 		dprint ("item fell out of level at ");
 		dprint (vtos(self.origin));
 		dprint ("\n");
-		remove(self);
+		remove (self);
 	}
 };
 
@@ -553,8 +542,7 @@ void() spikeshooter_use =
 		sound (self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
 		launch_spike (self.origin, self.movedir);
 		newmis.velocity = self.movedir * 500;
-		if (self.spawnflags & SPAWNFLAG_SUPERSPIKE)
-			newmis.touch = superspike_touch;
+		if (self.spawnflags & SPAWNFLAG_SUPERSPIKE) newmis.touch = superspike_touch;
 	}
 	else if (self.spawnflags & SPAWNFLAG_LASER)
 	{
@@ -574,10 +562,8 @@ void() spikeshooter_use =
 			sound (self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
 			launch_lava_spike (self.origin, self.movedir);
 			newmis.velocity = self.movedir * 500;
-			if (self.spawnflags & SPAWNFLAG_SUPERLAVA)
-				newmis.touch = superlavaspike_touch;
-			else if((self.spawnflags & SPAWNFLAG_LAVASKILL) && (cvar("skill") >= 2))
-				newmis.touch = superlavaspike_touch;
+			if (self.spawnflags & SPAWNFLAG_SUPERLAVA) newmis.touch = superlavaspike_touch;
+			else if ((self.spawnflags & SPAWNFLAG_LAVASKILL) && (cvar("skill") >= 2)) newmis.touch = superlavaspike_touch;
 		}
 		else
 		{
@@ -585,10 +571,8 @@ void() spikeshooter_use =
 			sound (self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
 			launch_spike (self.origin, self.movedir);
 			newmis.velocity = self.movedir * 500;
-			if (self.spawnflags & SPAWNFLAG_SUPERLAVA)
-				newmis.touch = superspike_touch;
-			else if ((self.spawnflags & SPAWNFLAG_LAVASKILL) && (cvar("skill") >= 2))
-				newmis.touch = superspike_touch;
+			if (self.spawnflags & SPAWNFLAG_SUPERLAVA) newmis.touch = superspike_touch;
+			else if ((self.spawnflags & SPAWNFLAG_LAVASKILL) && (cvar("skill") >= 2)) newmis.touch = superspike_touch;
 		}		
 	}
 };
@@ -607,8 +591,7 @@ void() trap_spikeshooter =
 	self.use = spikeshooter_use;
 	if (self.spawnflags & SPAWNFLAG_LASER)
 	{
-		precache_model2 ("progs/laser.mdl");
-		
+		precache_model2 ("progs/laser.mdl");		
 		precache_sound2 ("enforcer/enfire.wav");
 		precache_sound2 ("enforcer/enfstop.wav");
 	}
@@ -631,72 +614,62 @@ void() trap_spikeshooter =
 		precache_sound2 ("weapons/rocket1i.wav");
 		precache_sound2 ("weapons/spike2.wav");
         }
-        else if (self.spawnflags & SPAWNFLAG_FIREBALL)
-		precache_model ("progs/fireball.mdl");
-	else
-		precache_sound ("weapons/spike2.wav");
+        else if (self.spawnflags & SPAWNFLAG_FIREBALL) precache_model ("progs/fireball.mdl");
+	else precache_sound ("weapons/spike2.wav");
 };
 //MED 11/09/96 added lava ball and rocket
 /*
 void() spikeshooter_use =
 {
-   local entity lavaball;
+	local entity lavaball;
 	if (self.spawnflags & SPAWNFLAG_LASER)
 	{
-      if (!self.spawnflags & SPAWNFLAG_SILENT)
-         sound (self, CHAN_VOICE, "enforcer/enfire.wav", 1, ATTN_NORM);
+		if (!self.spawnflags & SPAWNFLAG_SILENT) sound (self, CHAN_VOICE, "enforcer/enfire.wav", 1, ATTN_NORM);
 		LaunchLaser (self.origin, self.movedir);
-      newmis.spawnflags = self.spawnflags;
+		newmis.spawnflags = self.spawnflags;
 	}
-   else if (self.spawnflags & SPAWNFLAG_LAVABALL)
-   {
-      if (!self.spawnflags & SPAWNFLAG_SILENT)
-         sound (self, CHAN_VOICE, "misc/spike.wav", 1, ATTN_NORM);
-      lavaball = spawn();
-      lavaball.movetype = MOVETYPE_FLYMISSILE;
-      lavaball.solid = SOLID_BBOX;
-      lavaball.classname = "lavaball";
-      // set lavaball speed
-      lavaball.velocity = self.movedir * 300;
-      lavaball.angles = vectoangles(lavaball.velocity);
-      lavaball.owner = self;
-      lavaball.touch = T_MissileTouch;
-      setmodel (lavaball, "progs/lavarock.mdl");
-      setsize (lavaball, '-4 -4 -4', '4 4 4');
-      setorigin (lavaball, self.origin);
-      lavaball.avelocity = '0 0 400';
-      lavaball.nextthink = time + 5;
-      lavaball.think = SUB_Remove;
-   }
-   else if (self.spawnflags & SPAWNFLAG_ROCKET)
-   {
-      if (!self.spawnflags & SPAWNFLAG_SILENT)
-         sound (self, CHAN_VOICE, "weapons/sgun1.wav", 1, ATTN_NORM);
-      W_FireRocket();
-      newmis.velocity = self.movedir*1000;
-      newmis.angles = vectoangles(newmis.velocity);
-      setorigin (newmis, self.origin + self.movedir*8);
-   }
-   else
+	else if (self.spawnflags & SPAWNFLAG_LAVABALL)
 	{
-      if (!self.spawnflags & SPAWNFLAG_SILENT)
-         sound (self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
+		if (!self.spawnflags & SPAWNFLAG_SILENT) sound (self, CHAN_VOICE, "misc/spike.wav", 1, ATTN_NORM);
+		lavaball = spawn ();
+		lavaball.movetype = MOVETYPE_FLYMISSILE;
+		lavaball.solid = SOLID_BBOX;
+		lavaball.classname = "lavaball";
+		// set lavaball speed
+		lavaball.velocity = self.movedir * 300;
+		lavaball.angles = vectoangles(lavaball.velocity);
+		lavaball.owner = self;
+		lavaball.touch = T_MissileTouch;
+		setmodel (lavaball, "progs/lavarock.mdl");
+		setsize (lavaball, '-4 -4 -4', '4 4 4');
+		setorigin (lavaball, self.origin);
+		lavaball.avelocity = '0 0 400';
+		lavaball.nextthink = time + 5;
+		lavaball.think = SUB_Remove;
+	}
+	else if (self.spawnflags & SPAWNFLAG_ROCKET)
+	{
+		if (!self.spawnflags & SPAWNFLAG_SILENT) sound (self, CHAN_VOICE, "weapons/sgun1.wav", 1, ATTN_NORM);
+		W_FireRocket ();
+		newmis.velocity = self.movedir * 1000;
+		newmis.angles = vectoangles(newmis.velocity);
+		setorigin (newmis, self.origin + self.movedir * 8);
+	}
+	else
+	{
+		if (!self.spawnflags & SPAWNFLAG_SILENT) sound (self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
 		launch_spike (self.origin, self.movedir);
 		newmis.velocity = self.movedir * 500;
-		if (self.spawnflags & SPAWNFLAG_SUPERSPIKE)
-			newmis.touch = superspike_touch;
+		if (self.spawnflags & SPAWNFLAG_SUPERSPIKE) newmis.touch = superspike_touch;
 	}
 };
 */
 
-//MED 11/01/96 added state capability
+// MED 11/01/96 Added state capability
 void() hip_shooter_think =
 {
-   if (self.state)
-      {
-      spikeshooter_use ();
-      }
-   self.nextthink = time + self.wait;
+	if (self.state) spikeshooter_use ();
+	self.nextthink = time + self.wait;
 };
 
 
@@ -709,37 +682,35 @@ void() trap_shooter =
 {
 	trap_spikeshooter ();
 	
-	if (self.wait == 0)
-		self.wait = 1;
-	self.nextthink = self.nextthink + self.wait + self.ltime;
+	if (self.wait == 0) self.wait = 1;
+	self.nextthink += self.wait + self.ltime;
 	self.think = shooter_think;
 };
-//MED 11/01/96 commented out setmovedir
-/*
+
+/* //MED 11/01/96 Commented out setmovedir
 void() trap_spikeshooter =
 {
-   SetMovedir ();
+	SetMovedir ();
 	self.use = spikeshooter_use;
+	
 	if (self.spawnflags & SPAWNFLAG_LASER)
 	{
 		precache_model2 ("progs/laser.mdl");
-
 		precache_sound2 ("enforcer/enfire.wav");
 		precache_sound2 ("enforcer/enfstop.wav");
 	}
-   else if (self.spawnflags & SPAWNFLAG_LAVABALL)
-   {
-      precache_model ("progs/lavarock.mdl");
-//      self.classname = "fireball";
-      precache_sound2 ("misc/spike.wav");
-   }
-   else if (self.spawnflags & SPAWNFLAG_ROCKET)
-   {
-      precache_model ("progs/missile.mdl");
-      precache_sound ("weapons/sgun1.wav");
-   }
-   else
-		precache_sound ("weapons/spike2.wav");
+	else if (self.spawnflags & SPAWNFLAG_LAVABALL)
+	{
+		precache_model ("progs/lavarock.mdl");
+//      	self.classname = "fireball";
+		precache_sound2 ("misc/spike.wav");
+	}
+	else if (self.spawnflags & SPAWNFLAG_ROCKET)
+	{
+		precache_model ("progs/missile.mdl");
+		precache_sound ("weapons/sgun1.wav");
+	}
+	else precache_sound ("weapons/spike2.wav");
 };
 */
 
@@ -753,19 +724,16 @@ void() hip_trap_shooter =
 {
 	trap_spikeshooter ();
 
-	if (self.wait == 0)
-		self.wait = 1;
-//MED 11/01/96 added state capability
-   self.state = 1;
-	self.nextthink = self.nextthink + self.wait + self.ltime;
+	if (self.wait == 0) self.wait = 1;
+	
+	// MED 11/01/96 Added state capability
+	self.state = 1;
+	self.nextthink += self.wait + self.ltime;
 	self.think = shooter_think;
 };
 
 //MED 11/01/96 added new use function
-void() trap_shooter_use =
-   {
-   self.state = 1 - self.state;
-   };
+void() trap_shooter_use = {self.state = 1 - self.state;};
 //MED 11/01/96 added new function
 /*QUAKED trap_switched_shooter (0 .5 .8) (-8 -8 -8) (8 8 8) superspike laser lavaball rocket silent
 Continuously fires spikes.
@@ -774,16 +742,16 @@ Continuously fires spikes.
 "state" 0 initially off, 1 initially on. (0 default)
 */
 void() trap_switched_shooter =
-   {
-   trap_spikeshooter ();
+{
+	trap_spikeshooter ();
 
-	if (self.wait == 0)
-		self.wait = 1;
-//MED 11/01/96 added state capability
-	self.nextthink = self.nextthink + self.wait + self.ltime;
+	if (self.wait == 0) self.wait = 1;
+	
+	// MED 11/01/96 Added state capability
+	self.nextthink += self.wait + self.ltime;
 	self.think = shooter_think;
-   self.use = trap_shooter_use;
-   };
+	self.use = trap_shooter_use;
+};
 
 
 
@@ -805,13 +773,13 @@ testing air bubbles
 */
 
 void() air_bubbles =
-
 {
 	if (deathmatch)
 	{
 		remove (self);
 		return;
 	}
+	
 	precache_model ("progs/s_bubble.spr");
 	self.nextthink = time + 1;
 	self.think = make_bubbles;
@@ -819,9 +787,8 @@ void() air_bubbles =
 
 void() make_bubbles =
 {
-local entity	bubble;
-
-	bubble = spawn();
+	local entity bubble = spawn ();
+	
 	setmodel (bubble, "progs/s_bubble.spr");
 	setorigin (bubble, self.origin);
 	bubble.movetype = MOVETYPE_NOCLIP;
@@ -840,8 +807,8 @@ local entity	bubble;
 
 void() bubble_split =
 {
-local entity	bubble;
-	bubble = spawn();
+	local entity bubble = spawn ();
+	
 	setmodel (bubble, "progs/s_bubble.spr");
 	setorigin (bubble, self.origin);
 	bubble.movetype = MOVETYPE_NOCLIP;
@@ -856,8 +823,8 @@ local entity	bubble;
 	setsize (bubble, '-8 -8 -8', '8 8 8');
 	self.frame = 1;
 	self.cnt = 10;
-	if (self.waterlevel != 3)
-		remove (self);
+	
+	if (self.waterlevel != 3) remove (self);
 };
 
 void() bubble_remove =
@@ -867,37 +834,30 @@ void() bubble_remove =
 //		dprint ("bump");
 		return;
 	}
+	
 	remove(self);
 };
 
 void() bubble_bob =
 {
-local float		rnd1, rnd2, rnd3;
+	local float rnd1, rnd2, rnd3;
 
-	self.cnt = self.cnt + 1;
-	if (self.cnt == 4)
-		bubble_split();
-	if (self.cnt == 20)
-		remove(self);
+	self.cnt += 1;
+	if (self.cnt == 4) bubble_split ();
+	if (self.cnt == 20) remove (self);
 
 	rnd1 = self.velocity_x + (-10 + (random() * 20));
 	rnd2 = self.velocity_y + (-10 + (random() * 20));
 	rnd3 = self.velocity_z + 10 + random() * 10;
 
-	if (rnd1 > 10)
-		rnd1 = 5;
-	if (rnd1 < -10)
-		rnd1 = -5;
+	if (rnd1 > 10) rnd1 = 5;
+	if (rnd1 < -10) rnd1 = -5;
 
-	if (rnd2 > 10)
-		rnd2 = 5;
-	if (rnd2 < -10)
-		rnd2 = -5;
+	if (rnd2 > 10) rnd2 = 5;
+	if (rnd2 < -10) rnd2 = -5;
 
-	if (rnd3 < 10)
-		rnd3 = 15;
-	if (rnd3 > 30)
-		rnd3 = 25;
+	if (rnd3 < 10) rnd3 = 15;
+	if (rnd3 > 30) rnd3 = 25;
 
 	self.velocity_x = rnd1;
 	self.velocity_y = rnd2;
@@ -916,7 +876,6 @@ Just for the debugging level.  Don't use
 */
 
 void() viewthing =
-
 {
 	self.movetype = MOVETYPE_NONE;
 	self.solid = SOLID_NOT;
@@ -933,10 +892,7 @@ SIMPLE BMODELS
 ==============================================================================
 */
 
-void() func_wall_use =
-{	// change to alternate textures
-	self.frame = 1 - self.frame;
-};
+void() func_wall_use = {self.frame = 1 - self.frame;}; // Change to alternate textures
 
 /*QUAKED func_wall (0 .5 .8) ?
 This is just a solid wall if not inhibitted
@@ -944,7 +900,7 @@ This is just a solid wall if not inhibitted
 void() func_wall =
 {
 	self.angles = '0 0 0';
-	self.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
+	self.movetype = MOVETYPE_PUSH;	// So it doesn't get pushed by anything
 	self.solid = SOLID_BSP;
 	self.use = func_wall_use;
 	setmodel (self, self.model);
@@ -955,7 +911,6 @@ void() func_wall =
 A simple entity that looks solid but lets you walk through it.
 */
 void() func_illusionary =
-
 {
 	self.angles = '0 0 0';
 	self.movetype = MOVETYPE_NONE;
@@ -968,152 +923,150 @@ void() func_illusionary =
 This bmodel will appear if the episode has allready been completed, so players can't reenter it.
 */
 void() func_episodegate =
-
 {
-	if (!(serverflags & self.spawnflags))
-		return;			// can still enter episode
+	if (!(serverflags & self.spawnflags)) return; // Can still enter episode
 
 	self.angles = '0 0 0';
-	self.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
+	self.movetype = MOVETYPE_PUSH;	// So it doesn't get pushed by anything
 	self.solid = SOLID_BSP;
 	self.use = func_wall_use;
 	setmodel (self, self.model);
 };
-
-/*QUAKED func_bossgate (0 .5 .8) ?
-This bmodel appears unless players have all of the episode sigils.
-*/
-/*
-void() func_bossgate =
-
-{
-	if ( (serverflags & 15) == 15)
-		return;		// all episodes completed
-	self.angles = '0 0 0';
-	self.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
-	self.solid = SOLID_BSP;
-	self.use = func_wall_use;
-	setmodel (self, self.model);
-};
-*/
 
 const float BOSSGATE_INVERSE = 64;
-void() func_bossgate =
+void() func_bossgate_mg1 =
 {
-	float inverse = self.spawnflags & BOSSGATE_INVERSE ? TRUE : FALSE;
-	self.spawnflags (-) BOSSGATE_INVERSE;
-	if (!self.spawnflags)
-		self.spawnflags = SIGIL_E1 | SIGIL_E2 | SIGIL_E3 | SIGIL_E4;
-	self.spawnflags&= SIGIL_ALL;
+/*	local float inverse = self.spawnflags & BOSSGATE_INVERSE ? TRUE : FALSE;
 	
-	if ((serverflags & self.spawnflags) == self.spawnflags) //All runes collected
+	self.spawnflags (-) BOSSGATE_INVERSE;
+	if (!self.spawnflags) self.spawnflags = SIGIL_MG1_E1 | SIGIL_MG1_E2 | SIGIL_MG1_E3 | SIGIL_MG1_E4;
+	self.spawnflags &= SIGIL_MG1_ALL;
+	
+	if ((serverflags & SIGIL_MG1_ALL) == SIGIL_MG1_ALL) // All runes collected
 	{
-		if(!inverse)
+		if (!inverse)
 		{
-			remove(self);
+			remove (self);
 			return;
 		}
 	}
-	else //Still missing some runes
+	else // Still missing some runes
 	{
-		if(inverse)
+		if (inverse)
 		{
-			remove(self);
+			remove (self);
 			return;
 		}	
 	}
+*/
 	
+	if ((serverflags & SIGIL_MG1_ALL) != SIGIL_MG1_ALL)
+	{
+		remove (self);
+		return;
+	}
+			
 	self.angles = '0 0 0';
 	self.movetype = MOVETYPE_PUSH;	// so it doesn't get pushed by anything
 	self.solid = SOLID_BSP;
 	self.use = func_wall_use;
 	setmodel (self, self.model);
 
-	if(self.target || self.killtarget)
+	if (self.target || self.killtarget)
 	{
 		self.think = SUB_UseTargets;
 		self.nextthink = time + 0.2;
 	}
 };
 
+/*QUAKED func_bossgate (0 .5 .8) ?
+This bmodel appears unless players have all of the episode sigils.
+*/
+void() func_bossgate =
+{
+	if (gameworld == MG1) {func_bossgate_mg1 (); return;} // MG1 Logic
+	
+	if ((serverflags & SIGIL_ID1_ALL) == SIGIL_ID1_ALL) {remove (self); return;} // All episodes completed
+		
+	self.angles = '0 0 0';
+	self.movetype = MOVETYPE_PUSH;	// So it doesn't get pushed by anything
+	self.solid = SOLID_BSP;
+	self.use = func_wall_use;
+	setmodel (self, self.model);
+};
+
 const float FUNC_HURT_START_ON = 1;
 
-void func_hurt_touch()
+void() func_hurt_touch =
 {
-	if(!self.state) return;
-	if(other.health <= 0) return;
-	if(!other.takedamage) return;
-	if(!(other.flags & (FL_CLIENT | FL_MONSTER))) return;
-	if(self.attack_finished > time) return;
+	if (!self.state) return;
+	if (other.health <= 0) return;
+	if (!other.takedamage) return;
+	if (!(other.flags & (FL_CLIENT | FL_MONSTER))) return;
+	if (self.attack_finished > time) return;
 	
-	T_Damage(other, self, world, self.dmg);
+	T_Damage (other, self, world, self.dmg);
 	self.attack_finished = time + self.wait;
-}
+};
 
-void func_hurt_use()
+void() func_hurt_use =
 {
 	self.state = 1 - self.state;
 	self.attack_finished = 0;
-}
+};
 
 /*QUAKED func_hurt (0 .5 .8) ?
 Hurts alive things when they touch it
 */
-void func_hurt()
+void() func_hurt =
 {
-	setmodel(self, self.model);
-	setorigin(self, self.origin);
+	setmodel (self, self.model);
+	setorigin (self, self.origin);
 	self.solid = SOLID_BSP;
 	self.movetype = MOVETYPE_PUSH;
 	self.touch = func_hurt_touch;
 	self.use = func_hurt_use;
 
-	if(!self.dmg) self.dmg = 10;
-	if(!self.wait) self.wait = 0.2;
+	if (!self.dmg) self.dmg = 10;
+	if (!self.wait) self.wait = 0.2;
 
-	if(self.spawnflags & FUNC_HURT_START_ON)
-	{
-		self.state = 1;
-	}
-}
+	if (self.spawnflags & FUNC_HURT_START_ON) self.state = 1;
+};
 
 //============================================================================
 
-void trigger_changetarget_use()
-{
-	SUB_SwitchTargets(target, self.target, self.killtarget);
-}
+void() trigger_changetarget_use = {SUB_SwitchTargets (target, self.target, self.killtarget);};
 
-void trigger_changetarget()
+void() trigger_changetarget =
 {
-	if(!self.target) objerror("Missing target.");
-	if(!self.killtarget) objerror("Missing target to change to.");
+	if (!self.target) objerror ("Missing target.");
+	if (!self.killtarget) objerror ("Missing target to change to.");
+	
 	self.use = trigger_changetarget_use;
-}
+};
 
 //============================================================================
 // Cleanup
-void trigger_cleanup_corpses_use()
+void() trigger_cleanup_corpses_use =
 {
-    entity e = nextent(world);
-    while(e)
-    {
-        if(e.flags & FL_MONSTER)
-        {
-            if(e.health <= 0)
-            {
-                remove(e);
-            }
-        }
-        e = nextent(e);
-    }
-    remove(self);
+	local entity e = nextent (world);
+	while (e)
+	{
+		if (e.flags & FL_MONSTER)
+		{
+			if (e.health <= 0) remove (e);
+		}
+		e = nextent (e);
+	}
+	
+	remove (self);
 }
 
-void trigger_cleanup_corpses()
+void() trigger_cleanup_corpses =
 {
-    if(coop == 0) { remove(self); return; }
-    self.use = trigger_cleanup_corpses_use;
+	if (coop == 0) {remove(self); return;}
+    
+	self.use = trigger_cleanup_corpses_use;
 }
 
 //============================================================================
@@ -1188,8 +1141,8 @@ void() ambient_generic =
 {
 	if (!self.noise)
 	{
-		dprint("ambient_generic with no noise. Removing.\n");
-		remove(self);
+		dprint ("ambient_generic with no noise. Removing.\n");
+		remove (self);
 	}
 	if (!self.volume) self.volume = 0.5;
 	if (!self.delay) self.delay = 3;

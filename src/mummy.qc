@@ -215,6 +215,8 @@ void(vector st) mummyFireGrenade =
 	setmodel (missile, "progs/zom_gib.mdl");
 	setsize (missile, '0 0 0', '0 0 0');        
 	setorigin (missile, org);
+	
+	entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 

@@ -114,6 +114,8 @@ void(vector org, vector vec) LaunchLaser =
 	newmis.nextthink = time + 5;
 	newmis.think = SUB_Remove;
 	newmis.touch = Laser_Touch;
+	
+	entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 

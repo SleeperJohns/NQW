@@ -245,7 +245,7 @@ void() PrecacheMonsters =
 	precache_model ("progs/ogre.mdl");
 	precache_model ("progs/rogue_ogre.mdl");
 	precache_model ("progs/h_ogre.mdl");
-	precache_model ("progs/rogue_h_ogre.mdl");
+	precache_model ("progs/h_rogue_ogre.mdl");
 	precache_model ("progs/grenade.mdl");
 
 	precache_sound ("ogre/ogdrag.wav");
@@ -470,7 +470,7 @@ void() PrecacheMonsters =
 	// -----------------------------------------------
 	
 	// new horde sounds
-	precache_sound("horde/nyom.wav");
+//	precache_sound("horde/nyom.wav");
 	
 	// precache keys
 	if (world.worldtype == WORLDTYPE_MEDIEVAL || world.worldtype == WORLDTYPE_HUB)
@@ -908,6 +908,8 @@ entity(string class, vector org, vector temp_angles) SpawnMonster =
 	}		
 	// --------------------------------------------------------------------------
 	else dprint("ERROR: No monster provided");
+	
+	entity_collision (monster, MONSTERMASK, PVE_GENERAL, PVE_GENERAL, PVE_GENERAL, EMPTYMASK, 0);
 	
 	// finish the shared settings
 	setorigin (monster, org);
@@ -1958,21 +1960,21 @@ void(float is_gold) SpawnKey =
 			item.netname = "gold runekey";
 			item.noise = "misc/runekey.wav";
 			setmodel (item, "progs/m_g_key.mdl");
-			centerprint_all ("A Gold Runekey appears...\n");
+			centerprint_all (other, "A Gold Runekey appears...\n", "A Gold Runekey appears...\n");
 		}
 		else if (world.worldtype == WORLDTYPE_BASE)
 		{
 			item.netname = "gold keycard";
 			item.noise = "misc/basekey.wav";
 			setmodel (item, "progs/b_g_key.mdl");
-			centerprint_all ("A Gold Keycard appears...\n");
+			centerprint_all (other, "A Gold Keycard appears...\n", "A Gold Keycard appears...\n");
 		}
 		else // assume medieval
 		{
 			item.netname = "gold key";
 			item.noise = "misc/medkey.wav";
 			setmodel (item, "progs/w_g_key.mdl");
-			centerprint_all ("A Gold Key appears...\n");
+			centerprint_all (other, "A Gold Key appears...\n", "A Gold Key appears...\n");
 		}
 	}
 	else
@@ -1984,21 +1986,21 @@ void(float is_gold) SpawnKey =
 			item.netname = "silver runekey";
 			item.noise = "misc/runekey.wav";
 			setmodel (item, "progs/m_s_key.mdl");
-			centerprint_all ("A Silver Runekey appears...\n");
+			centerprint_all (other, "A Silver Runekey appears...\n", "A Silver Runekey appears...\n");
 		}
 		else if (world.worldtype == WORLDTYPE_BASE)
 		{
 			item.netname = "silver keycard";
 			item.noise = "misc/basekey.wav";
 			setmodel (item, "progs/b_s_key.mdl");
-			centerprint_all ("A Silver Keycard appears...\n");
+			centerprint_all (other, "A Silver Keycard appears...\n", "A Silver Keycard appears...\n");
 		}
 		else // assume medieval
 		{
 			item.netname = "silver key";
 			item.noise = "misc/medkey.wav";
 			setmodel (item, "progs/w_s_key.mdl");
-			centerprint_all ("A Silver Key appears...\n");
+			centerprint_all (other, "A Silver Key appears...\n", "A Silver Key appears...\n");
 		}
 
 	}
@@ -2972,15 +2974,15 @@ void() Countdown4 =
 {
 	if (gameworld != APOTHEOSIS)
 	{
-		if (self.wave % 3 == 0) centerprint_all ("BOSS WAVE!\n");
-		else centerprint_all ("Fight!\n");
+		if (self.wave % 3 == 0) centerprint_all (other, "BOSS WAVE!\n", "BOSS WAVE!\n");
+		else centerprint_all (other, "", "Fight!\n");
 	}
 	SpawnWave2();
 	if (gameworld != APOTHEOSIS) sound (self, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NONE);
 };
 void() Countdown3 =
 {
-	if (gameworld != APOTHEOSIS) centerprint_all("1");
+	if (gameworld != APOTHEOSIS) centerprint_all(other, "1", "1");
 	self.think = Countdown4;
 	if (gameworld == APOTHEOSIS) self.nextthink = time + 0.1;
 	else self.nextthink = time + 1;
@@ -2988,7 +2990,7 @@ void() Countdown3 =
 };
 void() Countdown2 =
 {
-	if (gameworld != APOTHEOSIS) centerprint_all ("2");
+	if (gameworld != APOTHEOSIS) centerprint_all (other, "2", "2");
 	self.think = Countdown3;
 	if (gameworld == APOTHEOSIS) self.nextthink = time + 0.1;
 	else self.nextthink = time + 1;
@@ -2998,7 +3000,7 @@ void() Countdown =
 {
 	if (!SpawnWavePrep()) return;
 	
-	if (gameworld != APOTHEOSIS) centerprint_all ("3");
+	if (gameworld != APOTHEOSIS) centerprint_all (other, "3", "3");
 	self.think = Countdown2;
 	if (gameworld == APOTHEOSIS) self.nextthink = time + 0.1;
 	else self.nextthink = time + 1;	
@@ -3145,7 +3147,11 @@ void() horde_manager =
 	}
 	
 	// AY, Dec06 2021, auto set horde cvar
-	if (!cvar("horde") && !deathmatch) cvar_set("horde", "1");		
+	if (!cvar("horde") && !deathmatch) 
+	{
+		cvar_set("horde", "1");
+		cvar_set("campaign", "0");
+	}		
 	// end AY
 		
 	PrecacheMonsters();

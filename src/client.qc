@@ -90,6 +90,137 @@ void(entity e) intermission_clear_powerups =
 };
 // ===================================================
 
+float() FirstLevelMaps = 
+{
+	if (world.model == Start_Maplist_World[StartMaps_Finder()] || world.model == CustomCoop_MapsList_World[CustomCoopMaps_Finder()] || world.model == HordeMode_MapsList_World[HordeMaps_Finder()]) return FALSE;
+	
+	if (world.model == ID1_Maplist_World[1] || world.model == ID1_Maplist_World[9] || world.model == ID1_Maplist_World[16] || world.model == ID1_Maplist_World[23] || world.model == ID1_Maplist_World[31] || world.model == ID1_Maplist_World[32] ||
+	    world.model == HIP_Maplist_World[1] || world.model == HIP_Maplist_World[6] || world.model == HIP_Maplist_World[12] ||
+	    world.model == ROGUE_Maplist_World[1] || world.model == ROGUE_Maplist_World[8] ||
+	    world.model == DOPA_Maplist_World[1] || 
+	    world.model == MG1_Maplist_World[1] || world.model == MG1_Maplist_World[4] || world.model == MG1_Maplist_World[6] || world.model == MG1_Maplist_World[8] || world.model == MG1_Maplist_World[10] || world.model == MG1_Maplist_World[12]) return TRUE;
+	
+	return FALSE;
+};
+
+float() EndLevelMaps =
+{
+	if (world.model == Start_Maplist_World[StartMaps_Finder()] || world.model == CustomCoop_MapsList_World[CustomCoopMaps_Finder()] || world.model == HordeMode_MapsList_World[HordeMaps_Finder()]) return FALSE;
+	
+	if (world.model == ID1_Maplist_World[31] || 
+	    world.model == MG1_Maplist_World[12]) return TRUE;
+	
+	return FALSE;
+};
+
+/*
+float() MG1_FinalEpisodeMap =
+{
+	if (world.model == Start_Maplist_World[StartMaps_Finder()] || world.model == CustomCoop_MapsList_World[CustomCoopMaps_Finder()] || world.model == HordeMode_MapsList_World[HordeMaps_Finder()]) return FALSE;
+	
+	if (world.model == ID1_Maplist_World[ID1_Maps_Finder()] || 
+	    world.model == HIP_Maplist_World[HIP_Maps_Finder()] || 
+	    world.model == ROGUE_Maplist_World[ROGUE_Maps_Finder()] || 
+	    world.model == DOPA_Maplist_World[DOPA_Maps_Finder()]) return FALSE;
+	    
+	if (world.model == MG1_Maplist_World[2] || world.model == MG1_Maplist_World[5] || world.model == MG1_Maplist_World[7] || world.model == MG1_Maplist_World[9] || world.model == MG1_Maplist_World[11]) return TRUE;
+
+	return FALSE;
+};
+*/
+
+// Sleeper: In some maps (i.e.: start maps or the first map of an episode), we need to force an inventory wipe back to what's considered stock (full health, shotgun, yaada yaada...) after a level change.
+// We need to do this, so we don't lose our character model and skin selection every time we use changelevel.
+void() ForcePlayerInventoryClear =
+{
+	if (cvar("customcoop") && cvar("coop") && !cvar("horde") && !cvar("deathmatch"))
+	{
+		if (cvar("skill") == 5) 
+		{
+			self.health = 126;
+			self.max_health = 100;
+			self.ammo_shells1 = 25;
+			self.ammo_nails1 = 30;
+		}
+		else if (cvar("skill") == 4)
+		{
+			self.health = 76;
+			self.max_health = 50;
+			self.ammo_shells1 = 50;
+			self.ammo_nails1 = 50;
+		}
+		else if (gameworld >= ID1 && gameworld <= MG1) 
+		{
+			if (cvar("skill") == 5) self.health = self.max_health = 125;
+			else if (cvar("skill") == 4) self.health = self.max_health = 50;
+			else self.health = self.max_health = 100;
+			
+			self.ammo_shells1 = 25;
+			self.ammo_nails1 = 0;			
+			self.items = IT_AXE | IT_SHOTGUN;	
+			self.weapons = IT_AXE | IT_SHOTGUN;	
+			self.armorvalue = 0;
+			self.weapon = IT_SHOTGUN;
+			self.armortype = 0;						
+		}				
+		else
+		{
+			self.health = 126; 
+			self.max_health = 100;
+			self.ammo_shells1 = 50;
+			self.ammo_nails1 = 50;
+		}
+	}
+	else if (!cvar("customcoop"))
+	{
+		if (cvar("coop"))
+		{
+			if (cvar("horde"))
+			{
+				if (cvar("skill") == 5)
+				{
+					self.health = 151;
+					self.max_health = 125;
+				}
+				else if (cvar("skill") == 4)
+				{
+					self.health = 76;
+					self.max_health = 50;
+				}				
+				else
+				{
+					self.health = 126;
+					self.max_health = 100;
+				}
+			}
+			else
+			{
+				if (cvar("skill") == 5) self.health = self.max_health = 125;
+				else if (cvar("skill") == 4) self.health = self.max_health = 50;
+				else self.health = self.max_health = 100;
+			}
+		}
+		else if (cvar("deathmatch"))
+		{
+			self.health = 126;
+			self.max_health = 100;
+		}
+			
+		self.items = IT_AXE | IT_SHOTGUN;	
+		self.weapons = IT_AXE | IT_SHOTGUN;	
+		self.armorvalue = 0;
+		self.weapon = IT_SHOTGUN;
+		self.armortype = 0;	 
+	}
+
+	self.ammo_rockets1 = 0;
+	self.ammo_cells1 = 0;
+	self.ammo_lava_nails = 0;
+	self.ammo_multi_rockets = 0;
+	self.ammo_plasma = 0;
+	self.ammo_slugs = 0;
+	self.expansionitems = 0;
+};
 
 // Sleeper: Save inventory for respawn in Cooperative.
 void() SetRespawnParms =
@@ -102,7 +233,7 @@ void() SetRespawnParms =
 	self.gravity = 1.0;
 	
 	// Sleeper: Dafuq you need Respawn Parms for on Start Maps?
-	if (world.model == Start_Maplist[StartMaps()])
+	if (world.model == Start_Maplist_World[StartMaps_Finder()])
 	{
 		parm1 = parm15 = IT_SHOTGUN | IT_AXE;
 		
@@ -218,13 +349,8 @@ void() InheritParms =
 {
 	if (!cvar("campaign")) return;
 	if (!cvar("coop")) return; // Sleeper: Inheriting inventory can only be used in Co-Op.
-	if (world.model == Start_Maplist[StartMaps()] || world.worldtype == WORLDTYPE_HUB) return; // Sleeper: Don't inherit inventory if a startmap.			
-	if ((world.model == "maps/e1m1.bsp" || world.model == "maps/e2m1.bsp" || world.model == "maps/e3m1.bsp" || world.model == "maps/e4m1.bsp" || world.model == "maps/end.bsp") ||
-	    (world.model == "maps/hip1m1.bsp" || world.model == "maps/hip2m1.bsp" || world.model == "maps/hip3m1.bsp") ||
-	    (world.model == "maps/r1m1.bsp" || world.model == "maps/r2m1.bsp") ||
-	    (world.model == "maps/e5m1.bsp") ||
-	    (world.model == "maps/mge1m1.bsp" || world.model == "maps/mge2m1.bsp" || world.model == "maps/mge3m1.bsp" || world.model == "maps/mge4m1.bsp" || world.model == "maps/mge5m1.bsp" || world.model == "maps/mgend.bsp") ||
-	    (world.model == "maps/dm1sp.bsp")) return; // Sleeper: Don't inherit inventory if the first map of any epsiode.
+	if (world.model == Start_Maplist_World[StartMaps_Finder()] || world.worldtype == WORLDTYPE_HUB) return; // Sleeper: Don't inherit inventory if a startmap.			
+	if (FirstLevelMaps()) return; // Sleeper: Don't inherit inventory if the first map of any epsiode.
 	    
 	// Gravity
 	self.gravity = 1.0;	    
@@ -291,11 +417,10 @@ void() InheritParms =
 				parm7 = self.expansionitems;                                                           // Mission Pack inventory
 				parm8 = self.weapon = IT_SHOTGUN; 						       // Sleeper: Shotgun must be out when connecting to the server for the first time.
 				parm9 = self.armortype * 100;
-				parm10 = 0;
 				parm11 = self.ammo_slugs;				
 				parm12 = -1; 									       // Selected Team				
 				parm15 = self.weapons;	
-				parm17 = self.client_tags; // Are we a brand new player anymore?
+				parm17 = self.client_tags;
 				dprint (self.netname, " inherited ", new_player.netname, "'s inventory\n");
 				return;
 			}
@@ -308,10 +433,6 @@ float reset_flag;
 
 void() SetChangeParms =
 {	                      
-	local float official_endmaps_pool	      = ((world.model == "maps/end.bsp") || (world.model == "maps/hipend.bsp") || (world.model == "maps/rend.bsp") || (world.model == "maps/e5end.bsp") || (world.model == "maps/mgend.bsp"));
-	
-	local float official_mg1_finalepisodemap_pool = ((world.model == "maps/mge1m2.bsp" || world.model == "maps/mge2m2.bsp" || world.model == "maps/mge3m2.bsp" || world.model == "maps/mge4m2.bsp" || world.model == "maps/mge5m2.bsp"));
-
 	if (reset_flag)
 	{ 	
 		setspawnparms (self);
@@ -349,135 +470,59 @@ void() SetChangeParms =
 	if (cvar("coop") < 5 && !cvar("deathmatch"))
 	{	
 		// Sleeper: Force (all) player's/players health back up to their max health when leaving start maps, as long as the 
-		// game type doesn't involve speedrunning.
-		if (cvar("coop") != CLASSIC_COOP && !cvar("coop")) 
-		{		
-			if (world.model == Start_Maplist[StartMaps()])
-			{    	 
-				if (cvar("sv_public") == 1 || !cvar("sv_public")) // Public Server
-					self.health = self.max_health;
-			}
-		}
+		// game type doesn't involve speedrunning, this shouldn't be too "game breaking".
+		if ((cvar("sv_public") == 1 || !cvar("sv_public")) && cvar("coop") != CLASSIC_COOP && cvar("coop") != 0 && world.model == Start_Maplist_World[StartMaps_Finder()]) self.health = self.max_health; // Public Server
 		else
 		{
-			if (self.health > self.max_health)		  	  // Reset Health back to the skill's Max Health if exceeded during changelevel
-				self.health = self.max_health;	
+			if (self.health > self.max_health) self.health = self.max_health; // Reset Health back to the skill's Max Health if exceeded during changelevel
 			if (!cvar("horde"))
 			{		
-				if (cvar("skill") <= 4)				  // Skill 4 and below gets only one minimum health
+				if (cvar("skill") <= 4)	// Skill 4 and below gets only one minimum health
 				{
-					if (self.health < self.max_health / 2)	  // Minimum Health
-						self.health = self.max_health / 2;
+					if (self.health < self.max_health / 2) self.health = self.max_health / 2; // Minimum Health
 				}
-				else if (cvar("skill") == 5)			  // Skill 5 gets two minimum health
+				else if (cvar("skill") == 5) // Skill 5 gets two minimum health
 				{
-					if (self.health > 25 && self.health < 50) // First Minimum Health
-						self.health = 50;
-					if (self.health < 25)			  // Second Minimum Health
-						self.health = 25;
+					if (self.health > self.max_health / 5 && self.health < self.max_health / 2.5) self.health = self.max_health / 2.5; // First Minimum Health is 50
+					if (self.health < self.max_health / 5) self.health = self.max_health / 5;  // Second Minimum Health is 25
 				}
 			}
 		}
 	}
 	// --------------------------------------------------------------------------------------------------------------------------------------------
-	
-	// Sleeper: Reset all essential stats so we don't reset our skins & player models using "changelevel".
-	if (world.model == Start_Maplist[StartMaps()] || official_endmaps_pool || official_mg1_finalepisodemap_pool)
+		
+	// Sleeper: Clear all essential stats so we don't reset our skins & player models using "changelevel".
+	if (world.model == Start_Maplist_World[StartMaps_Finder()] || FirstLevelMaps() || EndLevelMaps() || cvar("horde") /*|| MG1_FinalEpisodeMap()*/)
 	{
-		if (!cvar("horde") && !cvar("deathmatch"))
+		if (!cvar("deathmatch"))
 		{
-			self.items = IT_SHOTGUN | IT_AXE;
-			self.weapons = IT_SHOTGUN | IT_AXE;	
-			self.armorvalue = 0;
-			self.ammo_shells1 = 25;
-			self.ammo_nails1 = 0;
-			self.ammo_rockets1 = 0;
-			self.ammo_cells1 = 0;
-			self.ammo_lava_nails = 0;
-			self.ammo_multi_rockets = 0;
-			self.ammo_plasma = 0;
-			self.ammo_slugs = 0;
-			self.expansionitems = 0;
-			self.weapon = IT_SHOTGUN;
-			self.armortype = 0;
-			if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
+			if (!FirstLevelMaps()) ForcePlayerInventoryClear ();
+			if (self.client_tags & NEW_PLAYER_MOTD) self.client_tags -= self.client_tags & (NEW_PLAYER_MOTD);
 		}
 	}
+	
 	if (cvar("deathmatch"))
 	{
-		self.items = IT_SHOTGUN | IT_AXE;	
-		self.weapons = IT_SHOTGUN | IT_AXE;	
-		self.armorvalue = 0;
-		self.health = 126;
-		self.max_health = 100;
-		self.ammo_shells1 = 25;
-		self.ammo_nails1 = 0;
-		self.ammo_rockets1 = 0;
-		self.ammo_cells1 = 0;
-		self.ammo_lava_nails = 0;
-		self.ammo_multi_rockets = 0;
-		self.ammo_plasma = 0;
-		self.ammo_slugs = 0;
-		self.expansionitems = 0;
-		self.weapon = IT_SHOTGUN;
-		self.armortype = 0;
-		if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
-	}	
+		ForcePlayerInventoryClear ();
+		if (self.client_tags & NEW_PLAYER_MOTD) self.client_tags -= self.client_tags & (NEW_PLAYER_MOTD);
+	}
+		
 	if (cvar("customcoop") && !cvar("deathmatch") && !cvar("horde"))
 	{	
 		if (cvar("coop") == REIGNITED_COOP || cvar("coop") == ENHANCED_COOP)
 		{
-//			self.items = IT_SHOTGUN | IT_AXE;
-//			self.weapons = IT_SHOTGUN | IT_AXE;	
-//			self.armorvalue = 0;
-			self.ammo_shells1 = 50;
-			self.ammo_nails1 = 50;
-			self.ammo_rockets1 = 0;
-			self.ammo_cells1 = 0;
-			self.ammo_lava_nails = 0;
-			self.ammo_multi_rockets = 0;
-			self.ammo_plasma = 0;
-			self.ammo_slugs = 0;
-			self.expansionitems = 0;
-//			self.weapon = IT_SHOTGUN;
-//			self.armortype = 0;
-			if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
+			ForcePlayerInventoryClear ();
+			if (self.client_tags & NEW_PLAYER_MOTD) self.client_tags -= self.client_tags & (NEW_PLAYER_MOTD);
 		}
 		if (cvar("coop") == CLASSIC_COOP)
 		{
-			self.items = IT_SHOTGUN | IT_AXE;	
-			self.weapons = IT_SHOTGUN | IT_AXE;
-			self.armorvalue = 0;
-			self.ammo_shells1 = 25;
-			self.ammo_nails1 = 0;
-			self.ammo_rockets1 = 0;
-			self.ammo_cells1 = 0;
-			self.ammo_lava_nails = 0;
-			self.ammo_multi_rockets = 0;
-			self.ammo_plasma = 0;
-			self.ammo_slugs = 0;
-			self.expansionitems = 0;
-			self.weapon = IT_SHOTGUN;
-			self.armortype = 0;
-			if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
+			ForcePlayerInventoryClear ();
+			if (self.client_tags & NEW_PLAYER_MOTD) self.client_tags -= self.client_tags & (NEW_PLAYER_MOTD);
 		}
 		if (gameworld >= ID1 && gameworld <= MG1) // Sleeper: Not sure why I gotta do this, but it's better to remove anything necessary before going back to the campaign maps while custom coop was still active.
 		{
-			self.items = IT_SHOTGUN | IT_AXE;
-			self.weapons = IT_SHOTGUN | IT_AXE;	
-			self.armorvalue = 0;
-			self.ammo_shells1 = 25;
-			self.ammo_nails1 = 0;
-			self.ammo_rockets1 = 0;
-			self.ammo_cells1 = 0;
-			self.ammo_lava_nails = 0;
-			self.ammo_multi_rockets = 0;
-			self.ammo_plasma = 0;
-			self.ammo_slugs = 0;
-			self.expansionitems = 0;
-			self.weapon = IT_SHOTGUN;
-			self.armortype = 0;
-			if (parm17 & NEW_PLAYER_MOTD) parm17 -= parm17 & (NEW_PLAYER_MOTD);
+			ForcePlayerInventoryClear ();
+			if (self.client_tags & NEW_PLAYER_MOTD) self.client_tags -= self.client_tags & (NEW_PLAYER_MOTD);
 		}
 	}					
 			
@@ -636,62 +681,6 @@ void() SetNewParms =
 	parm17 = NEW_PLAYER_INIT | DETECT_NEW_CLIENT | CLIENT_PLAYER | CLIENT_ENTERED | CLIENT_JOINED | NEW_PLAYER_MOTD; // Client Tags
 };
 
-// New Episode Parms
-void() SetNewCoopParms =
-{
-	if (cvar("deathmatch")) return;
-
-	parm15 = self.weapons | IT_SHOTGUN | IT_AXE;
-	parm1  = self.items   | IT_SHOTGUN | IT_AXE; // Sleeper: Start episode with Axe and Shotgun, and keep items after dying.
-	
-	// Single Player & Co-Operative Health
-	if (cvar("coop") <= REIGNITED_COOP || cvar("coop") == ENHANCED_COOP)
-	{
-		if (cvar("skill") == 4)   // KEX's Nightmare! skill (Skill 3 with a 50 health handicap and less aggressive monsters)
-		{
-			if (!cvar("horde")) parm2 = 50;
-			else parm2 = 76;  // Deflatable health for Horde Mode.
-		}
-		else if (cvar("skill") == 5) // Sleeper Must Die! skill (Higher monster density, +25 standard max health, and Quake II style armors with armor rot).
-		{
-			if (!cvar("horde")) parm2 = 125;
-			else parm2 = 151; // Deflatable health for Horde Mode.
-		}
-		else if (cvar("skill") <= 3) // Standard Skills.	
-		{
-			if (!cvar("horde")) parm2 = 100;
-			else parm2 = 126; // Deflatable health for Horde Mode.
-		}					
-	}
-	else if (cvar("coop") == CLASSIC_COOP)
-	{
-		if (cvar("skill") == 4) parm2 = 50;
-		else if (cvar("skill") == 5) parm2 = 125;
-		else if (cvar("skill") <= 3) parm2 = 100;				
-	}	
-				
-	parm3 = self.armorvalue;
-	
-	// Restock shells.		
-	if (self.ammo_shells1 < 25) self.ammo_shells1 = 25;
-		
-	parm4 = self.ammo_shells1;		
-	parm5 = encodeparms (self.ammo_nails1, self.ammo_rockets1, self.ammo_cells1);	
-	parm6 = encodeparms (self.ammo_lava_nails, self.ammo_multi_rockets, self.ammo_plasma);	
-	parm7 = self.expansionitems;	
-	parm8 = self.weapon;
-	parm9 = self.armortype * 100;
-	parm11 = self.ammo_slugs;	
-	parm12 = self.steam;	// Save the current team of the player
-	parm17 = DETECT_NEW_CLIENT | CLIENT_PLAYER | CLIENT_ENTERED | CLIENT_JOINED;
-	
-/*	if (!cvar("deathmatch") && cvar("sv_public") == 1)
-	{
-		if (!cvar("coop") || cvar("coop") == 2) parm13 = cvar("samelevel");
-	}
-*/	
-};
-
 // Custom Map Coop Parms
 void() SetNewCustomCoopParms =
 {
@@ -811,14 +800,14 @@ void() SetNewCustomCoopParms =
 	
 	parm1 = self.items;				
 	parm4 = self.ammo_shells1;			
-	parm5 = encodeparms (self.ammo_nails1, self.ammo_rockets1, self.ammo_cells1);	
-	parm6 = encodeparms (self.ammo_lava_nails, self.ammo_multi_rockets, self.ammo_plasma);	
-	parm7 = self.expansionitems;	
+	parm5 = encodeparms (self.ammo_nails1, 0, 0);	
+	parm6 = encodeparms (0, 0, 0);	
+	parm7 = 0;	
 	parm8 = self.weapon;
-        parm11 = self.ammo_slugs;	
-	parm12 = self.steam;	// Save the current team of the player	
+        parm11 = 0;	
+	parm12 = -1;	// Save the current team of the player	
 	parm15 = self.weapons;
-	parm17 = DETECT_NEW_CLIENT | CLIENT_PLAYER | CLIENT_ENTERED | CLIENT_JOINED;
+	parm17 = NEW_PLAYER_INIT | DETECT_NEW_CLIENT | CLIENT_PLAYER | CLIENT_ENTERED | CLIENT_JOINED | NEW_PLAYER_MOTD;
 	
 /*	if (!cvar("deathmatch") && cvar("sv_public") == 1)
 	{
@@ -845,45 +834,27 @@ void() SetSpecParms =
 	parm17 = DETECT_NEW_CLIENT | CLIENT_SPECTATOR | CLIENT_SPECTATOR_ENTERED | CLIENT_SPECTATOR_JOINED;	
 };
 
-
 void() DecodeLevelParms =
 {
-	local float firstlevelmaps = ((world.model == "maps/e1m1.bsp" || world.model == "maps/e2m1.bsp" || world.model == "maps/e3m1.bsp" || world.model == "maps/e4m1.bsp" || world.model == "maps/end.bsp") ||
-				      (world.model == "maps/hip1m1.bsp" || world.model == "maps/hip2m1.bsp" || world.model == "maps/hip3m1.bsp") || 
-				      (world.model == "maps/r1m1.bsp" || world.model == "maps/r2m1.bsp") ||
-				      (world.model == "maps/e5m1.bsp") ||
-		                      (world.model == "maps/mge1m1.bsp" || world.model == "maps/mge2m1.bsp" || world.model == "maps/mge3m1.bsp" || world.model == "maps/mge4m1.bsp" || world.model == "maps/mge5m1.bsp" || world.model == "maps/mgend.bsp"));			           
-
 	// iD1 / HIPNOTIC / ROGUE / DOPA / MG1 Start Maps ----------------------------------------------------------------------------------------------------------------		
-	if (/*serverflags && */world.model == Start_Maplist[StartMaps()] && !customcoop_flags && !cvar("deathmatch")) SetNewParms (); // Take away all stuff on start maps				
-	  
-	// iD1 / HIPNOTIC / ROGUE / DOPA / MG1 Episodes Maps -------------------------------------------------------------------------------------------------------------                   
-	if (firstlevelmaps && !customcoop_flags && !cvar("deathmatch"))
-	{
-		if (coop == REIGNITED_COOP || coop == ENHANCED_COOP) SetNewCoopParms (); // Take away all stuff on starting new episode, but also keep items & ammo you pick up in co-op after respawning
-		else SetNewParms ();   	    	     			       		 // Take away all stuff on starting new episode
-	}	
-	// Custom Coop ---------------------------------------------------------------------------------------------------------------------------------------------------	
-	if (customcoop_flags && world.model != Start_Maplist[StartMaps()] && !firstlevelmaps && !cvar("deathmatch"))
-	{	
-		if (coop == REIGNITED_COOP || coop == ENHANCED_COOP)
-		{
-			if (cvar("sv_public") == 1) SetNewCustomCoopParms ();		 // Start any custom map with a loadout	
-			else SetNewCoopParms ();	 				 // Take away all stuff on starting new episode, but also keep items & ammo you pick up in co-op after respawning	
-		}
-		else SetNewParms ();
-	}	
-	// ---------------------------------------------------------------------------------------------------------------------------------------------------------------	
-
-	// MG1: Yoder Oct25, reset weapons between map loads
-	if (cvar("horde") && !cvar("deathmatch"))
-	{
-		if (coop == REIGNITED_COOP || coop == ENHANCED_COOP) SetNewCoopParms (); // Take away all stuff on starting new episode, but also keep items & ammo you pick up in co-op after respawning	
-		else SetNewParms ();							 // Take away all stuff on starting new map
+	if (/*serverflags && */world.model == Start_Maplist_World[StartMaps_Finder()] && !customcoop_flags && !cvar("deathmatch")) {SetNewParms (); self.fresh_spawn = FALSE;} // Take away all stuff on start maps				
+	 
+	if (!self.fresh_spawn && !cvar("deathmatch")) // Sleeper: Parms should only be decoded once by SetNewParms (or SetNewCustomCoopParms) and taken care of by either SetRespawnParms for respawns or SetChangeParms for when the map changes.
+	{  
+		// iD1 / HIPNOTIC / ROGUE / DOPA / MG1 Episodes Maps -----------------------------------------------------------------------------------------------------                
+		if ((FirstLevelMaps() || EndLevelMaps()) && !customcoop_flags) SetNewParms (); // Take away all stuff on starting new episode 	
+		// Custom Coop -------------------------------------------------------------------------------------------------------------------------------------------	
+		if (customcoop_flags && world.model == CustomCoop_MapsList_World[CustomCoopMaps_Finder()])
+		{	
+			if ((coop == REIGNITED_COOP || coop == ENHANCED_COOP) && cvar("sv_public") == 1) SetNewCustomCoopParms ();  // Start any custom map with a loadout	
+			else SetNewParms (); // Take away all stuff on starting new episode 
+		}	
+		// -------------------------------------------------------------------------------------------------------------------------------------------------------		
+		// MG1: Yoder Oct25, reset weapons between map loads
+		if (cvar("horde") && world.model == HordeMode_MapsList_World[HordeMaps_Finder()]) SetNewParms (); // Take away all stuff on starting new episode  
+		self.fresh_spawn = TRUE;
 	}
-	
-//	if (cvar("deathmatch") && !cvar("coop")) SetNewParms ();	
-	
+		
 	self.items = parm1;		
 	self.health = parm2;			
 	self.armorvalue = parm3;
@@ -1000,25 +971,25 @@ added Aug31, 2021
 string() Horde_NextMap =
 {
 	local float canUse = FALSE, selected_map[2];
-	local float current_map_number, next_horde_map_number, random_map_number, max_map_number = RandomHordeMode_MapsList.length - 1;
+	local float current_map_number = 1, next_horde_map_number, random_map_number, max_map_number = HordeMode_MapsList_World.length - 2;
 
 	// Sleeper: Find the index of the current map.
-	for (; current_map_number < RandomHordeMode_MapsList.length; ++current_map_number)
+	for (; current_map_number < HordeMode_MapsList_World.length; ++current_map_number)
 	{
-		if (world.model == RandomHordeMode_MapsList[current_map_number]) break; 
+		if (world.model == HordeMode_MapsList_World[current_map_number]) break; 
 	}
 	
 	next_horde_map_number = rint(current_map_number + 1);
-	if (next_horde_map_number > max_map_number) next_horde_map_number = 0; // Sleeper: Circle back to the first map.
+	if (next_horde_map_number > max_map_number) next_horde_map_number = 1; // Sleeper: Circle back to the first map.
 	
 	selected_map[0] = next_horde_map_number; // Sleeper: Next map.
 	
-	for (float j = 0; j < RandomHordeMode_MapsList.length; j++)
+	for (float j = 1; j < max_map_number; j++)
 	{		
 		while (canUse == FALSE) // Sleeper: Find us a map number that isn't the same as the current map.
 		{
 			random_map_number = rint(random() * max_map_number);
-			if (random_map_number < 0) random_map_number = 0; // Sleeper: Correct for the -1 undershot.
+			if (random_map_number < 1) random_map_number = 1; // Sleeper: Correct for the -1 undershot.
 										
 			if (random_map_number != current_map_number)
 			{
@@ -1027,9 +998,11 @@ string() Horde_NextMap =
 				break;
 			}	
 		}
-	}		
-		
-	return RandomHordeMode_MapsList[selected_map[1]];
+	}	
+
+	if (cvar("random_maps") == TRUE) return HordeMode_MapsList_World[selected_map[1]]; // Sleeper: If we want random_maps, pick something random.
+
+	return HordeMode_MapsList_World[selected_map[0]]; // Sleeper: Fallback to using next map in the sequence, if nobody wants anything fancy.
 };
 
 /*
@@ -1040,25 +1013,25 @@ Custom random map pick
 string() CustomCoop_NextMap =
 {
 	local float canUse = FALSE, selected_map[2];
-	local float current_map_number, next_customcoop_map_number, random_map_number, max_map_number = RandomCustomCoop_MapsList.length - 1;
+	local float current_map_number = 1, next_customcoop_map_number, random_map_number, max_map_number = CustomCoop_MapsList_World.length - 2;
 
 	// Sleeper: Find the index of the current map.
-	for (; current_map_number < RandomCustomCoop_MapsList.length; ++current_map_number)
+	for (; current_map_number < CustomCoop_MapsList_World.length; ++current_map_number)
 	{
-		if (world.model == RandomCustomCoop_MapsList[current_map_number]) break; 
+		if (world.model == CustomCoop_MapsList_World[current_map_number]) break; 
 	}
 	
 	next_customcoop_map_number = rint(current_map_number + 1);
-	if (next_customcoop_map_number > max_map_number) next_customcoop_map_number = 0; // Sleeper: Circle back to the first map.
+	if (next_customcoop_map_number > max_map_number) next_customcoop_map_number = 1; // Sleeper: Circle back to the first map.
 	
 	selected_map[0] = next_customcoop_map_number; // Sleeper: Next map.
 	
-	for (float j = 0; j < RandomCustomCoop_MapsList.length; j++)
+	for (float j = 1; j < max_map_number; j++)
 	{		
 		while (canUse == FALSE) // Sleeper: Find us a map number that isn't the same as the current map.
 		{
 			random_map_number = rint(random() * max_map_number);
-			if (random_map_number < 0) random_map_number = 0; // Sleeper: Correct for the -1 undershot.
+			if (random_map_number < 1) random_map_number = 1; // Sleeper: Correct for the -1 undershot.
 										
 			if (random_map_number != current_map_number)
 			{
@@ -1067,9 +1040,11 @@ string() CustomCoop_NextMap =
 				break;
 			}	
 		}
-	}		
+	}
+	
+	if (cvar("random_maps") == TRUE) return CustomCoop_MapsList_World[selected_map[1]]; // Sleeper: If we want random_maps, pick something random.	 	
 		
-	return RandomCustomCoop_MapsList[selected_map[1]];	
+	return CustomCoop_MapsList_World[selected_map[0]]; // Sleeper: Fallback to using next map in the sequence, if nobody wants anything fancy.	
 };
 
 /*
@@ -1121,7 +1096,7 @@ void() GotoNextMap =
 	}
 	// ---------------------------------------------------------------------------------------------------------------------------------------
 	// =======================================================================================================================================		
-	
+
 	if (cvar("samelevel")) changelevel (mapname); // if samelevel is set, stay on same level
 	else if (cvar("horde")) changelevel (Horde_NextMap()); // MG1
 //	#ifdef RANDOMCUSTOMCOOPMAPS
@@ -1130,182 +1105,196 @@ void() GotoNextMap =
 	else changelevel (nextmap);
 };
 
-.string endtext;
-string intermissiontext;
-float select_soundtrack_2;
-float select_soundtrack_3;
+// .string endtext;
+// string intermissiontext;
+string intermission1_message, intermission2_message, intermission3_message;
 
+// Sleeper: Rewritten; All official end-of-episode intermission endtexts have been rerouted here.
 void() ExitIntermission =
 {
-	local float official_maps = ((world.model == "maps/e5end.bsp") || 
-				     (world.model == "maps/mge1m2.bsp" || world.model == "maps/mge2m2.bsp" || 
-			              world.model == "maps/mge3m2.bsp" || world.model == "maps/mge4m2.bsp" || 
-				      world.model == "maps/mge5m2.bsp" || world.model == "maps/mgend.bsp"));
-		
-	if (official_maps)
-	{
-		select_soundtrack_2 = 2;
-		select_soundtrack_3 = 3;
-	}
-
-	if (deathmatch)
-	{
-		GotoNextMap();
-		return;
-	}		
+	local float Inter1_CDTRACK_2, Inter1_CDTRACK_3;
+	local float Inter2_CDTRACK_2, Inter2_CDTRACK_3;
+	local float Inter3_CDTRACK_2, Inter3_CDTRACK_3;
 	
-	intermission_exittime = time + 1;
-	intermission_running += 1;
-	if (intermission_running == 2)
+	// Play the appropriate soundtrack for the intermission endtexts.
+	if (gameworld == HIPNOTIC)
 	{
-		// iD1 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (world.model == "maps/e1m7.bsp")
+		if (world.model == "maps/hipend.bsp")
 		{
-			WriteByte(MSG_ALL, SVC_CDTRACK);
-			WriteByte(MSG_ALL, 2);
-			WriteByte(MSG_ALL, 3);
-			if (!cvar("registered"))
+			Inter2_CDTRACK_2 = 12;
+			Inter2_CDTRACK_3 = 13;	
+		}
+		else
+		{
+			Inter2_CDTRACK_2 = 16;
+			Inter2_CDTRACK_3 = 13;
+		}	
+	}
+	else if (gameworld == ROGUE)
+	{
+		if (world.model == "maps/r2m8.bsp" || world.model == "maps/rend.bsp")
+		{
+			if (cvar("coop"))
 			{
-				WriteByte(MSG_ALL, SVC_FINALE);
-				WriteString(MSG_ALL, "As the corpse of the monstrous entity\nChthon sinks back into the lava whence\nit rose, you grip the Rune of Earth\nMagic tightly. Now that you have\nconquered the Dimension of the Doomed,\nrealm of Earth Magic, you are ready to\ncomplete your task in the other three\nhaunted lands of Quake. Or are you? If\nyou don't register Quake, you'll never\nknow what awaits you in the Realm of\nBlack Magic, the Netherworld, and the\nElder World!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
+				Inter1_CDTRACK_2 = 28;
+				Inter1_CDTRACK_3 = 23;	
 			}
 			else
 			{
-				WriteByte(MSG_ALL, SVC_FINALE);
-				WriteString(MSG_ALL, "As the corpse of the monstrous entity\nChthon sinks back into the lava whence\nit rose, you grip the Rune of Earth\nMagic tightly. Now that you have\nconquered the Dimension of the Doomed,\nrealm of Earth Magic, you are ready to\ncomplete your task. A Rune of magic\npower lies at the end of each haunted\nland of Quake. Go forth, seek the\ntotality of the four Runes!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
-			}
-			return;
-		}        // iD1's Original Map		   // iD1's KEX Map
-		else if (world.model == "maps/e2m6.bsp" || world.model == "maps/e2m6_qe.bsp") // Sleeper: Added the version of E2M6 that has the cut intro that came with Quake Enhanced from 2021. Should be used when not in a speedrunning Game Type.
+				Inter2_CDTRACK_2 = 28;
+				Inter2_CDTRACK_3 = 23;	
+			}		
+		}
+		else
 		{
-			WriteByte(MSG_ALL, SVC_CDTRACK);
-			WriteByte(MSG_ALL, 2);
-			WriteByte(MSG_ALL, 3);
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "The Rune of Black Magic throbs evilly in\nyour hand and whispers dark thoughts\ninto your brain. You learn the inmost\nlore of the Hell-Mother; Shub-Niggurath!\nYou now know that she is behind all the\nterrible plotting which has led to so\nmuch death and horror. But she is not\ninviolate! Armed with this Rune, you\nrealize that once all four Runes are\ncombined, the gate to Shub-Niggurath's\nPit will open, and you can face the\nWitch-Goddess herself in her frightful\notherworld cathedral.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
-			return;
+			Inter2_CDTRACK_2 = 22;
+			Inter2_CDTRACK_3 = 23;
 		}		
-		else if (world.model == "maps/e3m6.bsp")
-		{
-			WriteByte(MSG_ALL, SVC_CDTRACK);
-			WriteByte(MSG_ALL, 2);
-			WriteByte(MSG_ALL, 3);
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "The charred viscera of diabolic horrors\nbubble viscously as you seize the Rune\nof Hell Magic. Its heat scorches your\nhand, and its terrible secrets blight\nyour mind. Gathering the shreds of your\ncourage, you shake the devil's shackles\nfrom your soul, and become ever more\nhard and determined to destroy the\nhideous creatures whose mere existence\nthreatens the souls and psyches of all\nthe population of Earth.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
-			return;
-		}
-		else if (world.model == "maps/e4m7.bsp")
-		{
-			WriteByte(MSG_ALL, SVC_CDTRACK);
-			WriteByte(MSG_ALL, 2);
-			WriteByte(MSG_ALL, 3);
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "Despite the awful might of the Elder\nWorld, you have achieved the Rune of\nElder Magic, capstone of all types of\narcane wisdom. Beyond good and evil,\nbeyond life and death, the Rune\npulsates, heavy with import. Patient and\npotent, the Elder Being Shub-Niggurath\nweaves her dire plans to clear off all\nlife from the Earth, and bring her own\nfoul offspring to our world! For all the\ndwellers in these nightmare dimensions\nare her descendants! Once all Runes of\nmagic power are united, the energy\nbehind them will blast open the Gateway\nto Shub-Niggurath, and you can travel\nthere to foil the Hell-Mother's plots\nin person.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
-			return;
-		}
-		// HIPNOTIC ------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		else if (world.model == "maps/hip1m4.bsp")
-		{
-			WriteByte(MSG_ALL, SVC_CDTRACK);
-			WriteByte(MSG_ALL, 16);
-			WriteByte(MSG_ALL, 13);
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "Deep within the bowels of the\nResearch Facility, you discover the\npassage that the followers of Quake\nhave used to enter our world.\nThe bastards used some type of\ngigantic teleporter to overload\none of our own slipgates!  As long as\nthis portal exists, Earth will never\nbe safe from Quake's cruel minions.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
-			return;
-		}
-		else if (world.model == "maps/hip2m5.bsp")
-		{
-			WriteByte(MSG_ALL, SVC_CDTRACK);
-			WriteByte(MSG_ALL, 16);
-			WriteByte(MSG_ALL, 13);
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "After destroying the power generator,\nyou pass beyond the gate of Mortum's\nKeep.  A wave of nausea suddenly flows\nover you and you find yourself cast\nout into a liquid void.  You float\nlifelessly, yet aware, in a lavender\nsea of energy.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
-			return;
-		}
-		else if (world.model == "maps/hipend.bsp")
-		{
-			WriteByte(MSG_ALL, SVC_CDTRACK);
-			WriteByte(MSG_ALL, 12);
-			WriteByte(MSG_ALL, 13);
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "After the last echoes of Armagon's\ndeath yell fade away, you breathe a\nheavy sigh of relief.  With the loss\nof his magic, Armagon's fortress\nbegins to collapse.  The rift he\ncreated to send his grisly troops\nthrough time slowly closes and seals\nitself forever.  In the chaos that\nensues, a wall collapses, revealing\none remaining time portal.  With your\nchances to escape rapidly growing\nslim, you race for the portal,\nmindless of your destination.  In a\nflash of light, you find yourself\nback at Command HQ, safe and sound.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
-			return;
-		}
-		// ROGUE ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		else if (world.model == "maps/r1m7.bsp")
-		{
-			WriteByte(MSG_ALL, SVC_CDTRACK); // Added
-			WriteByte(MSG_ALL, 22);
-			WriteByte(MSG_ALL, 23);
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "Victory! The Overlord's mangled\nremains are the evidence.  His evil\nWrath army?  Cast out to wander\naimlessly throughout time.\n\nAs the Slipgate fog surrounds you,\nthoughts rage into your consciousness:\nHas Quake's oppressive reign ended?\nIs it Salvation, or Damnation, which\nwaits beyond the Vortex?\n\nAnother thought, not quite your own,\nrazors through the haze.  \"Forgiveness\ncan yet be granted; Our Master remains\nto absolve your sins against his Chosen.\nFall down upon your knees-pray for\nQuake's mercy.\"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK\n to continue to Episode 2.");
-			return;
-		}
-		// DOPA / MG1 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-		else if (world.endtext) intermissiontext = world.endtext;
-		if (intermissiontext)
-		{
-			if (world.model == "maps/e5end.bsp") nextmap = "mgstart";
-			if (world.model == "maps/mgend.bsp") nextmap = "start";
-			WriteByte (MSG_ALL, SVC_CDTRACK);
-			WriteByte (MSG_ALL, select_soundtrack_2);
-			WriteByte (MSG_ALL, select_soundtrack_3);
-			WriteByte (MSG_ALL, SVC_FINALE);
-			WriteString (MSG_ALL, intermissiontext);
-			intermissiontext = string_null;
-			return;
-		}
-		// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------		
-		GotoNextMap ();
 	}
-	if (intermission_running == 3)
+	else
 	{
-		// iD1 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (!cvar("registered"))
-		{
-			// Shareware episode has been completed, go to sell screen
-			WriteByte(MSG_ALL, SVC_SELLSCREEN);
-			return;
-		}   // iD1's Final Map of Ep. 1       // iD1's Final Map of Ep. 2       // iD1's KEX Final Map of Ep. 2	     // iD1's Final Map of Ep. 3       // iD1's Final Map of Ep. 4
-		if (world.model == "maps/e1m7.bsp" || world.model == "maps/e2m6.bsp" || world.model == "maps/e2m6_qe.bsp" || world.model == "maps/e3m6.bsp" || world.model == "maps/e4m7.bsp")
-		{
-			if ((serverflags & 15) == 15)
-			{
-				WriteByte(MSG_ALL, SVC_FINALE);
-				WriteString(MSG_ALL, "Now, you have all four Runes. You sense\ntremendous invisible forces moving to\nunseal ancient barriers. Shub-Niggurath\nhad hoped to use the Runes Herself to\nclear off the Earth, but now instead,\nyou will use them to enter her home and\nconfront her as an avatar of avenging\nEarth-life. If you defeat her, you will\nbe remembered forever as the savior of\nthe planet. If she conquers, it will be\nas if you had never been born.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue");
-				return;
-			}
-		}	
-		// HIPNOTIC ------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		else if (world.model == "maps/hip1m4.bsp")
-		{
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "If you can find the source of the\nportal's power, you can shut it\ndown--possibly forever!  With only a\nmoment's consideration for your own\nsafety, you re-enter the dark domain,\nknowing Hell would be a better fate\nthan experiencing the reign of Quake.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK\n to continue to Episode 2.");
-			return;
-		}
-		else if (world.model == "maps/hip2m5.bsp")
-		{
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "After what seems like an eternity,\nyou feel the presence of a diabolical\nintelligence.  You are held helpless\nfor a moment as your mind is open to\nthat of Armagon--Quake's General and\nmaster of this realm.  Recognizing\nyou as the one who foiled his\nattempt to conquer Earth, a hellish\nhowl fills your mind and blots out\nall consciousness.  When you awake,\nyou find yourself on the shores of\nreality, but in a time and place\nunknown to you.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK\n to continue to Episode 3.");
-			return;
-		}
-		else if (world.model == "maps/hipend.bsp")
-		{
-			nextmap = "rstart";
-			WriteByte(MSG_ALL, SVC_FINALE);
-			WriteString(MSG_ALL, "Congratulations!  You are victorious!\nThe minions of Quake have once again\nfallen before your mighty hand.\nIs this the last you will see of\nQuake's hellions?\n\nOnly time will tell... \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue to...\n\n Dissolution of Eternity!\n");
-			return;
-		}
-		// MG1 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		if ((serverflags & SIGIL_ALL) == SIGIL_ALL) 
-		{
-			WriteByte (MSG_ALL, SVC_FINALE);
-			WriteString (MSG_ALL, "With all six runes in your possession\n you can feel their power surge\n through time and space.\n\n Ancient seals are broken as the path\n to your final challenge unlocks.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.");
-			return;
-		}
-		// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		Inter2_CDTRACK_2 = 2;
+		Inter2_CDTRACK_3 = 3;	
+	}	
+	
+	// Skip any text in deathmatch
+	if (deathmatch)	
+	{
+		GotoNextMap ();
+		return;
 	}
-	GotoNextMap ();
+	
+	intermission_exittime = time + 1;
+	intermission_running += 1;
+
+	// Run some text if at the end of an episode, or when set as 'message' on a trigger_changelevel	
+	if (intermission_running == 1)
+	{
+		if (intermission1_message == "") 
+		{
+			if (world.model == "maps/end.bsp") intermission1_message = "Blank Text Here."; // Sleeper: Has to be at least be something to be read or passed on.
+			
+			// Sleeper: Moved from ending.qc, just seems right.
+			if ((world.model == "maps/r2m8.bsp" || world.model == "maps/rend.bsp") && cvar("coop")) intermission1_message = "You have destroyed Quake's\nTemporal Teleporter. His assault\non Time has been defeated.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue to...\n\n The Dimension Of The Past!\n";
+		}
+		
+		if (intermission1_message != "") 
+		{
+			if (world.model == "maps/end.bsp") intermission1_message = "";
+		
+			if ((world.model == "maps/r2m8.bsp" || world.model == "maps/rend.bsp") && cvar("coop")) nextmap = "e5start";
+			
+			if (Inter1_CDTRACK_2 != 0 && Inter1_CDTRACK_3 != 0) // Sleeper: Add CD Support if necessary.
+			{
+				WriteByte (MSG_ALL, SVC_CDTRACK);
+				WriteByte (MSG_ALL, Inter1_CDTRACK_2);
+				WriteByte (MSG_ALL, Inter1_CDTRACK_3);
+			}
+			
+			WriteByte (MSG_ALL, SVC_FINALE);
+			WriteString (MSG_ALL, intermission1_message);
+			return;
+		}
+	}	
+	
+	if (intermission_running == 2) 
+	{
+		if (intermission2_message == "") // Sleeper: Mostly used for end-of-episode endtexts.
+		{
+			if (world.model == "maps/e1m7.bsp" || world.model == "maps/e1.bsp")
+			{
+				if (!cvar("registered")) intermission2_message = "As the corpse of the monstrous entity\nChthon sinks back into the lava whence\nit rose, you grip the Rune of Earth\nMagic tightly. Now that you have\nconquered the Dimension of the Doomed,\nrealm of Earth Magic, you are ready to\ncomplete your task in the other three\nhaunted lands of Quake. Or are you? If\nyou don't register Quake, you'll never\nknow what awaits you in the Realm of\nBlack Magic, the Netherworld, and the\nElder World!";
+				else intermission2_message = "As the corpse of the monstrous entity\nChthon sinks back into the lava whence\nit rose, you grip the Rune of Earth\nMagic tightly. Now that you have\nconquered the Dimension of the Doomed,\nrealm of Earth Magic, you are ready to\ncomplete your task. A Rune of magic\npower lies at the end of each haunted\nland of Quake. Go forth, seek the\ntotality of the four Runes!";
+			}
+			if (world.model == "maps/e2m6.bsp") intermission2_message = "The Rune of Black Magic throbs evilly in\nyour hand and whispers dark thoughts\ninto your brain. You learn the inmost\nlore of the Hell-Mother; Shub-Niggurath!\nYou now know that she is behind all the\nterrible plotting which has led to so\nmuch death and horror. But she is not\ninviolate! Armed with this Rune, you\nrealize that once all four Runes are\ncombined, the gate to Shub-Niggurath's\nPit will open, and you can face the\nWitch-Goddess herself in her frightful\notherworld cathedral.";
+			if (world.model == "maps/e3m6.bsp") intermission2_message = "The charred viscera of diabolic horrors\nbubble viscously as you seize the Rune\nof Hell Magic. Its heat scorches your\nhand, and its terrible secrets blight\nyour mind. Gathering the shreds of your\ncourage, you shake the devil's shackles\nfrom your soul, and become ever more\nhard and determined to destroy the\nhideous creatures whose mere existence\nthreatens the souls and psyches of all\nthe population of Earth.";
+			if (world.model == "maps/e4m7.bsp") intermission2_message = "Despite the awful might of the Elder\nWorld, you have achieved the Rune of\nElder Magic, capstone of all types of\narcane wisdom. Beyond good and evil,\nbeyond life and death, the Rune\npulsates, heavy with import. Patient and\npotent, the Elder Being Shub-Niggurath\nweaves her dire plans to clear off all\nlife from the Earth, and bring her own\nfoul offspring to our world! For all the\ndwellers in these nightmare dimensions\nare her descendants! Once all Runes of\nmagic power are united, the energy\nbehind them will blast open the Gateway\nto Shub-Niggurath, and you can travel\nthere to foil the Hell-Mother's plots\nin person.";
+			if (world.model == "maps/end.bsp") 
+			{
+				if (cvar("skill") == 5) intermission2_message = "Congratulations and well done! You have\nbeaten the hideous Shub-Niggurath, and\nher hundreds of ugly changelings and\nmonsters. You have proven that your\nskill and your cunning are greater than\nall the powers of Quake. You are the\nGrandmaster now. Id Software salutes you.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue\n\n Scourge of Armagon!";	
+				else intermission2_message = "Congratulations and well done! You have\nbeaten the hideous Shub-Niggurath, and\nher hundreds of ugly changelings and\nmonsters. You have proven that your\nskill and your cunning are greater than\nall the powers of Quake. You are the\nmaster now. Id Software salutes you.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue\n\n Scourge of Armagon!";
+			}
+			if (world.model == "maps/hip1m4.bsp") intermission2_message = "Deep within the bowels of the\nResearch Facility, you discover the\npassage that the followers of Quake\nhave used to enter our world.\nThe bastards used some type of\ngigantic teleporter to overload\none of our own slipgates!  As long as\nthis portal exists, Earth will never\nbe safe from Quake's cruel minions.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue";
+			if (world.model == "maps/hip2m5.bsp") intermission2_message = "After destroying the power generator,\nyou pass beyond the gate of Mortum's\nKeep.  A wave of nausea suddenly flows\nover you and you find yourself cast\nout into a liquid void.  You float\nlifelessly, yet aware, in a lavender\nsea of energy.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue";
+			if (world.model == "maps/hipend.bsp") intermission2_message = "After the last echoes of Armagon's\ndeath yell fade away, you breathe a\nheavy sigh of relief.  With the loss\nof his magic, Armagon's fortress\nbegins to collapse.  The rift he\ncreated to send his grisly troops\nthrough time slowly closes and seals\nitself forever.  In the chaos that\nensues, a wall collapses, revealing\none remaining time portal.  With your\nchances to escape rapidly growing\nslim, you race for the portal,\nmindless of your destination.  In a\nflash of light, you find yourself\nback at Command HQ, safe and sound.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue";
+			if (world.model == "maps/r1m7.bsp") intermission2_message = "Victory! The Overlord's mangled\nremains are the evidence.  His evil\nWrath army?  Cast out to wander\naimlessly throughout time.\n\nAs the Slipgate fog surrounds you,\nthoughts rage into your consciousness:\nHas Quake's oppressive reign ended?\nIs it Salvation, or Damnation, which\nwaits beyond the Vortex?\n\nAnother thought, not quite your own,\nrazors through the haze.  \"Forgiveness\ncan yet be granted; Our Master remains\nto absolve your sins against his Chosen.\nFall down upon your knees-pray for\nQuake's mercy.\"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK\n to continue to Episode 2.";
+			if ((world.model == "maps/r2m8.bsp" || world.model == "maps/rend.bsp") && !cvar("coop")) intermission2_message = "\nFinally, Quake's Temporal Teleporter\nyields to your assault. A high\npitched scream emits from the\ndevastated device as stressed steel\nblasts outward to rock the cavern.\nThe machine is devoured by molten lava.\n\nThe ground shudders as reality shifts\nback to its predestined path.\n\nYou run to enter the charged time pod,\nscrambling in as the chamber closes.\nYour consciousness fades as you realize\nyou have halted Quake's plans for...\n\nThe Dissolution of Eternity.";
+			if (world.model == "maps/e5end.bsp") intermission2_message = "Congratulations and Well Done!\nYou have shown excellent skill,\ntravelling from one realm to another,\ndefeating vicious monsters and beasts.\nYou are a True Ranger.\nWe salute you.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue to...\n\n The Dimension Of The Machine!";
+			if (world.model == "maps/mge1m2.bsp") intermission2_message = "The Rune of the Machinists rends\n your mind with inscrutable patterns,\n blueprints of Chthon's design.\n\n Traveling beyond echoes of gears\n and chains, beyond the labyrinthine\n halls of the engine of pain,\n you awaken once again in\n The Machine\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.";
+			if (world.model == "maps/mge2m2.bsp") intermission2_message = "With the heat of the Rune\n of Blacksmiths in your hand,\n you leave the smoldering ruins\n of this cursed realm behind you.\n\n The doomed denizens remaining will\n be fighting over the scraps of this\n dying world for some time yet.\n\n You hope that by collecting all\n the arcane runes you may return\n home, and save yourself from\n a similar fate.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.";
+			if (world.model == "maps/mge3m2.bsp") intermission2_message = "As you make it out of the\n trap-filled and hellish underearth\n alive, you grab a firm hold of the\n Rune of the Stonemasons and bring it\n back to The Machine.\n\n You have conquered one of the most\n heavily guarded and monster-infested\n military fortifications of the\n entire dimension and you are now\n ready for any new challenge that\n Quake manages to throw your way!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.";
+			if (world.model == "maps/mge4m2.bsp" || world.model == "maps/mge4m2b.bsp" || world.model == "maps/mge4arena.bsp") intermission2_message = "From familiar halls and twisting\n geometry you have seen the world\n being turned on it's head.\n\n Leaving this realm of foul worship\n behind, you feel the bloodlust\n run through you, like a\n tremor in your soul.\n\n Yet again, being a cog in The Machine.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.";
+			if (world.model == "maps/mge5m2.bsp") intermission2_message = "Exalted Warrior from the Machine, you\n succeeded where the expedition failed.\n They came from beyind the stars on\n a black ship powered by captured suns.\n They found the oldest planet,\n filled their ship with the inhabitants.\n\n You delivered them vengeance.\n\n They dug out the ground at the holy\n site, not knowing how close they came.\n\n You hold the Rune of Astrologers,\n return to the machine.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.";
+			if (world.model == "maps/mgend.bsp") intermission2_message = "Congratulations and Well Done!\n Once again you have defeated Chthon,\n the demon of fire and darkness,\n and the master of the underworld.\n You have shown great skill in\n taking down military death squads and\n hundreds of other ferocious monsters.\n\n You are more powerful than any threat\n Quake can manage to summon.\n You are the master now.\n\n We salute you.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.";
+		}
+
+		if (intermission2_message != "") 
+		{
+			if (world.model == "maps/end.bsp") 
+			{
+				killed_monsters += 1;
+				WriteByte (MSG_ALL, SVC_KILLEDMONSTER);
+				nextmap = "hipstart";
+			}
+			if ((world.model == "maps/r2m8.bsp" || world.model == "maps/rend.bsp") && !cvar("coop")) nextmap = "e5start"; // Sleeper: Continue to the next mission pack.
+			if (world.model == "maps/e5end.bsp") nextmap = "mgstart"; // Sleeper: Continue to the next mission pack.
+			if (world.model == "maps/mgend.bsp") nextmap = "start"; // Sleeper: Circle back around when finished with all campaign content.
+			
+			WriteByte (MSG_ALL, SVC_CDTRACK);
+			WriteByte (MSG_ALL, Inter2_CDTRACK_2);
+			WriteByte (MSG_ALL, Inter2_CDTRACK_3);
+			WriteByte (MSG_ALL, SVC_FINALE);
+			WriteString (MSG_ALL, intermission2_message);
+			return;
+		}
+
+		GotoNextMap();
+	}
+	
+	if (intermission_running == 3) 
+	{
+		if (!cvar("registered")) 
+		{	
+			// Shareware episode has been completed, go to sell screen
+			WriteByte (MSG_ALL, SVC_SELLSCREEN);
+			return;
+		}
+
+		if (intermission3_message == "") 
+		{
+			// All ID1 runes are taken (serverflags 1 + 2 + 4 + 8)
+			if (gameworld == ID1 && (serverflags & SIGIL_ID1_ALL) == SIGIL_ID1_ALL) intermission3_message = "Now, you have all four Runes. You sense\ntremendous invisible forces moving to\nunseal ancient barriers. Shub-Niggurath\nhad hoped to use the Runes Herself to\nclear off the Earth, but now instead,\nyou will use them to enter her home and\nconfront her as an avatar of avenging\nEarth-life. If you defeat her, you will\nbe remembered forever as the savior of\nthe planet. If she conquers, it will be\nas if you had never been born.";
+			
+			// Hipnotic episode/finale level completed
+			if (gameworld == HIPNOTIC) 
+			{
+				if (world.model == "maps/hip1m4.bsp") intermission3_message = "If you can find the source of the\nportal's power, you can shut it\ndown--possibly forever!  With only a\nmoment's consideration for your own\nsafety, you re-enter the dark domain,\nknowing Hell would be a better fate\nthan experiencing the reign of Quake.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK\n to continue to Episode 2.";
+				if (world.model == "maps/hip2m5.bsp") intermission3_message = "After what seems like an eternity,\nyou feel the presence of a diabolical\nintelligence.  You are held helpless\nfor a moment as your mind is open to\nthat of Armagon--Quake's General and\nmaster of this realm.  Recognizing\nyou as the one who foiled his\nattempt to conquer Earth, a hellish\nhowl fills your mind and blots out\nall consciousness.  When you awake,\nyou find yourself on the shores of\nreality, but in a time and place\nunknown to you.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK\n to continue to Episode 3.";
+				if (world.model == "maps/hipend.bsp") intermission3_message = "Congratulations!  You are victorious!\nThe minions of Quake have once again\nfallen before your mighty hand.\nIs this the last you will see of\nQuake's hellions?\n\nOnly time will tell... \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue to...\n\n Dissolution of Eternity!\n";
+			}
+			
+			// All MG1 runes are taken (serverflags 1 + 2 + 4 + 8 + 16)
+			if (gameworld == MG1 && (serverflags & SIGIL_MG1_ALL) == SIGIL_MG1_ALL) intermission3_message = "With all six runes in your possession\n you can feel their power surge\n through time and space.\n\n Ancient seals are broken as the path\n to your final challenge unlocks.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.";
+		}
+		
+		if (intermission3_message != "") 
+		{
+			if (world.model == "maps/hipend.bsp") nextmap = "rstart"; // Sleeper: Continue to the next mission pack.
+			
+			if (Inter3_CDTRACK_2 != 0 && Inter3_CDTRACK_3 != 0) // Sleeper: Add CD Support if necessary.
+			{
+				WriteByte (MSG_ALL, SVC_CDTRACK);
+				WriteByte (MSG_ALL, Inter3_CDTRACK_2);
+				WriteByte (MSG_ALL, Inter3_CDTRACK_3);
+			}
+			
+			WriteByte (MSG_ALL, SVC_FINALE);
+			WriteString (MSG_ALL, intermission3_message);
+			return;
+		}			
+	}
+
+	GotoNextMap();
 };
 
 /*
@@ -1320,7 +1309,7 @@ void() IntermissionThink =
 	// Do QStats Patch v1.8 stuff
 	if (!cvar("coop") || cvar("coop") == CLASSIC_COOP)
 	{
-		if (!deathmatch && cvar("sv_public") == 1)
+		if (!cvar("deathmatch") && cvar("sv_public") == 1)
 		{
 			if (!DisplayedExitMsg) ExitMessage (); // Display a recorded time down to the hundred thousandth of a second for speedrunning
 		}
@@ -1430,7 +1419,7 @@ void() changelevel_touch =
 	else if (!coop && !deathmatch && cvar("sv_public") == 1) bprint (other.netname, " cleared ", mapname, "\n");
 				
 	nextmap = self.map;
-	
+	/*
 	// Sleeper: Moved DOPA's & MG1's endtexts to QuakeC instead of within the .ent file of the maps for more customization. (Probably will make a coop variant endtexts.)
 	// DOPA --------------------------------------------
 	if (mapname == "e5end") // DOPA | Episode 5 end text
@@ -1469,9 +1458,11 @@ void() changelevel_touch =
 		self.endtext = "Congratulations and Well Done!\n Once again you have defeated Chthon,\n the demon of fire and darkness,\n and the master of the underworld.\n You have shown great skill in\n taking down military death squads and\n hundreds of other ferocious monsters.\n\n You are more powerful than any threat\n Quake can manage to summon.\n You are the master now.\n\n We salute you.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n JUMP or ATTACK to continue.";
 		intermissiontext = self.endtext;
 	}
-	if ((mapname == "end" || gameworld >= HIPNOTIC && gameworld <= DOPA) || (mapname == "mgstart" || mapname == "mgend") || (cvar("customcoop"))) serverflags = 0; // Sleeper: Clear runes if required.
-				
-	if (self.spawnflags & (NO_INTERMISSION) && !deathmatch && self.endtext == string_null) // MG1 added endtext condition
+	*/	
+	
+	if ((mapname == "end" || gameworld >= HIPNOTIC && gameworld <= DOPA) || (mapname == "mgstart" || mapname == "mgend") || (cvar("customcoop"))) serverflags = 0; // Sleeper: Clear runes if required.	
+			
+	if (self.spawnflags & NO_INTERMISSION && !deathmatch/* && self.endtext == string_null*/) // MG1 added endtext condition
 	{
 		GotoNextMap ();
 		return;
@@ -1598,7 +1589,7 @@ void() LoadGame =
 	dprint ("\n\n");
 
 	// For each player...
-	entity cl = find (world, classname, "player");
+	local entity cl = find (world, classname, "player");
 	while (cl)
 	{
 		if (cl.fog_density) SetFog (cl, cl.fog_density, cl.fog_color, 0.0); // Restore fog
@@ -1627,7 +1618,6 @@ void() respawn =
 	}
 	else if (deathmatch)
 	{
-		self.modelindex = modelindex_nqwplayer;
 		// Make a copy of the dead body for appearances sake
 		CopyToBodyQue (self);
 		// Set default spawn parms
@@ -1644,7 +1634,9 @@ void() respawn =
 		// Request a reset to the parms
 		reset_flag = TRUE;
 		// Restart the entire server
-		localcmd ("restart\n");		
+		localcmd ("changelevel ");
+		localcmd (mapname);
+		localcmd ("\n");		
 	}		
 };
 
@@ -1671,7 +1663,9 @@ void() horde_respawn_all =
 	localcmd ("restart\n");
 };
 
-void() GibPlayer;
+void() DeathSound;
+.float suicide_timer;
+.float suicide_pressed;
 /*
 ============
 ClientKill
@@ -1681,7 +1675,7 @@ Player entered the suicide command
 */
 void() ClientKill =
 {
-	if (intermission_running == 1) return; // R00k	
+	if (intermission_running == TRUE || self.suicide_pressed == TRUE) return; // R00k	
 	
 	if (self.spectator) // Sleeper: Almost broke the server man, be careful!
 	{
@@ -1750,17 +1744,16 @@ void() ClientKill =
         self.touch = SUB_Null;
 	if (cvar("horde")) // horde mode behavior
 	{
+		DeathSound ();
 		PlayerDie ();
 		self.health = 0;
 	}
 	else
-	{        
-		self.health = -999;
-  		self.th_die (); // Reset powerups and drop Backpack when appropriate
-		set_suicide_frame ();
-		self.modelindex = modelindex_nqwplayer;
-		self.think = respawn;
-		self.nextthink = time + 1.2;
+	{       
+		PlayerDie ();
+		self.health = 0;
+		self.suicide_timer = time + 1.5;
+		self.suicide_pressed = TRUE; // Sleeper: Cheesy hack to avoid using thinks.
 	}
 };
 
@@ -1850,8 +1843,8 @@ entity(float forceSpawn) SelectSpawnPointEX =
 		{
 			if (lastspawn == startedAt) break;
 			lastspawn = find (lastspawn, classname, "info_player_coop");
-		}			
-		if (lastspawn != world) return lastspawn; 		
+		}	
+		if (lastspawn != world) return lastspawn; 
 	}
 	
 	if (deathmatch && !coop)
@@ -2000,12 +1993,12 @@ entity(float forceSpawn) SelectSpawnPointEX =
 		if (lastPickup)
 		{
 			string spname = string_null;
-			     if (lastPickup & SIGIL_E1) spname = "start_1";
-			else if (lastPickup & SIGIL_E2) spname = "start_2";
-			else if (lastPickup & SIGIL_E3) spname = "start_3";
-			else if (lastPickup & SIGIL_E4) spname = "start_4";
-			else if (lastPickup & SIGIL_E5) spname = "start_5";
-			else if (lastPickup & SIGIL_E6) spname = "start_6";
+			     if (lastPickup & SIGIL_MG1_E1) spname = "start_1";
+			else if (lastPickup & SIGIL_MG1_E2) spname = "start_2";
+			else if (lastPickup & SIGIL_MG1_E3) spname = "start_3";
+			else if (lastPickup & SIGIL_MG1_E4) spname = "start_4";
+			else if (lastPickup & SIGIL_MG1_E5) spname = "start_5";
+			else if (lastPickup & SIGIL_MG1_E6) spname = "start_6";
 			if (spname)
 			{
 				spot = find (world, netname, spname);
@@ -2195,14 +2188,7 @@ void() PutClientInServer =
 	
 	if (self.netname == "[overseer]-BOT") self.solid = SOLID_NOT;	
 	else self.solid = SOLID_SLIDEBOX;
-/*
-	self.dimension_solid = 1;
-	self.dimension_hit = 1;
-	self.dimension_see = 1;
-	self.dimension_seen = 1;
-	self.dimension_ghost = 0;
-	self.dimension_ghost_alpha = 0;	
-*/	
+		
 //	self.solid = SOLID_SLIDEBOX;	
 	self.movetype = MOVETYPE_WALK;
 	self.show_hostile = 0;
@@ -2229,10 +2215,10 @@ void() PutClientInServer =
 	self.invincible_time = 0;
 	self.healthtime = 0;
 	self.armorrottime = 0;	
-	self.health_overstacked = 0; // Overstack flag
+	self.health_overstacked = FALSE; // Overstack flag
 	self.spawn_protection_finished = 0; // Spawn Protection primarily for custom coop
 	self.spawn_protection_time = 0;
-	self.guard = 0; // Rune of Guard to adjust max health to 200 and armorvalue to 200
+	self.guard = FALSE; // Rune of Guard to adjust max health to 200 and armorvalue to 200
 	
 	//JIM
 	self.wetsuit_finished = 0;
@@ -2256,14 +2242,19 @@ void() PutClientInServer =
 
 	W_SetCurrentAmmo ();
 	
+//	dprint (self.netname, " has dimension_solid set to: ", ftos(self.dimension_solid), "\n");
+//	dprint (self.netname, " has dimension_hit set to: ", ftos(self.dimension_hit), "\n");
+			
 	self.attack_finished = time;
 	self.th_pain = player_pain;
 	self.th_die = PlayerDie;
 	
 	self.deadflag = DEAD_NO;
 	self.pausetime = 0; // Pausetime is set by teleporters to keep the player from moving a while
-	self.spectator = 0; // Remove from spectator mode
-	self.falling = 0; // Not falling
+	self.spectator = FALSE; // Remove from spectator mode
+	self.falling = FALSE; // Not falling
+//	self.changing_player_model = FALSE;
+	self.suicide_pressed = FALSE;
 		
 	local float shouldTelefrag;
 	if (self.spawn_deferred > 0 && time >= self.spawn_deferred)
@@ -2300,12 +2291,12 @@ void() PutClientInServer =
 		self.weapon = 0;
 		return;
 	}
-	self.spawn_deferred = 0;	
+	self.spawn_deferred = FALSE;	
 		
 //	spot = SelectSpawnPoint ();
-	self.oldorigin = self.origin = spot.origin + '0 0 1'; // R00k: update oldorigin so we dont respawn where we died. 
+	self.oldorigin = self.origin = spot.origin + '0 0 1'; // R00k: Update oldorigin so we dont respawn where we died. 
 	self.angles = spot.angles;
-	self.fixangle = TRUE;		// turn this way immediately	
+	self.fixangle = TRUE;		// Turn this way immediately	
 	
 	if (cvar("coop") && !cvar("deathmatch"))
 	{	
@@ -2334,13 +2325,15 @@ void() PutClientInServer =
 	#endif		
 	
 	self.touch = player_touch;
+//	self.customizeentityforclient = player_customizeentityforclient;
 
 	// oh, this is a hack!
 	setmodel (self, "progs/playham.mdl");
 	modelindex_hammer = self.modelindex;
  
 	setmodel (self, "progs/eyes.mdl");
-	modelindex_eyes = self.modelindex;	
+	modelindex_eyes = self.modelindex;
+	
 	/* 
 	// Replacing with NQW code =====================================================
 	setmodel (self, "progs/player.mdl");
@@ -2360,8 +2353,7 @@ void() PutClientInServer =
 	}
 
 	NQW_SpawnCharacter ();	
-//	tracebox (self.origin, VEC_HULL_MIN, VEC_HULL_MAX, self.origin, 0, self);
-		
+			
 	if (deathmatch || coop)
 	{
 		makevectors (self.angles);
@@ -2402,7 +2394,7 @@ void() PutClientInServer =
 	msg_entity = self;
         WriteByte (MSG_ONE, SVC_SETVIEWPORT);
         WriteEntity (MSG_ONE, self);  
-        setorigin (self, spot.origin);	       
+        setorigin (self, spot.origin);	 
 };
 
 /*
@@ -2661,6 +2653,7 @@ void() CheckRules =
 		if (warmup_engaged == TRUE) Warmup_Rules ();
 	}
 	
+	
 	if (initiate_matchtime == TRUE) // Sleeper: Timelimit is only active when the match is initiated.
 	{
 		if (!justonce) // Sleeper: Not a fucking word, Bell...
@@ -2678,12 +2671,12 @@ void() CheckRules =
 			// Sleeper: Warn players time is almost up!
 			if (matchtime <= (60 * 5) && !fiveminutewarning) 
 			{
-				bprint ("5 Minute Warning!\n");
-				fiveminutewarning = TRUE;				
+				bprint ("5 Minute Warning!\n");	
+				fiveminutewarning = TRUE;			
 			}
 			
 			if (matchtime <= (60 * 1) && !oneminutewarning)
-			{
+			{			
 				bprint ("1 Minute Warning!\n");
 				oneminutewarning = TRUE;
 			}
@@ -2845,7 +2838,8 @@ void() PlayerDeathThink =
 	if (self.deadflag == DEAD_DEAD)
 	{
 		if (self.button2 || self.button1 || self.button0) return;
-		if (self.deathrespawn < time) self.deadflag = DEAD_RESPAWNABLE;
+		if (self.deathrespawn < time) self.deadflag = DEAD_RESPAWNABLE; // Sleeper: Quake II had a slight delay before making players respawnable.
+		if (self.suicide_timer < time && self.suicide_pressed) {self.suicide_pressed = FALSE; respawn ();} // Sleeper: Prevent suicide spam.
 		return;
 	}
 
@@ -2895,7 +2889,7 @@ void() PlayerJump =
 	self.button2 = 0;
 	
 	// Player jumping sound
-	sound (self, CHAN_BODY, self.nqwSndJump, 1, ATTN_NORM);
+	sound (self, CHAN_VOICE, self.nqwSndJump, 1, ATTN_NORM);
 	self.velocity_z += 270;
 };
 
@@ -3083,6 +3077,37 @@ void() QWSpeedCap =
 	self.velocity_y = hvel_y;			
 };
 
+// Sleeper: To be able to toggle when to disable or enable player collision.
+.float player_collision_cvar_engaged;
+void() player_collision_toggle =
+{	
+	if (cvar("player_collision") == FALSE) 
+	{
+		if (!self.player_collision_cvar_engaged)
+		{
+			if (cvar("coop") >= 0 && !cvar("deathmatch")) entity_collision (self, PLAYERMASK, PVE_MONSTER_ONLY, PVE_GENERAL, PVE_GENERAL, EMPTYMASK, 0);							
+			else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (self, TEAMRED4_PLAYERMASK, PvP_BLUETEAM_STUFF, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (self, TEAMBLUE13_PLAYERMASK, PvP_REDTEAM_STUFF, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (self, PLAYERMASK, PvP_DM, PvP_DM, PvP_DM, EMPTYMASK, 0);
+					
+			self.player_collision_cvar_engaged = TRUE;
+		}
+	}	
+	
+	if (cvar("player_collision") == TRUE)
+	{
+		if (self.player_collision_cvar_engaged == TRUE)
+		{
+			if (cvar("coop") >= 0 && !cvar("deathmatch")) entity_collision (self, PLAYERMASK, PVE_GENERAL, PVE_GENERAL, PVE_GENERAL, EMPTYMASK, 0);
+			else entity_collision (self, PLAYERMASK, PvP_DM, PvP_DM, PvP_DM, EMPTYMASK, 0);
+			self.player_collision_cvar_engaged = FALSE;
+		}
+	}
+};
+
 /*
 ================
 PlayerPreThink
@@ -3234,11 +3259,9 @@ void() PlayerPreThink =
 	
 	KillTheBunny (); // Runner's Delight: KILL THE BUNNY!	
 	
-	Player_Countdown_Sounds (); // For Deathmatch Warmups.
-	
-	// Sleeper: I can never get player collision to work right utilizing tracebox or traceline. ._.
-//	player_collision ();	
-//	Player_Collision (self);
+	Player_Countdown_Sounds (); // For Deathmatch Warmups.	
+		
+	player_collision_toggle (); // Sleeper: Toggle player physics on and off in real time when desired.
 };
 
 /*
@@ -3258,7 +3281,7 @@ void() CheckPowerups =
 		// Sound and screen flash when items starts to run out
 		if (self.invisible_sound < time)
 		{
-			sound (self, CHAN_AUTO, "items/inv3.wav", 0.5, ATTN_IDLE);
+			sound (self, CHAN_POWERUP, "items/inv3.wav", 0.5, ATTN_IDLE);
 			self.invisible_sound = time + ((random() * 3) + 1);
 		}
 
@@ -3270,7 +3293,7 @@ void() CheckPowerups =
 				else if (cvar("skill") == 5) sprint(self, "", "The Ring of Shadows' magic begins to fade away...\n");
 				
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/inv2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_POWERUP, "items/inv2.wav", 1, ATTN_NORM);
 				self.invisible_time = time + 1;
 			}
 			if (self.invisible_time < time)
@@ -3306,7 +3329,7 @@ void() CheckPowerups =
 				else if (cvar("skill") == 5) sprint(self, "", "The unholy ward is burning out...\n");
 				
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/protect2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_POWERUP, "items/protect2.wav", 1, ATTN_NORM);
 				self.invincible_time = time + 1;
 			}
 			if (self.invincible_time < time)
@@ -3344,7 +3367,7 @@ void() CheckPowerups =
 			{				
 				sprint(self, "Spawn Protection is waning...\n");
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/protect2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_POWERUP, "items/protect2.wav", 1, ATTN_NORM);
 				self.spawn_protection_time = time + 1;
 			}
 			if (self.spawn_protection_time < time)
@@ -3386,7 +3409,7 @@ void() CheckPowerups =
 				else if (cvar("skill") == 5) sprint (self, "Quad damage's power weakens...\n");
 				
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/damage2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_POWERUP, "items/damage2.wav", 1, ATTN_NORM);
 				self.super_time = time + 1;
 			}
 
@@ -3428,7 +3451,7 @@ void() CheckPowerups =
 				else if (cvar("skill") == 5) sprint(self, "", "The Air Supply in your Biosuit is running dry...\n");
 				
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/suit2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_POWERUP, "items/suit2.wav", 1, ATTN_NORM);
 				self.rad_time = time + 1;
 			}
 
@@ -3460,7 +3483,7 @@ void() CheckPowerups =
 				else if (cvar("skill") == 5) sprint (self, "", "The Air Supply in your Wetsuit is running dry...\n");
 				
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/suit2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_POWERUP, "items/suit2.wav", 1, ATTN_NORM);
 				self.wetsuit_time = time + 1;
 			}
 
@@ -3492,7 +3515,7 @@ void() CheckPowerups =
 				else if (cvar("skill") == 5) sprint (self, "", "Empathy Shields is turning to dust...\n");
 				
 				stuffcmd (self, "bf\n");
-				sound (self, CHAN_AUTO, "items/suit2.wav", 1, ATTN_NORM);
+				sound (self, CHAN_POWERUP, "items/suit2.wav", 1, ATTN_NORM);
 				self.empathy_time = time + 1;
 			}
 			if (self.empathy_time < time)
@@ -3523,7 +3546,7 @@ void() CheckPowerups =
 				if (cvar("skill") <= 4) sprint (self, "", "The Power Shield is failing...\n");
 				else if (cvar("skill") == 5) sprint (self, "", "The Power Shield is falling apart...\n");
 				
-				sound (self, CHAN_AUTO, "shield/fadeout.wav", 1, ATTN_NORM);
+				sound (self, CHAN_POWERUP, "shield/fadeout.wav", 1, ATTN_NORM);
 				self.shield_time = 0;
 			}
 			if (self.shield_time < time)
@@ -3608,13 +3631,7 @@ void() PlayerPostThink =
 
 	// Do rot stuff (Health, Armor)
 	Item_Rot_Systems ();
-//	bprint (ftos(self.max_health), "\n");
 	
-	// Sleeper: Send copies to CSQC.
-//	self.playerrunes = serverflags;
-//	self.itemscopy = self.items;
-//	self.expansionitemscopy = self.expansionitems;
-		
 	// Check to see if player landed and play landing sound
 	if ((self.jump_flag < -300) && (self.flags & FL_ONGROUND) && (self.health > 0))
 	{
@@ -3623,7 +3640,7 @@ void() PlayerPostThink =
 		{
 			if (self.health <= 5) self.deathtype = "falling"; // Sleeper: Moved up to allow the bprint to work properly the first time.
 			if (cvar("falldamage")) T_Damage (self, world, world, 5);
-			if (self.health <= 0) sound (self, CHAN_VOICE, self.nqwSndFallDeath, 1, ATTN_NONE);
+			if (self.health <= 0) sound (self, CHAN_VOICE, self.nqwSndFallDeath, 1, ATTN_NORM);
 			else sound (self, CHAN_VOICE, self.nqwSndLand2, 1, ATTN_NORM);
 		}
 		else sound (self, CHAN_VOICE, self.nqwSndLand1, 1, ATTN_NORM);
@@ -3638,8 +3655,8 @@ void() PlayerPostThink =
 	if ((self.killspree > 0) && (time > self.killtime))
 	{
 		dprint ("killspree ended.\n");
-		score = ceil (self.killtotal);
-		streak = ceil (self.killspree);
+		score = ceil(self.killtotal);
+		streak = ceil(self.killspree);
 		if (self.killspree > 1) sprint (self, "Streak Ended with ", ftos(streak), " (+", ftos(score), " Points)\n"); // Sleeper: Only print something to the player when they have 2 or more in a killing spree.
 //		self.frags += score;	
 		add_frag (self, score);
@@ -3650,16 +3667,14 @@ void() PlayerPostThink =
 		
 	CheckPowerups ();
 	
-	// Displays if server is public and is coop, DM or TDM.
-	Send_MOTD ();	
+	// Displays a greeting MOTD if server is public
+	if (self.motdgreeting == ENABLE_MOTD && cvar("sv_public") == TRUE) Send_MOTD ();	
 	
-	// Runner's Delight: get player speed
+	// Runner's Delight: Get player speed
 	local vector v;
 	v_x = self.velocity_x;
 	v_y = self.velocity_y;
 	self.speed = vlen(v);	
-		
-//	Player_Collision (self);
 };
 
 #define redify(s) strconv(0,2,2,s)
@@ -3695,7 +3710,8 @@ void() Detect_Client =
 		if (myClient != "") 
 		{
 			self.client = EzQ_CLIENT;
-			clientname = "ezQuake (Unsupported)";		
+			clientname = "ezQuake (Unsupported)";	
+			/*	
 			sprint (self, "\n");
 			sprint (self, "You have been rejected from connecting to the server for using ezQuake!\nEzQuake is NOT SUPPORTED yet! Consider trying QSS-M 1.6.2+ or FTEQW 6446+ instead for maximum\nNet Quake & QuakeWorld compatibility!");
 			sprint (self, "\n");
@@ -3706,6 +3722,7 @@ void() Detect_Client =
 			sprint (self, "\n");
 			stuffcmd (self, "disconnect\n");
 			bprint (self.netname, " is getting kicked from the server for using an unsupported client\n"); 
+			*/
 		}
 		else
 		{
@@ -3743,24 +3760,19 @@ void() ClientConnect =
 	MOTD_Sounds(); // Make greeting sounds.	
 	
 //	new_key_owners ();	
-	// Keep MOTD displayed if client is a new player.
-	if (parm17 & NEW_PLAYER_MOTD) 
-	{
-		self.greet = ENABLE_MOTD;
-		parm17 -= parm17 & (NEW_PLAYER_MOTD);
-	}
-					
-	// Sleeper: Inherit weapons and ammo from an existing player on the server in coop.
-	if (cvar("coop") == REIGNITED_COOP || cvar("coop") == ENHANCED_COOP)
+				
+	if (parm17 & (NEW_PLAYER_INIT | NEW_PLAYER_MOTD))
 	{	
-		if (!cvar("deathmatch") && !cvar("horde"))
-		{
-			if (parm17 & NEW_PLAYER_INIT) 
-			{
-				InheritParms ();
-				parm17 -= parm17 & (NEW_PLAYER_INIT);
-			}
+		// Sleeper: Display MOTD.
+		if (parm17 & NEW_PLAYER_MOTD) self.motdgreeting = ENABLE_MOTD;
+		
+		// Sleeper: Inherit weapons and ammo from an existing player on the server in coop.
+		if (cvar("coop") == REIGNITED_COOP || cvar("coop") == ENHANCED_COOP)
+		{	
+			if (!cvar("deathmatch") && !cvar("horde") && !cvar("customcoop")) InheritParms ();
 		}
+		
+		parm17 -= parm17 & (NEW_PLAYER_INIT | NEW_PLAYER_MOTD); // Sleeper: Remove bitflags immediately.
 	}
 	
 	// Sleeper: Equip the Shotgun on the first spawn in Custom Coop.
@@ -3769,46 +3781,30 @@ void() ClientConnect =
 	if (parm17 & CLIENT_ENTERED)
 	{
 		// Cooperative & Single Player
-		if ((coop >= 0 && cvar("sv_public") == 1) || (coop >= REIGNITED_COOP && !cvar("sv_public")))
+		if ((coop >= SINGLE_PLAYER && cvar("sv_public") == 1) || (coop >= REIGNITED_COOP && !cvar("sv_public")))
 		{
 			if (!deathmatch)
 			{
-				// iD1 Game World
-				if (gameworld == ID1)
+				if (cvar("skill") <= 4) bprint (self.netname, " entered the game\n");
+				else
 				{
-					if (cvar("skill") <= 4) bprint (self.netname, " entered the game\n");
-					else bprint (self.netname, " entered the game with a Deathwish!\n");
+					// iD1 Game World
+					if (gameworld == ID1) bprint (self.netname, " entered the game with a Deathwish!\n");
+					// Hipnotic Game World
+					else if (gameworld == HIPNOTIC) bprint (self.netname, " entered the game with Slickness!\n");
+					// Rogue Game World
+					else if (gameworld == ROGUE) bprint (self.netname, " has gone Rogue!\n");	
+					// DOPA Game World
+					else if (gameworld == DOPA) bprint (self.netname, " entered an Otherworldly place!\n");	
+					// MG1 Game World
+					else if (gameworld == MG1) bprint (self.netname, " entered The Machine!\n");	
+					// Default
+					else bprint (self.netname, " entered the game\n");
 				}
-				// Hipnotic Game World
-				else if (gameworld == HIPNOTIC)	
-				{
-					if (cvar("skill") <= 4) bprint (self.netname, " entered the game\n");
-					else bprint (self.netname, " entered the game with Slickness!\n");
-				}
-				// Rogue Game World
-				else if (gameworld == ROGUE)
-				{
-					if (cvar("skill") <= 4) bprint (self.netname, " entered the game\n");
-					else bprint (self.netname, " has gone Rogue!\n");	
-				}
-				// DOPA Game World
-				else if (gameworld == DOPA)
-				{
-					if (cvar("skill") <= 4) bprint (self.netname, " entered the game\n");
-					else bprint (self.netname, " entered an Otherworldly place!\n");	
-				}
-				// MG1 Game World
-				else if (gameworld == MG1)
-				{
-					if (cvar("skill") <= 4) bprint (self.netname, " entered the game\n");
-					else bprint (self.netname, " entered The Machine!\n");	
-				}
-				// Default
-				else bprint (self.netname, " entered the game\n");
 			}		
 		}
 		// Free For All & Duels
-		else if (deathmatch == DM_DUEL || deathmatch == DM_FFA) bprint (self.netname, " entered the arena eternal\n");		
+		if (deathmatch == DM_DUEL || deathmatch == DM_FFA) bprint (self.netname, " entered the arena eternal\n");		
 		parm17 -= parm17 & (CLIENT_ENTERED);
 	}	
 						
@@ -3816,7 +3812,7 @@ void() ClientConnect =
 	self.suicide_count = 0;
 	self.ctf_killed = 0;
 	
- 	// If this is our first connection, parm9 is < 0
+ 	// If this is our first connection, parm12 is < 0
  	// Set lastteam negative.
  	if (deathmatch == DM_DUEL || deathmatch == DM_FFA)
  	{
@@ -3891,8 +3887,6 @@ Called when a player disconnects from a server
 */
 void() ClientDisconnect =
 {
-	local float intro_maps = (world.model == Start_Maplist[StartMaps()] || world.worldtype == WORLDTYPE_HUB);
-	
 	// If the level end trigger has been activated, just return
 	// since they aren't *really* leaving.							
 	if (gameover) return;
@@ -3933,7 +3927,7 @@ void() ClientDisconnect =
 	
 	if (cvar("customcoop") && num_players <= 1)
 	{
-		if (cvar("skill") <= 1 || cvar("skill") == 3) cvar_set("skill", "2");
+		if (cvar("skill") <= 1 || cvar("skill") >= 3) cvar_set("skill", "2");
 	}
 							
 	sphere_remove (self);
@@ -3955,9 +3949,13 @@ void() ClientDisconnect =
 	
 	// Sleeper: No free ammo and weapons from disconnected players in Deathmatch or on start maps when playing Cooperative
 	// unless it's Classic Coop or Single Player, but still exclude start maps.
-	if ((!intro_maps) && !cvar("deathmatch"))
+	
+	if (world.model == Start_Maplist_World[StartMaps_Finder()] || world.worldtype == WORLDTYPE_HUB)
 	{
-		if (cvar("coop") == CLASSIC_COOP || !cvar("coop")) DropBackpack ();
+		if (!cvar("deathmatch"))
+		{
+			if (cvar("coop") == CLASSIC_COOP || !cvar("coop")) DropBackpack ();
+		}
 	}
 			
 	// Sleeper: Return keys back to the world if there are no existing players.
@@ -3965,7 +3963,7 @@ void() ClientDisconnect =
 //	if (self.items & IT_KEY2) respawn_key (IT_KEY2);
 	if (self.items & (IT_KEY1 | IT_KEY2)) respawn_keys ();
 	
-	if (parm17 & CLIENT_JOINED) parm17 -= parm17 & (CLIENT_JOINED);
+	if (parm17 & CLIENT_JOINED) parm17 -= parm17 & (CLIENT_JOINED);	
 };
 
 void() SpectatorFirstConnect = {stuffcmd (self, "observe\n");};
@@ -4626,7 +4624,12 @@ void(entity targ, entity attacker) ClientObituary =
 			}
 			else if (targ.deathtype == "lava_nail" || targ.deathtype == "super_lava_nail") bprint (targ.netname, " was burned by ", attacker.netname, "\n");
 			else if (targ.deathtype == "plasma_rocket") bprint (targ.netname, " was fused by ", attacker.netname, "\n");
-			else if (targ.deathtype == "multi_grenade" || targ.deathtype == "multi_rocket") bprint (targ.netname, " was blasted to bits by ", attacker.netname, "\n");													
+			else if (targ.deathtype == "multi_grenade" || targ.deathtype == "multi_rocket") bprint (targ.netname, " was blasted to bits by ", attacker.netname, "\n");	
+			else if (targ.deathtype == "slug") // Coilgun kills
+			{
+				if (random() < 0.4) bprint (targ.netname, " was railed by ", attacker.netname, "\n");
+				else bprint (targ.netname, " was corkscrewed by ", attacker.netname, "\n");
+			}											
 			// Axe kills
 			else if (rnum == IT_AXE)
 			{
@@ -4689,14 +4692,6 @@ void(entity targ, entity attacker) ClientObituary =
 			}
 			// Thor's Hammer kills
 			else if (rnum == IT_MJOLNIR) bprint (targ.netname, " was slammed by ", attacker.netname, "'s hammer\n");
-			// Coilgun kills
-			/*
-			else if (rnum == NQW_IT_COILGUN)
-			{
-				if (random() < 0.4) bprint (targ.netname, " was railed by ", attacker.netname, "\n");
-				else bprint (targ.netname, " was corkscrewed by ", attacker.netname, "\n");
-			}
-			*/
 			return;
 		}
 		else

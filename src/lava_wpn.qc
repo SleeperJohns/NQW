@@ -44,6 +44,26 @@ void(vector org, vector dir) launch_lava_spike =
 	setorigin (newmis, org);
 
 	newmis.velocity = dir * 1000;
+	
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (newmis, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}				
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (newmis, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (newmis, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (newmis, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (newmis, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 void() W_FireSuperLavaSpikes =
@@ -63,6 +83,8 @@ void() W_FireSuperLavaSpikes =
 
 	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);		
 	self.punchangle_x = -2;
+	
+//	player_projectile_collision (newmis);
 };
 
 void(float ox) W_FireLavaSpikes =
@@ -117,7 +139,7 @@ void() lavaspike_touch =
 	{
 		other.deathtype = "lava_nail";
 		spawn_touchblood (9);
-		if (other.classname == "player")
+		if (other.classname == "player") // Sleeper: Armor Piercing... kinda.
 		{
 			old_armortype = other.armortype;
 			old_armorvalue = other.armorvalue;
@@ -127,7 +149,7 @@ void() lavaspike_touch =
 			T_Damage (other, self, self.owner, 9);
 			other.armortype = old_armortype;
 			other.armorvalue = old_armorvalue;
-			other.expansionitems |= old_armormask;
+			other.items |= old_armormask;
 		}
 		else		// is a monster
 		{

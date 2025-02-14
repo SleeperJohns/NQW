@@ -13,10 +13,12 @@
 #pragma warning disable F301
 #pragma warning disable F312
 #define SSQC
-// #define CSQC
+// #define MENU
+#define CSQC
 
 sysdefs.qc
 nqw_fteextensions.qc
+client_collision.qc
 hipdefs.qc   			// Hipnotic: JIM
 defs.qc
 nqwdefs.qc			// NQW

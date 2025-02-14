@@ -21,6 +21,11 @@
 // Jan'97 by ZOID <zoid@threewave.com>
 // Under contract to id software for Rogue Entertainment
 
+// Sleeper: Just a disclaimer: this is not the Rogue implementation of the grappling hook, 
+// however it's still made by the same guy that made Threewave CTF. 
+// It just has a few modern enhancements and is completely server-side
+// as opposed to using the beam model rendered client-side.
+
 // New entity fields
 // Sleeper: Moved to nqwdefs.qc
 // .float hook_finished;
@@ -62,18 +67,7 @@ void() HookVanish =
 	while (self);
 };
 
-void() UnHookPlayer =
-{
-	local entity oself;
-
-	if (self.hook_out)
-	{
-		oself = self;
-		self = self.hookentity;
-		HookVanish ();
-		self = oself;
-	}
-};
+void() UnHookPlayer = {if (self.hook_out) SUB_CallAsSelf (self.hookentity, HookVanish);};
 
 /**********\
 * HookPull *
@@ -261,7 +255,7 @@ void() W_FireGrapple =
 	hook.movetype = MOVETYPE_FLY;
 	hook.solid = SOLID_BBOX;
 	makevectors (self.v_angle);	
-	hook.velocity = grappling_hook_pullspeed * aim (self, grappling_hook_speed);
+	hook.velocity = grappling_hook_pullspeed * aim(self, grappling_hook_speed);
 	hook.angles = vectoangles (hook.velocity);
 	hook.avelocity 	= '0 0 -500';
 	hook.touch = T_HookTouch;
@@ -332,18 +326,7 @@ void() OffHand_HookVanish =
 	while (self);
 };
 
-void() OffHand_UnHookPlayer =
-{
-	local entity oself;
-
-	if (self.offhand_hook_out)
-	{
-		oself = self;
-		self = self.offhand_hookentity;
-		OffHand_HookVanish ();
-		self = oself;
-	}
-};
+void() OffHand_UnHookPlayer = {if (self.offhand_hook_out) SUB_CallAsSelf (self.offhand_hookentity, OffHand_HookVanish);};
 
 /**********\
 * HookPull *
@@ -544,7 +527,7 @@ void() OffHand_W_FireGrapple =
 	hook.angles = vectoangles(hook.velocity);
 	hook.avelocity 	= '0 0 -500';
 	hook.touch = OffHand_T_HookTouch;
-	hook.nextthink = time + sys_ticrate;//instead lets check if we let off the button in mid-flight! eh?
+	hook.nextthink = time + sys_ticrate; // Instead lets check if we let off the button in mid-flight! eh?
 	hook.think = OffHand_Hook_Check;
 	setorigin (hook, self.origin + (v_forward * 16) + '0 0 16');
 	setsize (hook, '0 0 0', '0 0 0');
@@ -567,11 +550,11 @@ void() OffHand_W_FireGrapple =
 		
 		if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
 		{
-			if (self.steam == TEAM_BLUE_13) setmodel (link, "progs/laserhook_blue.mdl");
-			if (self.steam == TEAM_RED_4) setmodel (link, "progs/laserhook_red.mdl");
+			if (self.steam == TEAM_BLUE_13) setmodel (link, "progs/laserhook_blue.mdl"); // Team Blue
+			if (self.steam == TEAM_RED_4) setmodel (link, "progs/laserhook_red.mdl"); // Team Red
 		}
-		else setmodel (link, "progs/laserhook.mdl");
-//		setmodel (link, "progs/beam.mdl");
+		else setmodel (link, "progs/laserhook.mdl"); // Default
+//		setmodel (link, "progs/beam.mdl"); // Sleeper: This is the old grappling hook model trail.
 
 		link.alpha = 0.4;
 		link.scale = 0.5;		

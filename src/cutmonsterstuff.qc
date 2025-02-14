@@ -530,6 +530,26 @@ void(vector start, vector dir) Meat_Launch =
     newmis.touch        = Meat_Touch;
     newmis.nextthink    = time + 2.5;
     newmis.think        = SUB_Remove;
+    
+	if (self.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (newmis, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}						
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (self.steam == TEAM_RED_4) entity_collision (newmis, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (self.steam == TEAM_BLUE_13) entity_collision (newmis, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (newmis, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (newmis, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
 
     setall (newmis, "progs/zom_gib.mdl", '0 0 0', '0 0 0', start);
 };

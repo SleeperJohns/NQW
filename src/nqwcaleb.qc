@@ -7,7 +7,8 @@ NQW: Caleb
 void() NQW_Caleb =
 {
 	// Player Model
-	setmodel 	          (self, "progs/player_caleb.mdl"); // Caleb's Player Model
+	self.nqwMdlChar        = "progs/player_caleb.mdl";
+	self.view_ofs           = '0 0 22';
 	self.nqwCharGib         = "progs/h_player_caleb.mdl";       // Caleb's Head when gibbed
 	
 	// Melee Weapon Models

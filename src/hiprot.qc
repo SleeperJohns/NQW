@@ -63,8 +63,8 @@ Used as the point of rotation for rotatable objects.
 */
 void() info_rotate =
 {
-// remove self after a little while, to make sure that entities that
-// have targeted it have had a chance to spawn
+	// Remove self after a little while, to make sure that entities that
+	// have targeted it have had a chance to spawn
 	self.nextthink = time + 2;
 	self.think = SUB_Remove;
 };

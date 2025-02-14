@@ -2,7 +2,10 @@
 
 void(string soundToPlay) countdown_sounds = 
 {
+	local entity speaker;
+	
 	if (speaker) remove (speaker); // no multiple sounds  
+	
 	speaker = spawn ();
 	speaker.noise = soundToPlay;
 	speaker.nextthink = time + 0.0001;
@@ -30,7 +33,7 @@ string() Warmup_Count =
 ================
 Warmup_Rules
 
-Called in CheckRules.
+Called via CheckRules.
 Give a countdown before starting a Deathmatch Match.
 ================
 */
@@ -70,9 +73,11 @@ void() Warmup_Rules =
 					{
 						if (!player.client_spawned) // Sleeper: Prevent a looping telefrag by respawning everyone once.
 						{
+							//self.modelindex = self.modelindex_nqwplayer;
 							player.client_spawned = TRUE;
 							player.attack_finished = time;
-							player.think = respawn;
+//							PutClientInServer ();
+							player.think = PutClientInServer;
 							player.nextthink = time + 0.0001;
 						}
 					}
@@ -82,12 +87,11 @@ void() Warmup_Rules =
 	}	
 };
 
-
 /*
 ================
 SuddenDeath_Rules
 
-Called in CheckRules.
+Called via CheckRules.
 Grants overtime to a match, if teams/players are tied.
 (FTE Only Cvar) sudden_death_style = 0 (Default; Off), sudden_death_style = 1 (Quake III: Arena/Team Arena, Quake Champions), sudden_death_style = 2 (Quake Live)
 ================
@@ -168,7 +172,7 @@ void() SuddenDeath_Rules =
 								}
 							}																	
 						}
-						else // Sleeper: Everybody was pussy footing around or didn't play aggressive enough to break the tie.
+						else // Sleeper: Everybody was pussyfooting around or didn't play aggressive enough to break the tie.
 						{
 							sudden_death_engaged = FALSE;
 							endgame = TRUE;
@@ -212,7 +216,7 @@ void() SuddenDeath_Rules =
 										if (sudden_death_round_count <= cvar("sudden_death_max_rounds")) 
 										{
 											if (sudden_death_round_count < cvar("sudden_death_max_rounds")) bprint ("Sudden Death! (Round ", ftos(sudden_death_round_count), ")\n");
-											if (sudden_death_round_count == cvar("sudden_death_max_rounds")) bprint ("Sudden Death! (Final Round)\n");
+											else bprint ("Sudden Death! (Final Round)\n");
 										}
 									}
 									sudden_death_timelimit = time + (cvar("sudden_death_timelimit") * 60);
@@ -240,7 +244,7 @@ void() SuddenDeath_Rules =
 										if (sudden_death_round_count <= cvar("sudden_death_max_rounds")) 
 										{
 											if (sudden_death_round_count < cvar("sudden_death_max_rounds")) bprint ("Sudden Death! (Round ", ftos(sudden_death_round_count), ")\n");
-											if (sudden_death_round_count == cvar("sudden_death_max_rounds")) bprint ("Sudden Death! (Final Round)\n");
+											else bprint ("Sudden Death! (Final Round)\n");
 										}
 									}
 									sudden_death_timelimit = time + (cvar("sudden_death_timelimit") * 60);

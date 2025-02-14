@@ -118,7 +118,7 @@ void() SUB_regen =
 	if (self.weapon_pickedup[other.colormap] == TRUE) self.weapon_pickedup[other.colormap] = FALSE;
 	if (self.powerup_pickedup[other.colormap] == TRUE) self.powerup_pickedup[other.colormap] = FALSE;
 	if (self.health_pickedup[other.colormap] == TRUE) self.health_pickedup[other.colormap] = FALSE;
-
+	
 	self.model = self.mdl;		// Restore original model
 	self.solid = SOLID_TRIGGER;	// Allow it to be touched again				
 	sound (self, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);		
@@ -734,17 +734,17 @@ void() Item_Armor_Rot =
 	if (self.health <= 0) return;
 	if (self.armorvalue <= 0) return;
 		
-	// Rot -10 armorvalue on skill 5
+	// Rot -5 armorvalue on skill 5
 	if (cvar("skill") == 5 && !cvar("deathmatch")) 
 	{
 	   	// Protect armor from rotting when Pentagram is acquired (you'll still be able to take armor damage).
 		if (self.invincible_finished > time) return;
 		
-		// Tick down -10 every 6.66 seconds.	
+		// Tick down -5 every 6.66 seconds.	
 		if (self.armorvalue > self.max_armorvalue / 2)
 		{
 			self.armorvalue -= 5;
-			self.armorrottime = time + 6.66;
+			self.armorrottime = time + 5;
 			if (self.armorvalue < self.max_armorvalue / 2) self.armorvalue = self.max_armorvalue / 2; // Don't overshoot max armorvalue.
 		}
 		sound (self, CHAN_ITEM, "items/armorrot.wav", 1, ATTN_STATIC); // Make a Doom 3-style rot sound every 6.66 seconds.
@@ -792,60 +792,49 @@ float(entity player) ArmorIndex =
 	return FALSE;	
 };
 
-// Quake II-style Armor information system
-void(entity item, float armorinfo_bit, float base_count, float max_count, float true_protection, float fake_protection) item_armor_info =
+string() armor_pickup_sound =
 {
-	local string pickup_noise = string_null, pickup_message = string_null; // Sleeper: Clear strings just in case.
+	if (cvar("skill") == 5 && !cvar("deathmatch"))
+	{
+		if (self.items & IT_ARMOR1) return "items/q2armor1.wav"; // Quake 2 Jacket Armor pickup sound
+		if (self.items & IT_ARMOR2) return "items/q3armor1.wav"; // Quake 3 Standard Armor pickup sound
+		if (self.items & IT_ARMOR3) return "items/q4armor1.wav"; // Quake 4 Standard Armor pickup sound		
+		return "items/armor1.wav";   				 // Quake 1 Standard Armor pickup sound
+	}
 	
-	// Armor pickup noise and message
-	if (armorinfo_bit & IT_ARMOR1)      // The Green Armor
-	{
-		if (cvar("skill") == 5 && !cvar("deathmatch"))
-		{
-			pickup_noise = "items/q2armor1.wav"; // Quake 2 Jacket Armor pickup sound
-			pickup_message = "Jacket Armor";
-		}
-		else
-		{
-			pickup_noise = "items/armor1.wav";   // Quake 1 Armor pickup sound
-			pickup_message = "Red Armor";		
-		}		
-	}	
-	else if (armorinfo_bit & IT_ARMOR2) // The Yellow Armor
-	{
-		if (cvar("skill") == 5 && !cvar("deathmatch"))
-		{
-			pickup_noise = "items/q3armor1.wav"; // Quake 3 Armor pickup sound
-			pickup_message = "Combat Armor";
-		}
-		else
-		{
-			pickup_noise = "items/armor1.wav";   // Quake 1 Armor pickup sound
-			pickup_message = "Yellow Armor";		
-		}			
-	}	
-	else if (armorinfo_bit & IT_ARMOR3) // The Red Armor
-	{
-		if (cvar("skill") == 5 && !cvar("deathmatch"))
-		{
-			pickup_noise = "items/q4armor1.wav"; // Quake 4 Armor pickup sound
-			pickup_message = "Heavy Armor";
-		}
-		else
-		{
-			pickup_noise = "items/armor1.wav";   // Quake 1 Armor pickup sound
-			pickup_message = "Red Armor";		
-		}			
-	}	
+	return "items/armor1.wav"; // Quake 1 Standard Armor pickup sound
+};
 
-	// Armor Info
+string() armortype_pickup_message =
+{
+	if (cvar("skill") == 5 && !cvar("deathmatch"))
+	{
+		if (self.items & IT_ARMOR1) return "Jacket Armor";
+		if (self.items & IT_ARMOR2) return "Combat Armor";
+		if (self.items & IT_ARMOR3) return "Heavy Armor";		
+		return "Armor";	
+	}
+	else if ((cvar("skill") >= 0 && cvar("skill") <= 4 && !cvar("deathmatch")) || (cvar("deathmatch") && !cvar("coop")))
+	{
+		if (self.items & IT_ARMOR1) return "Green Armor";
+		if (self.items & IT_ARMOR2) return "Yellow Armor";
+		if (self.items & IT_ARMOR3) return "Red Armor";		
+		return "Armor";	
+	}
+	
+	return "Armor";	
+};
+
+// Quake II-style Armor information system
+void(entity item, float armorinfo_bit, float base_count, float max_count, float true_protection, float fake_protection/*, float energy_protection*/) item_armor_info =
+{
 	item.items = armorinfo_bit;
 	item.armorvalue = base_count;
 	item.max_armorvalue = max_count;
 	item.armortype = true_protection;
 	item.fake_armortype = fake_protection;	
-	item.noise = pickup_noise;
-	item.message = sprintf ("You got the %s", pickup_message);	
+	item.noise = armor_pickup_sound ();
+	item.message = sprintf ("You got the %s", armortype_pickup_message());	
 };
 
 float(entity item) armor_info = 
@@ -853,21 +842,21 @@ float(entity item) armor_info =
 	// Which Self, Armor Bit, Armorvalue, Max Armorvalue, True Protection, Fake Protection (To keep the Quake II-style armor salvaging balancing intact). Next would be energy protection, for the Quake II Power Shield.	
 	if (item.classname == "item_armor1")   // The Green Armor
 	{
-		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR1, 25, 50, 0.15, 0.3);
+		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR1, 25, 50, 0.15, 0.3/*, 0*/);
 		else item_armor_info (item, IT_ARMOR1, 100, 100, 0.3, 0.3);
 		return IT_ARMOR1;
 	}
 	
 	if (item.classname == "item_armor2")   // The Yellow Armor
 	{
-		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR2, 50, 100, 0.19, 0.6);
+		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR2, 50, 100, 0.19, 0.6/*, 0.3*/);
 		else item_armor_info (item, IT_ARMOR2, 150, 150, 0.6, 0.6);
 		return IT_ARMOR2;
 	}
 	
 	if (item.classname == "item_armorInv") // The Red Armor
 	{
-		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR3, 75, 150, 0.245, 0.8);
+		if (cvar("skill") == 5 && !cvar("deathmatch")) item_armor_info (item, IT_ARMOR3, 75, 150, 0.245, 0.8/*, 0.6*/);
 		else item_armor_info (item, IT_ARMOR3, 200, 200, 0.8, 0.8);
 		return IT_ARMOR3;
 	}
@@ -929,10 +918,10 @@ void() armor_touch =
 		}
 		else
 		{
-			     // Sleeper: Save old armor information
-			     if (old_armor_index == IT_ARMOR1) oldinfo_bit = IT_ARMOR1;
-			else if (old_armor_index == IT_ARMOR2) oldinfo_bit = IT_ARMOR2;
-			else if (old_armor_index == IT_ARMOR3) oldinfo_bit = IT_ARMOR3;
+			// Sleeper: Save old armor information
+			if (old_armor_index == IT_ARMOR1) oldinfo_bit = IT_ARMOR1;
+			if (old_armor_index == IT_ARMOR2) oldinfo_bit = IT_ARMOR2;
+			if (old_armor_index == IT_ARMOR3) oldinfo_bit = IT_ARMOR3;
 			
 			oldinfo_type = other.armortype;
 			oldinfo_maxvalue = other.max_armorvalue;
@@ -1103,6 +1092,131 @@ void() armor_touch =
 	
 	if (self.armor_pickedup[other.colormap] == 1 && !deathmatch && coop == REIGNITED_COOP) self.customizeentityforclient = armor_customizeentityforclient;		
 };
+
+/* Sleeper: Not yet.
+void() shard_touch = // progs_dump
+{
+	if (other.netname == "[overseer]-BOT") return;	
+	if (other.health <= 0) return;	
+	if (other.classname != "player") return;
+	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;	
+	
+	// Fire trigger, even though the item hasn't been picked up.			
+	if (!self.cnt_trig)
+	{
+		self.cnt_trig = 1;
+		activator = other;
+		SUB_UseTargets();
+	}
+	
+	if (self.armor_lockout_selective == 1) // Choose when an ammo pack can be locked out from being picked up again from a player during coop.
+	{	
+		if (coop & REIGNITED_COOP || deathmatch)
+		{
+			if (self.armor_lockout[other.colormap] == -1) return; // Lockout
+		}
+	}		
+
+	if (other.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3))	
+	{
+		if (!cvar("deathmatch")) // Sleeper: Single Player/Co-Op can be uncapped to mirror Quake II.
+		{
+			// MG1 ================================================================================================================				
+			#ifdef COOP_RESPAWN_ITEMS_FOR_PLAYERS
+			if (coop && other == self.enemy && self.wait <= 0) return; // In coop, don't allow the same player to pick up all the respawns.
+			if ((coop == CLASSIC_COOP && gameworld == MG1) || (coop == REIGNITED_COOP && cvar("customcoop")) || (coop == ENHANCED_COOP)) self.enemy = other;	// Store this player for coop			
+			#endif	
+			// ====================================================================================================================		
+			if (cvar("skill") == 5) other.armorvalue += 1;
+			else other.armorvalue += 2;
+			self.armor_pickedup[other.colormap] = 1;
+		}
+		else // Check bounds
+		{
+			if (other.items & IT_ARMOR1 && other.armorvalue >= 100)	return;
+			if (other.items & IT_ARMOR2 && other.armorvalue >= 150)	return;
+			if (other.items & IT_ARMOR3 && other.armorvalue >= 200)	return;
+
+			// MG1 ================================================================================================================				
+			#ifdef COOP_RESPAWN_ITEMS_FOR_PLAYERS
+			if (coop && other == self.enemy && self.wait <= 0) return; // In coop, don't allow the same player to pick up all the respawns.
+			if ((coop == CLASSIC_COOP && gameworld == MG1) || (coop == REIGNITED_COOP && cvar("customcoop")) || (coop == ENHANCED_COOP)) self.enemy = other;	// Store this player for coop			
+			#endif	
+			// ====================================================================================================================		
+			other.armorvalue += 5; // Was 2, RMQ team
+			self.armor_pickedup[other.colormap] = 1;
+
+			// Cap armorvalue to bounds
+			if (other.items & IT_ARMOR1 && other.armorvalue >= 100)	other.armorvalue = 100;
+			if (other.items & IT_ARMOR2 && other.armorvalue >= 150)	other.armorvalue = 150;
+			if (other.items & IT_ARMOR3 && other.armorvalue >= 200)	other.armorvalue = 200;
+		}
+	}
+	else
+	{
+		// MG1 ================================================================================================================				
+		#ifdef COOP_RESPAWN_ITEMS_FOR_PLAYERS
+		if (coop && other == self.enemy && self.wait <= 0) return; // In coop, don't allow the same player to pick up all the respawns.
+		if ((coop == CLASSIC_COOP && gameworld == MG1) || (coop == REIGNITED_COOP && cvar("customcoop")) || (coop == ENHANCED_COOP)) self.enemy = other;	// Store this player for coop			
+		#endif	
+		// ====================================================================================================================		
+			
+		other.armortype = 0.3;	// Shard = Green Armor Level
+		
+		if (!cvar("deathmatch"))
+		{
+			if (cvar("skill") == 5) other.armorvalue = 1;
+			else other.armorvalue = 2;
+		}		
+		else other.armorvalue = 5;
+		
+		self.items = IT_ARMOR1;
+		other.items -= other.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
+		other.items |= self.items;
+		self.armor_pickedup[other.colormap] = 1;
+	}
+
+	sound (other, CHAN_ITEM, "items/shard_pickup.wav", 1, ATTN_NORM);
+	sprint(other, "You got the Armor Shard\n");	
+	stuffcmd (other, "bf\n");
+
+	activator = other;
+	// Fire all Targets/Killtargets
+	SUB_UseTargets();
+	
+	if (coop & REIGNITED_COOP && !cvar("customcoop")) 
+	{
+		self.alpha = 0.87;
+		self.armor_lockout_selective = 1;
+	}				
+	if (!self.armor_lockout_selective)
+	{ 
+		self.model = string_null;
+		self.solid = SOLID_NOT;	
+	}				
+	if (self.armor_lockout_selective == 1) self.armor_lockout[other.colormap] = -1;	
+	
+	if (self.armor_pickedup[other.colormap] == 1 && !deathmatch && coop == REIGNITED_COOP) self.customizeentityforclient = armor_customizeentityforclient;		
+};
+
+void() item_armor_shard = 
+{
+	if (cvar("instagib"))
+	{
+		remove (self);
+		return;
+	}
+
+	self.touch = shard_touch;
+	precache_model ("progs/shard.mdl");
+	setmodel (self, "progs/shard.mdl");
+	precache_sound ("items/shard_pickup.wav");
+	self.noise = "items/shard_pickup.wav";
+	self.skin = 0;
+	setsize (self, '-16 -16 0', '16 16 56');
+	StartItem ();
+};
+*/
 
 /*QUAKED item_armor1 (0 .5 .8) (-16 -16 0) (16 16 32)
 */
@@ -1301,6 +1415,7 @@ void(entity weap, entity responsible) GiveWeapon =
 	if (self.items & HUD_WEAPONS) self.items |= weap.weapon; // Sleeper: .items field always needs the HUD weapons in case of no CSQC HUD. 
 	other.weapons |= weap.weapon;
 	AddAmmo (self, weap.aflag, weap.cnt);
+	AddAmmo (self, weap.aflag, weap.cnt_horde);
 /*	
 	if (!hadweap && self == responsible)
 	{
@@ -2529,36 +2644,23 @@ void() sigil_touch =
 	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;	
 
 	// MG1 ====================
-	if (gameworld == MG1)
+	if ((gameworld == MG1) || (world.model == Start_Maplist_World[6] && world.worldtype == WORLDTYPE_HUB))
 	{	
 		sigil_touch_mg1 ();
 		return;
 	}
 	// ========================	
 
-	id1_centerprint (other, "You got the ", self.netname, "!\n");
-	
-	// Broadcast a centerprint to all players with the player's nickname added to the message, unless it's a single player game.
-	if (coop >= REIGNITED_COOP)
-	{
-		local entity all_players = find (world, classname, "player");
-		while (all_players)
-		{	
-//			all_players.playerrunes |= self.spawnflags & 15;
-			if (all_players != other) id1_centerprint (all_players, other.netname, " got the\n", self.netname, "!\n");
-			all_players = find (all_players, classname, "player");
-		}
-	}
-	
+	centerprint_all (other, sprintf("You got the %s!", self.netname), sprintf("%s got the %s!", other.netname, self.netname)); 	
 	sound (other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
 	self.solid = SOLID_NOT;
 	self.model = string_null;
-	serverflags |= self.spawnflags & 15;
-	self.classname = ""; // so rune doors won't find it
+	serverflags |= self.spawnflags & SIGIL_ID1_ALL;
+	self.classname = ""; // So rune doors won't find it
 
 	activator = other;
-	SUB_UseTargets ();   // fire all targets / killtargets
+	SUB_UseTargets ();   // Fire all Targets/Killtargets
 };
 
 
@@ -2575,38 +2677,42 @@ void() item_sigil =
 	}
 	
 	// MG1 ===================
-	if (gameworld == MG1)
+	if ((gameworld == MG1) || (world.model == Start_Maplist_World[6] && world.worldtype == WORLDTYPE_HUB))
 	{
 		item_sigil_mg1 ();
 		return;
 	}
 	// =======================
 	
-	if (!self.spawnflags) objerror ("no spawnflags");
+	if (!self.spawnflags) 
+	{
+		self.spawnflags = SIGIL_ID1_E1;
+		objerror ("no spawnflags");
+	}
 
 	precache_sound ("misc/runekey.wav");
 	self.noise = "misc/runekey.wav";
 		
 	self.netname = "Rune";
-	if (self.spawnflags & 1)
+	if (self.spawnflags & SIGIL_ID1_E1)
 	{
 		precache_model ("progs/end1.mdl");
 		setmodel (self, "progs/end1.mdl");
 		self.netname = "Rune of Earth Magic";
 	}
-	if (self.spawnflags & 2)
+	if (self.spawnflags & SIGIL_ID1_E2)
 	{
 		precache_model2 ("progs/end2.mdl");
 		setmodel (self, "progs/end2.mdl");
 		self.netname = "Rune of Black Magic";
 	}
-	if (self.spawnflags & 4)
+	if (self.spawnflags & SIGIL_ID1_E3)
 	{
 		precache_model2 ("progs/end3.mdl");
 		setmodel (self, "progs/end3.mdl");
 		self.netname = "Rune of Hell Magic";
 	}
-	if (self.spawnflags & 8)
+	if (self.spawnflags & SIGIL_ID1_E4)
 	{
 		precache_model2 ("progs/end4.mdl");
 		setmodel (self, "progs/end4.mdl");
@@ -2636,9 +2742,13 @@ void() powerup_touch =
 	if (initiate_matchtime == FALSE && cvar("deathmatch")) return;	
 	
 	if (!self.droppable_item) self.fresh_powerup = TRUE;
-	else self.fresh_powerup = FALSE;	
+	else self.fresh_powerup = FALSE;
+	
+	self.storetime = 0;	
 
-	if (self.powerup_lockout_selective == 1) // Choose what powerup that can lockout a player from picking the same powerup again.
+	local float seconds_left = 0;	
+
+	if (self.powerup_lockout_selective == TRUE) // Choose what powerup that can lockout a player from picking the same powerup again.
 	{
 		if (self.powerup_lockout[other.colormap] > time || self.powerup_lockout[other.colormap] == -1) return; // Lockout
 	}	// Time + # is temporary lockout, -1 is permanent lockout.
@@ -2662,7 +2772,7 @@ void() powerup_touch =
 			if (world.model == "maps/e1m8.bsp" && self.classname == "item_artifact_invulnerability" && self.spawnflags != 256 && !self.droppable_item)
 			{
 				self.alpha = 0.45;
-				self.powerup_lockout_selective = 1;							
+				self.powerup_lockout_selective = TRUE;							
 			} // Sleeper: Although this is a major powerup, E1M8 will be an exception due to the Quad Secret hiding in the lava. Only one pentagram will be able to be obtained by all players in this map,
 			  // but will be permanently locked out after picking it once to retain balance.
 		}		
@@ -2671,7 +2781,7 @@ void() powerup_touch =
 			if (self.classname == "item_artifact_envirosuit" || 
 			    self.classname == "item_artifact_invulnerability" ||
 			    self.classname == "item_artifact_super_damage" || 
-			    self.classname == "item_artifact_invisibility") self.powerup_lockout_selective = 1; // Sleeper: Major items get locked out longer than minor items to prevent overusages.																			
+			    self.classname == "item_artifact_invisibility") self.powerup_lockout_selective = TRUE; // Sleeper: Major items get locked out longer than minor items to prevent overusages.																			
 		}
 	}
 	
@@ -2679,7 +2789,7 @@ void() powerup_touch =
 	{	
 		if (!cvar("customcoop") && !deathmatch)
 		{		
-			if (self.classname == "item_artifact_envirosuit" && !self.droppable_item) self.powerup_lockout_selective = 1; // Sleeper: Let biosuit respawn an infinite amount of times, as it is a minor powerup to let other players gain access to water secrets easier.	
+			if (self.classname == "item_artifact_envirosuit" && !self.droppable_item) self.powerup_lockout_selective = TRUE; // Sleeper: Let biosuit respawn an infinite amount of times, as it is a minor powerup to let other players gain access to water secrets easier.	
 			if (world.model == "maps/e1m8.bsp" && self.classname == "item_artifact_invulnerability" && self.spawnflags != 256 && !self.droppable_item)
 			{
 				if (self.wait <= 0)
@@ -2707,246 +2817,175 @@ void() powerup_touch =
 			    self.classname == "item_artifact_invisibility") self.powerup_lockout_selective = 1; // Sleeper: Major items get locked out longer than minor items to prevent overusages.																			
 		}						
 	}
-
-	sound (other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
-	stuffcmd (other, "bf\n");
-	if (!self.powerup_lockout_selective) self.solid = SOLID_NOT;
-	other.items |= self.items;
-	if (!self.powerup_lockout_selective) self.model = string_null;	
 	
-	if (self.powerup_lockout_selective == 1)
+	if (self.powerup_lockout_selective == TRUE && !deathmatch)
 	{
-		if (!deathmatch)
+		if (!cvar("customcoop") && self.classname != "item_artifact_envirosuit") self.powerup_lockout[other.colormap] = -1;			
+		else
 		{
-			if (!cvar("customcoop") && self.classname != "item_artifact_envirosuit") self.powerup_lockout[other.colormap] = -1;			
-			else
-			{
-				if (self.classname == "item_artifact_envirosuit") self.powerup_lockout[other.colormap] = time + 5; // Short lockout time for biosuit.
-				else self.powerup_lockout[other.colormap] = time + (2 * 60); // Prevent players from overusing major powerups in customcoop.
-			}
+			if (self.classname == "item_artifact_envirosuit") self.powerup_lockout[other.colormap] = time + 5; // Short lockout time for biosuit.
+			else self.powerup_lockout[other.colormap] = time + (2 * 60); // Prevent players from overusing major powerups in customcoop.
 		}
 	}	
-
-	local float seconds_left = rint (self.delay);
-
+	
 	// Do the apropriate action
 	if (self.classname == "item_artifact_envirosuit")
 	{
-		other.rad_time = 1;
-		
+		other.rad_time = TRUE;	
 		// Sleeper: Don't need this, but it's good for consistent item behavior.
 		if (other.radsuit_finished > time) self.storetime = other.radsuit_finished - time; // Sleeper: Store our current Quad timer for later.	
 		
-		if (self.droppable_item == 1) 
+		if (self.droppable_item == TRUE) 
 		{ 	
 			// Sleeper: If we picked up a dropped pre-decayed Quad, make sure to add it's delay to the next Quad's pickup. Whether it was dropped, or an untouched Quad.
-			if (other.radsuit_finished > time && self.fresh_powerup == TRUE) other.radsuit_finished = time + self.delay + self.storetime;
-			else other.radsuit_finished = time + self.delay;
+			other.radsuit_finished = time + self.delay + self.storetime;								
+			if (other.invisible_finished > time + 30) // Sleeper: Don't overstack the timer.	
+			{
+				seconds_left = 30;
+				other.radsuit_finished = time + 30;
+			}		
+			else seconds_left = rint(self.delay + self.storetime);		
 			
-			if (other.radsuit_finished > time + 30) other.radsuit_finished = time + 30; // Sleeper: Don't overstack the timer.
+			sprint (other, "You have recovered a decaying ", self.netname);		
+			if (seconds_left != 1) sprint (other, " (", ftos(seconds_left), " seconds remaining)");
+			else sprint (other, " (", ftos(seconds_left), " second remaining)");				
 		}		
-		else other.radsuit_finished = time + 30;
-		if (!self.droppable_item) sprint (other, "", "You got the ", self.netname, "\n");
-		else
+		else 
 		{
-			if (coop) sprint (other, "You recovered a fallen ally's decaying Biosuit ");
-			else sprint (other, "You recovered a decaying Biosuit ");
-			if (seconds_left >= 2)
-			{
-				sprint (other, "(", ftos(seconds_left), " seconds remaining)");
-				sprint (other, "\n");
-			}
-			else
-			{
-				sprint (other, "(", ftos(seconds_left), " second remaining)");
-				sprint (other, "\n");
-			}
+			other.radsuit_finished = time + 30;
+			sprint (other, "You got the ", self.netname);	
 		}
 	}
 	if (self.classname == "item_artifact_invulnerability")
 	{
-		other.invincible_time = 1;	
-		
+		other.invincible_time = TRUE;			
 		if (other.invincible_finished > time) self.storetime = other.invincible_finished - time; // Sleeper: Store our current Quad timer for later.	
 			
 		// MG1: Yoder Sept24 2021 Horde Merge
 		if (horde_ent) other.invincible_finished = time + 5;
-		else if (self.droppable_item == 1)
+		else if (self.droppable_item == TRUE)
 		{ 	
-			// Sleeper: If we picked up a dropped pre-decayed Quad, make sure to add it's delay to the next Quad's pickup. Whether it was dropped, or an untouched Quad.
-			if (other.invincible_finished > time && self.fresh_powerup == TRUE) other.invincible_finished = time + self.delay + self.storetime;
-			else other.invincible_finished = time + self.delay;
+			// Sleeper: If we picked up a dropped pre-decayed Pentagram, make sure to add it's delay to the next Pentagram's pickup. Whether it was dropped, or an untouched Pentagram.
+			other.invincible_finished = time + self.delay + self.storetime;								
+			if (other.invincible_finished > time + 30) // Sleeper: Don't overstack the timer.	
+			{
+				seconds_left = 30;
+				other.invincible_finished = time + 30;
+			}		
+			else seconds_left = rint(self.delay + self.storetime);		
 			
-			if (other.invincible_finished > time + 30) other.invincible_finished = time + 30; // Sleeper: Don't overstack the timer.
-		}		
-		else other.invincible_finished = time + 30;
-		if (cvar("skill") <= 4)
-		{
-			if (!self.droppable_item)
+			if (other.super_time == TRUE && other.invincible_time == TRUE) 
 			{
-				if (other.super_time == 1 && other.invincible_time == 1) sprint (other, "", "Your reign of power has come!\n");
-				else sprint (other, "", "You got the ", self.netname, "\n");
+				if (other.nqwCharacter == NQW_SLEEPER && cvar("skill") == 5) sprint (other, "You have become an Unstoppable Devilwalker!");
+				else sprint (other, "Your reign of power has come!");
 			}
-			else
-			{			
-				if (other.super_time == 1 && other.invincible_time == 1) sprint (other, "", "Your reign of power has come! ");					
-				else 
-				{
-					if (coop) sprint (other, "You recovered a fallen ally's decaying Pentagram of Protection ");
-					else sprint (other, "You recovered a decaying Pentagram of Protection ");
-					if (seconds_left >= 2)
-					{
-						sprint (other, "(", ftos(seconds_left), " seconds remaining)");
-						sprint (other, "\n");
-					}
-					else
-					{
-						sprint (other, "(", ftos(seconds_left), " second remaining)");
-						sprint (other, "\n");
-					}					
-				}				
-			}			
-		}
-		else
+			else sprint (other, "You have recovered a decaying ", self.netname);
+			
+			if (seconds_left != 1) sprint (other, " (", ftos(seconds_left), " seconds remaining)");
+			else sprint (other, " (", ftos(seconds_left), " second remaining)");	
+		}		
+		else 
 		{
-			if (!self.droppable_item)
+			other.invincible_finished = time + 30;
+			if (cvar("skill") <= 4)
 			{
-				if (other.super_time == 1 && other.invincible_time == 1)
-				{
-					if (other.nqwCharacter == NQW_SLEEPER) sprint (other, "", "You have become an Unstoppable Devilwalker!\n");
-					else sprint (other, "", "Your reign of power has come!\n");
-				}
-				else sprint (other, "", "An unholy ward surrounds you!\n");
+				if (other.super_time == TRUE && other.invincible_time == TRUE) sprint (other, "Your reign of power has come!");
+				else sprint (other, "You got the ", self.netname);			
 			}
 			else
 			{
-				if (other.super_time == 1 && other.invincible_time == 1) sprint(other, "", "Your reign of power has come! ");					
-				else 
+				if (other.super_time == TRUE && other.invincible_time == TRUE)
 				{
-					if (coop) sprint (other, "You recovered a fallen ally's decaying Pentagram of Protection ");
-					else sprint (other, "You recovered a decaying Pentagram of Protection ");
-					if (seconds_left >= 2)
-					{
-						sprint (other, "(", ftos(seconds_left), " seconds remaining)");
-						sprint (other, "\n");
-					}
-					else
-					{
-						sprint (other, "(", ftos(seconds_left), " second remaining)");
-						sprint (other, "\n");
-					}					
+					if (other.nqwCharacter == NQW_SLEEPER) sprint (other, "You have become an Unstoppable Devilwalker!");
+					else sprint (other, "Your reign of power has come!");
 				}
+				else sprint (other, "An unholy ward surrounds you!");			
 			}			
-		}		
+		}			
 	}
+	
 	if (self.classname == "item_artifact_invisibility")
 	{
-		other.invisible_time = 1;
-		
+		other.invisible_time = TRUE;	
 		if (other.invisible_finished > time) self.storetime = other.invisible_finished - time; // Sleeper: Store our current Quad timer for later.	
 		
-		if (self.droppable_item == 1)
+		if (self.droppable_item == TRUE)
 		{ 	
-			// Sleeper: If we picked up a dropped pre-decayed Quad, make sure to add it's delay to the next Quad's pickup. Whether it was dropped, or an untouched Quad.
-			if (other.invisible_finished > time && self.fresh_powerup == TRUE) other.invisible_finished = time + self.delay + self.storetime;
-			else other.invisible_finished = time + self.delay;
+			// Sleeper: If we picked up a dropped pre-decayed Ring, make sure to add it's delay to the next Ring's pickup. Whether it was dropped, or an untouched Ring.
+			other.invisible_finished = time + self.delay + self.storetime;								
+			if (other.invisible_finished > time + 30) 
+			{
+				seconds_left = 30;
+				other.invisible_finished = time + 30; // Sleeper: Don't overstack the timer.	
+			}		
+			else seconds_left = rint(self.delay + self.storetime);	
 			
-			if (other.invisible_finished > time + 30) other.invisible_finished = time + 30; // Sleeper: Don't overstack the timer.
+			sprint (other, "You have recovered a decaying ", self.netname);
+			if (seconds_left != 1) sprint (other, " (", ftos(seconds_left), " seconds remaining)");
+			else sprint (other, " (", ftos(seconds_left), " second remaining)");
 		}		
-		else other.invisible_finished = time + 30;
-		if (!self.droppable_item) sprint (other, "", "You got the ", self.netname, "\n");
-		else
+		else 
 		{
-			if (coop) sprint (other, "You recovered a fallen ally's decaying Ring of Shadows ");
-			else sprint (other, "You recovered a decaying Ring of Shadows ");
-			if (seconds_left >= 2)
-			{
-				sprint (other, "(", ftos(seconds_left), " seconds remaining)");
-				sprint (other, "\n");
-			}
-			else
-			{
-				sprint (other, "(", ftos(seconds_left), " second remaining)");
-				sprint (other, "\n");
-			}
+			other.invisible_finished = time + 30;
+			sprint (other, "You got the ", self.netname);
 		}
 	}
+	
 	if (self.classname == "item_artifact_super_damage")
 	{						
-		other.super_time = TRUE;	
-		
-		if (other.super_damage_finished > time) self.storetime = other.super_damage_finished - time; // Sleeper: Store our current Quad timer for later.	
+		other.super_time = TRUE;		
+		if (other.super_damage_finished > time) self.storetime = other.super_damage_finished - time; // Sleeper: Store our current Quad timer for later.
 		
 		// MG1: Yoder Sept24 2021 Horde Merge
 		if (horde_ent) other.super_damage_finished = time + 5;		
 		else if (self.droppable_item == TRUE) 
 		{ 	
 			// Sleeper: If we picked up a dropped pre-decayed Quad, make sure to add it's delay to the next Quad's pickup. Whether it was dropped, or an untouched Quad.
-			if (other.super_damage_finished > time && self.fresh_powerup == TRUE) other.super_damage_finished = time + self.delay + self.storetime;
-			else other.super_damage_finished = time + self.delay;
+			other.super_damage_finished = time + self.delay + self.storetime;
+									
+			if (other.super_damage_finished > time + 30) // Sleeper: Don't overstack the timer.	
+			{
+				seconds_left = 30;
+				other.super_damage_finished = time + 30;
+			}		
+			else seconds_left = rint(self.delay + self.storetime);
 			
-			if (other.super_damage_finished > time + 30) other.super_damage_finished = time + 30; // Sleeper: Don't overstack the timer.
-		}
-		else other.super_damage_finished = time + 30;
-		if (cvar("skill") <= 4)
-		{
-			if (!self.droppable_item)
+			if (other.super_time == TRUE && other.invincible_time == TRUE) 
 			{
-				if (other.super_time == TRUE && other.invincible_time == TRUE) sprint (other, "", "Your reign of power has come!\n");
-				else sprint (other, "", "You got the ", self.netname, "\n");
+				if (other.nqwCharacter == NQW_SLEEPER && cvar("skill") == 5) sprint (other, "You have become an Unstoppable Devilwalker!");
+				else sprint (other, "Your reign of power has come!");
 			}
-			else
-			{			
-				if (other.super_time == TRUE && other.invincible_time == TRUE) sprint (other, "", "Your reign of power has come! ");					
-				else 
-				{
-					if (coop) sprint (other, "You recovered a fallen ally's decaying Quad Damage ");
-					else sprint (other, "You recovered a decaying Quad Damage ");
-					if (seconds_left >= 2)
-					{
-						sprint (other, "(", ftos(seconds_left), " seconds remaining)");
-						sprint (other, "\n");
-					}
-					else
-					{
-						sprint (other, "(", ftos(seconds_left), " second remaining)");
-						sprint (other, "\n");
-					}					
-				}
-			}			
+			else sprint (other, "You have recovered a decaying ", self.netname);
+			
+			if (seconds_left != 1) sprint (other, " (", ftos(seconds_left), " seconds remaining)");
+			else sprint (other, " (", ftos(seconds_left), " second remaining)");			
 		}
-		else
+		else 
 		{
-			if (!self.droppable_item)
+			other.super_damage_finished = time + 30;			
+			if (cvar("skill") <= 4)
 			{
-				if (other.super_time == 1 && other.invincible_time == 1)
-				{
-					if (other.nqwCharacter == NQW_SLEEPER) sprint (other, "", "You have become an Unstoppable Devilwalker!\n");
-					else sprint (other, "", "Your reign of power has come!\n");
-				}
-				else sprint (other, "", "You begin to channel an unstoppable power!\n");
+				if (other.super_time == TRUE && other.invincible_time == TRUE) sprint (other, "Your reign of power has come!");
+				else sprint (other, "You got the ", self.netname);			
 			}
 			else
 			{
-				if (other.super_time == 1 && other.invincible_time == 1) sprint(other, "", "Your reign of power has come! ");					
-				else 
+				if (other.super_time == TRUE && other.invincible_time == TRUE)
 				{
-					if (coop) sprint (other, "You recovered a fallen ally's decaying decaying Quad Damage ");
-					else sprint (other, "You recovered a decaying decaying Quad Damage ");
-					if (seconds_left >= 2)
-					{
-						sprint (other, "(", ftos(seconds_left), " seconds remaining)");
-						sprint (other, "\n");
-					}
-					else
-					{
-						sprint (other, "(", ftos(seconds_left), " second remaining)");
-						sprint (other, "\n");
-					}					
+					if (other.nqwCharacter == NQW_SLEEPER) sprint (other, "You have become an Unstoppable Devilwalker!");
+					else sprint (other, "Your reign of power has come!");
 				}
-			}			
-		}
-	}	
+				else sprint (other, "You begin to channel an unstoppable power!");			
+			}
+		}			
+	}
+	sprint (other, "\n");		
+
+	sound (other, CHAN_POWERUP, self.noise, 1, ATTN_NORM);
+	stuffcmd (other, "bf\n");
+	if (!self.powerup_lockout_selective) self.solid = SOLID_NOT;
+	other.items |= self.items;
+	if (!self.powerup_lockout_selective) self.model = string_null;	
 
 	activator = other;
 	SUB_UseTargets (); // Fire all Targets/Killtargets

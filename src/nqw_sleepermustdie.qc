@@ -160,6 +160,24 @@ void(vector pos, vector angle, float specify_team, string clname, void() func) f
         self = oldself; // Revert it back after we're done
 };
 
+// Sleeper: Anything else that might not be playing nicely in the .ent files.
+void(vector pos, vector angle, string clname, float spawn_flag, void() func, optional float opt_alpha) func_SpawnEntReplacements =
+{
+        entity ent = spawn();
+        
+        ent.origin = pos;
+        ent.angles = angle;
+            
+        ent.classname = clname; // Mostly for safety
+
+	// Changes health to Rotten (Heal by 15), or Unrotten (Heal by 25)
+	ent.spawnflags = spawn_flag;
+	
+	ent.alpha = opt_alpha;
+                  
+	SUB_CallAsSelf (ent, func);
+};
+
 // Anything that may be missing in Deathmatch maps by default
 void() NQW_SMD_DMItems =
 {
@@ -1025,6 +1043,7 @@ void() NQW_SMD_RuneSpawnSpots =
 	
 	if (world.model == "maps/ctf2_3wave.bsp")
 	{
+		
 	}
 
 	if (world.model == "maps/ctf3_3wave.bsp")
@@ -1044,22 +1063,27 @@ void() NQW_SMD_RuneSpawnSpots =
 	
 	if (world.model == "maps/ctf4_3wave.bsp")
 	{
+		
 	}
 	
 	if (world.model == "maps/ctf5_3wave.bsp")
 	{
+		
 	}
 	
 	if (world.model == "maps/ctf6_3wave.bsp")
 	{
+		
 	}
 	
 	if (world.model == "maps/ctf7_3wave.bsp")
 	{
+		
 	}
 	
 	if (world.model == "maps/ctf8_3wave.bsp")
 	{
+		
 	}
 	
 	if (world.model == "maps/ctf8_3wave_qe.bsp")
@@ -1081,21 +1105,42 @@ void() NQW_SMD_RuneSpawnSpots =
 void() dev_stuff =
 {
 	// Sleeper: Testing key respawns, whenever there's no players in the server.
-	if (world.model == "maps/e1m3.bsp") func_SpawnWeapon('-648 -1679 151', '0 0 0', "gold key", item_key2);
-	if (world.model == "maps/400m.bsp") func_SpawnWeapon('1820 -314 60', '0 0 0', "gold key", item_key2);
+//	if (world.model == "maps/e1m3.bsp") func_SpawnWeapon('-648 -1679 151', '0 0 0', "gold key", item_key2);
+//	if (world.model == "maps/400m.bsp") func_SpawnWeapon('1820 -314 60', '0 0 0', "gold key", item_key2);
 	
-	// Easy Hallway
+	// Sleeper: Trying out dedicated spawnpoints for support runes
 	// Red
-	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('110 900 -40', '0 0 0', TEAM1, "team1_support_rune1", team1_support_rune1);
-	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('110 950 -40', '0 0 0', TEAM1, "team1_support_rune2", team1_support_rune2);
-	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('110 1000 -40', '0 0 0', TEAM1, "team1_support_rune3", team1_support_rune3);
-	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('110 1050 -40', '0 0 0', TEAM1, "team1_support_rune4", team1_support_rune4);
+//	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('110 900 -40', '0 0 0', TEAM1, "team1_support_rune1", team1_support_rune1);
+//	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('110 950 -40', '0 0 0', TEAM1, "team1_support_rune2", team1_support_rune2);
+//	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('110 1000 -40', '0 0 0', TEAM1, "team1_support_rune3", team1_support_rune3);
+//	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('110 1050 -40', '0 0 0', TEAM1, "team1_support_rune4", team1_support_rune4);
 	
 	// Blue
-	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('325 900 -40', '0 0 0', TEAM2, "team2_support_rune1", team2_support_rune1);
-	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('325 950 -40', '0 0 0', TEAM2, "team2_support_rune2", team2_support_rune2);
-	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('325 1000 -40', '0 0 0', TEAM2, "team2_support_rune3", team2_support_rune3);
-	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('325 1050 -40', '0 0 0', TEAM2, "team2_support_rune4", team2_support_rune4);				
+//	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('325 900 -40', '0 0 0', TEAM2, "team2_support_rune1", team2_support_rune1);
+//	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('325 950 -40', '0 0 0', TEAM2, "team2_support_rune2", team2_support_rune2);
+//	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('325 1000 -40', '0 0 0', TEAM2, "team2_support_rune3", team2_support_rune3);
+//	if (world.model == "maps/start.bsp") func_SpawnInfoRunes('325 1050 -40', '0 0 0', TEAM2, "team2_support_rune4", team2_support_rune4);	
+	
+	// Sleeper: Testing higher spawnflags for the MG1 Runes.
+//	if (world.model == "maps/hub.bsp") func_SpawnHealth('0 -1738 24', '0 0 0', "item_sigil", 16, item_sigil);	
+//	if (world.model == "maps/hub.bsp") func_SpawnHealth('0 -1638 24', '0 0 0', "item_sigil", 32, item_sigil);
+//	if (world.model == "maps/hub.bsp") func_SpawnHealth('0 -1538 24', '0 0 0', "item_sigil", 64, item_sigil);
+//	if (world.model == "maps/hub.bsp") func_SpawnHealth('0 -1438 24', '0 0 0', "item_sigil", 128, item_sigil);
+//	if (world.model == "maps/hub.bsp") func_SpawnHealth('0 -1338 24', '0 0 0', "item_sigil", 256, item_sigil);	
+//	if (world.model == "maps/hub.bsp") func_SpawnHealth('0 -1238 24', '0 0 0', "item_sigil", 512, item_sigil);
+
+	if (world.model == "maps/start.bsp")
+	{
+		func_SpawnMonsterIdle ('233 650 -40', '0 90 0', "monster_army", monster_army);
+		func_SpawnMonsterIdle ('233 700 -40', '0 90 0', "monster_army", monster_army);
+		func_SpawnMonsterIdle ('233 750 -40', '0 90 0', "monster_army", monster_army);
+		func_SpawnMonsterIdle ('233 800 -40', '0 90 0', "monster_army", monster_army);
+		func_SpawnMonsterIdle ('233 850 -40', '0 90 0', "monster_army", monster_army);
+		func_SpawnMonsterIdle ('233 900 -40', '0 90 0', "monster_army", monster_army);
+		func_SpawnMonsterIdle ('233 950 -40', '0 90 0', "monster_army", monster_army);
+		func_SpawnMonsterIdle ('233 1000 -40', '0 90 0', "monster_army", monster_army);
+		func_SpawnMonsterIdle ('233 1050 -40', '0 90 0', "monster_army", monster_army);
+	}
 };
 
 
@@ -1110,6 +1155,9 @@ Call for Skill 5 stuff
 // Sleeper: Skill 5 needs to be called something, ya know.
 void() NQW_SleeperMustDie =
 {
+	// Sleeper: For when certain entities don't want to behave.
+	if (world.model == "maps/hub.bsp") func_SpawnEntReplacements ('1864 0 32', '0 0 0', "misc_rune_indicator", 512, misc_rune_indicator);	
+	
 	if (cvar("developer")) dev_stuff ();
 	
 	// Group all spawn calls into a single call then call this from worldspawn. Now we have a proper custom skill for Single Player and Cooperative. (Currently can only be used in FTEQW)

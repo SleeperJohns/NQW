@@ -267,6 +267,8 @@ void(vector st) ZombieFireGrenade =
 
 	missile.touch = ZombieGrenadeTouch;
 	
+	entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+	
 // set missile duration
 	missile.nextthink = time + 2.5;
 	missile.think = SUB_Remove;

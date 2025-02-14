@@ -98,6 +98,8 @@ void(float offset) hknight_shot =
 	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);		
 	newmis.velocity = vec*300;
 	sound (self, CHAN_WEAPON, "hknight/attack1.wav", 1, ATTN_NORM);
+	
+	entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 void() CheckForCharge =

@@ -61,13 +61,10 @@ void() NQW_CharacterName =
 
 // Sleeper: Note to self, all this shit needs to properly organized.
 
-//.float player_collision;
-
 #define redify(s) strconv(0,2,2,s)
 
 void() OffHand_W_FireGrapple;
 void() OffHand_UnHookPlayer;
-.entity hook; // This is my hook
 .float hookdmg;
 
 // Weapon Grappling Hook
@@ -191,16 +188,6 @@ float START_OFF = 1;
 .float special_spawned_pickup_sound;
 .float special_noise;
 
-void(string s) centerprint_all =
-{
-	entity e = find (world, classname, "player");
-	while (e)
-	{
-		id1_centerprint(e, s);
-		e = find (e, classname, "player");
-	}
-};
-
 // const float DROPTOFLOOR_DISABLE = 65536;
 const float WORLDTYPE_HUB = 3;
 //
@@ -268,20 +255,27 @@ float HORDE_AMMO_RESPAWN_DELAY = 20; // how long between horde ammo spawns
 
 // AY Dec15 2021, moving from item_runes to defs since these get used by horde now
 /*
-float SIGIL_E1 = 1;
-float SIGIL_E2 = 2;
-float SIGIL_E3 = 4;
-float SIGIL_E4 = 8;
-float SIGIL_E5 = 16;
-float SIGIL_E6 = 32;
+float SIGIL_MG1_E1 = 1;
+float SIGIL_MG1_E2 = 2;
+float SIGIL_MG1_E3 = 4;
+float SIGIL_MG1_E4 = 8;
+float SIGIL_MG1_E5 = 16;
+float SIGIL_MG1_E6 = 32;
 */
-float SIGIL_E1 = 16;
-float SIGIL_E2 = 32;
-float SIGIL_E3 = 64;
-float SIGIL_E4 = 128;
-float SIGIL_E5 = 256;
-float SIGIL_E6 = 512;
-float SIGIL_NUMBITS = 6;
+
+float SIGIL_ID1_E1 = 1;
+float SIGIL_ID1_E2 = 2;
+float SIGIL_ID1_E3 = 4;
+float SIGIL_ID1_E4 = 8;
+float SIGIL_ID1_ALL = 15;
+
+float SIGIL_MG1_E1 = 16;
+float SIGIL_MG1_E2 = 32;
+float SIGIL_MG1_E3 = 64;
+float SIGIL_MG1_E4 = 128;
+float SIGIL_MG1_E5 = 256;
+float SIGIL_MG1_E6 = 512;
+float SIGIL_MG1_NUMBITS = 6;
 
 // Bots. Probably will give support for only Deathmatch modes.
 float FL_ISBOT = 8192; 	// mal: this will be set on bot players
@@ -397,6 +391,7 @@ void(entity collector, entity item) NQW_SpeakItemNull = {};
 .string nqwSpeakShubKill;
 
 // Players Sounds
+.string nqwMdlChar;
 .string nqwSndMelee; // axe, sword, gauntlet sound
 .string nqwSndMeleeHit; // melee weapon enemy hit sound; leave "" for silent (default behavior)
 .string nqwSndMeleeWall; // melee weapon wall hit sound
@@ -463,8 +458,7 @@ var float greyteam 	 = 0;
 // .float deferspawn;
 
 // ClientConnect Greetings
-.float greet;
-// .float MOTDstay;
+.float motdgreeting;
 float DISABLE_MOTD = 0;
 float ENABLE_MOTD = 1;
 
@@ -490,6 +484,8 @@ float grappling_hook_anchor_timeout;
 float grappling_hook_enable_damage;
 float grappling_hook_damage;
 float killthebunny;
+float random_maps;
+float player_collision_enabled;
 // float speedrunning_mode; // Not yet.
 
 // float sudden_death; // Overtime cvar
@@ -512,10 +508,12 @@ float initiate_matchtime;
 float matchtime_timer;
 float matchtime;
 
+.float lifetime_finished;
+.vector oldvelocity;
 
 // Counts
 .float cnt_mg1;  // Item Respawn cycles whenever the server is in Classic Co-Op in MG1, or in Custom Co-Op mode.
-.float cnt_trig; // Trigger
+.float cnt_trig; // Trigger Cnt
 
 // NQW miscs
 .float nqwMaxSkins;
@@ -533,16 +531,19 @@ void() Item_Armor_Rot;
 .float armorrottime;
 .float max_armorvalue;
 
+float isKex; 
+
 // Client Checks
 .string client;
 string QSSM_CLIENT    = "QSS-M";
 string FTEQW_CLIENT   = "FTE";
 string EzQ_CLIENT     = "ezQuake";
 string VANILLA_CLIENT = "Quake";
+string KEX_CLIENT     = "Quake Enhanced";
 
 // Greeting Sound Controllers
 void(string soundToPlay, float special_delay) greet_announcer;
-entity speaker;
+// entity speaker;
 // .string snd;
 
 // Are we playing any of the official campaigns?
@@ -568,6 +569,8 @@ float CLIENT_SPECTATOR_MOVED   = 256;   // Client moved to the sidelines. To be 
 // float TEAM_BLUE	       = 4096;
 // float TEAM_RED	       = 8192;
 float NEW_PLAYER_MOTD          = 16384; // Send Message Of The Day to New Client. To be removed on join.
+
+.float fresh_spawn;
 
 enum : float 
 {
@@ -649,6 +652,9 @@ void() Change_New_Cvars;
 //  1 = The key has been picked up. 
 // .float coop_key_pickup;
 .entity keytaker; // Sleeper: Hey, look another .owner deal.
+.entity railentity;
+.entity trueowner;
+.vector expire_pos;
 
 float(string s) checkextension = #99;
 
@@ -658,6 +664,19 @@ float(string s) checkextension = #99;
 // __uint monstermask = 2;
 
 // void(entity client, string sample) localsound = #0:ex_localsound;
+
+// Sleeper: Recommended you use sprintf.
+void(entity client, string oneclient_message, string allclients_message) centerprint_all =
+{
+	id1_centerprint (client, oneclient_message);
+	
+	local entity allclients = find (world, classname, "player");
+	while (allclients != world)
+	{
+		if (allclients != client) id1_centerprint (allclients, allclients_message);
+		allclients = find (allclients, classname, "player");
+	}
+};
 
 /* Creates more Parm space */
 // Encode and Decode Parms ------------------------------------------
@@ -675,7 +694,7 @@ float(float parm, float which) decodeparms =
 {
 	if (which == 1) return (parm / 65536) & 255;
 	else if (which == 2) return (parm / 256) & 255;
-	else return parm & 255;
+	return parm & 255;
 };
 // ------------------------------------------------------------------
 
@@ -696,7 +715,7 @@ vector(vector point, float ang) NQW_RotatePointYaw =
 	return vec;
 };
 
-// const float A_SHITLOAD = 9999999;
+const float A_SHITLOAD = 9999999;
 
 /*
 =================================================

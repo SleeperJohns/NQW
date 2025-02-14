@@ -405,6 +405,8 @@ void(float AttackNumber) lavaman_missile =
 	fireball.avelocity = '200 100 300';
 	fireball.think = SUB_Remove;
 	fireball.nextthink = time + 6;
+	
+	entity_collision (fireball, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
 
 	sound (self, CHAN_WEAPON, "boss1/throw.wav", 1, ATTN_NORM);
 	

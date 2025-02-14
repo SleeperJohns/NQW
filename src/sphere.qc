@@ -145,6 +145,26 @@ void() sphere_spawn =
 	missile.avelocity = '40 40 40';
 	missile.think = sphere_think;
 	missile.nextthink = time + 0.1;
+	
+	if (other.classname == "player")
+	{
+		if (cvar("coop") >= 0 && !cvar("deathmatch"))
+		{
+			if (cvar("player_collision") == FALSE) entity_collision (missile, PROJECTILE, MONSTERMASK, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
+			else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
+		}						
+		else if (cvar("deathmatch") >= DM_TDM && cvar("deathmatch") <= DM_OneFlagCTF)
+		{
+			if (cvar("player_collision") == FALSE) 
+			{
+				if (other.steam == TEAM_RED_4) entity_collision (missile, PROJECTILE, TEAMBLUE13_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+				if (other.steam == TEAM_BLUE_13) entity_collision (missile, PROJECTILE, TEAMRED4_PLAYERMASK, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+			}
+			else entity_collision (missile, PROJECTILE, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, PvP_BOTH_CLIENT_TEAMS, EMPTYMASK, 0);
+		}
+		else entity_collision (missile, PROJECTILE, PLAYERMASK, PLAYERMASK, PLAYERMASK, EMPTYMASK, 0);
+	}
+	else entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 };
 
 /*QUAKED item_sphere (0 0 1) (-8 -8 -8) (8 8 8) ?

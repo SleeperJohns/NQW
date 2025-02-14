@@ -197,149 +197,39 @@ Character SPAWNING
 // returns 1 if area is clear, 0 if not
 float(vector org, vector minbbox, vector maxbbox) isClear = 
 {
-    entity e = spawn();
-    e.movetype = MOVETYPE_TOSS;
-    setorigin(e, org);
-    setsize(e, minbbox, maxbbox);
+	local entity e = spawn();
+	e.movetype = MOVETYPE_TOSS;
+	setorigin(e, org);
+	setsize(e, minbbox, maxbbox);
 
- // droptofloor() returns false if the drop distance is more than 256
- // and that's indistinguishable from a solid check.
- // So we need to put another entity below as a stopper so droptofloor
- // will always return true if there's room
+// 	droptofloor() returns false if the drop distance is more than 256
+// 	and that's indistinguishable from a solid check.
+// 	So we need to put another entity below as a stopper so droptofloor
+//	will always return true if there's room
  
-    entity e2 = spawn();
-    e2.solid = SOLID_BBOX;
+	entity e2 = spawn();
+	e2.solid = SOLID_BBOX;
     
- // slightly below the test box's lower bound
+// 	slightly below the test box's lower bound
  
-    setorigin(e2, e.origin + [0, 0, minbbox_z - 4]);
-    setsize(e2, [minbbox_x, minbbox_y, -1], [maxbbox_x, maxbbox_y, 1]);
+	setorigin(e2, e.origin + [0, 0, minbbox_z - 4]);
+	setsize(e2, [minbbox_x, minbbox_y, -1], [maxbbox_x, maxbbox_y, 1]);
 
-    entity oldself = self;
-    self = e;
+	local entity oldself = self;
+	self = e;
         
-    float ret = droptofloor();
+	local float ret = droptofloor();
 
-    self = oldself;
+	self = oldself;
 
-    remove(e);
-    remove(e2);
+	remove (e);
+	remove (e2);
 
-    return ret;
-}
-*/
-
-// .float _collided;
-/*
-void(entity pl) Player_Collision =
-{	
-	if (pl.flags & FL_MONSTER) return;
-
-	local vector s, d;
-	
-	pl = find (world, classname, "player");
-	while (pl != world && pl.classname == "player")
-	{
-//		for (float y = 0; y < 5; y++)
-//		{
-			if (!pl._collided)
-			{
-				s_z += 1, d_z += 1;
-//				traceline (s, d, MOVE_TRIGGERS | MOVE_HITMODEL, pl);
-				tracebox (pl.origin, VEC_HULL_MIN, VEC_HULL_MAX, pl.origin, MOVE_TRIGGERS | MOVE_HITMODEL, pl);
-				if ((trace_fraction <= 1 || trace_allsolid || trace_startsolid) && trace_ent.classname != "player") pl._collided = TRUE;
-				else pl._collided = FALSE;				
-			}
-			else pl._collided = FALSE;
-
-			if (!pl._collided) pl.dimension_hit = 0;
-			else pl.dimension_hit = 1;		
-//		}
-		pl = find (pl, classname, "player");	
-	}
-};*/
-
-/*
-void(entity pl) Player_Collision =
-{
-	local vector s, d;
-	
-	for (int y = 0; y < 5; y++)
-	{
-		if (!pl._collided)
-		{
-			s_z += 1, d_z += 1;
-			traceline (s, d, MOVE_TRIGGERS | MOVE_HITMODEL, pl);
-//			tracebox (pl.origin, VEC_HULL_MIN, VEC_HULL_MAX, pl.origin, 0, pl);
-			if (!pl._collided)
-			{
-				if (trace_fraction < 1 || trace_allsolid || trace_startsolid)
-				{
-					if (self.mask != playermask) pl._collided = TRUE;
-					else pl._collided = FALSE;
-				}
-				else pl._collided = FALSE;
-			}
-			else pl._collided = FALSE;
-		}
-		else pl._collided = FALSE;
-		
-		if (!pl._collided) pl.dimension_hit = 0;
-		else pl.dimension_hit = 1;								
-	}
-};
-*/
-
-/*
-void() Player_Collision =
-{
-	tracebox (self.origin, VEC_HULL_MIN, VEC_HULL_MAX, self.origin, 1, self);
-	if (trace_fraction < 1 || trace_allsolid || trace_startsolid)
-	{
-		if (trace_ent.mask != playermask) self.dimension_solid = 0;
-		else self.dimension_solid = 1;
-	}
-	else self.dimension_solid = 1;							
-};
-*/
-
-/*
-void(entity pl) Player_Collision_Post =
-{
-	if (pointcontentsmask(self.origin) != playermask) return;
-	
-	if (!pl._collided) pl.solid = SOLID_NOT;
-	else pl.solid = SOLID_SLIDEBOX;
-};
-*/
-
-/*
-void(entity pl) Player_Collision =
-{
-	pl = find (world, classname, "player");
-	while (pl != world && pl.classname == "player")
-	{
-		tracebox (pl.origin, VEC_HULL_MIN, VEC_HULL_MAX, pl.origin, 0, pl);
-		if (!pl._collided) 
-		{
-			if (trace_fraction < 1 || trace_allsolid || trace_startsolid)
-			{
-				if (trace_ent.classname != "player") pl._collided = TRUE;
-			}
-		}
-		else pl._collided = FALSE;
-			
-		if (!pl._collided) pl.dimension_hit = FALSE;
-		else pl.dimension_hit = TRUE;	
-		pl = find (pl, classname, "player");
-	}							
+	return ret;
 };
 */
 
 .float donttelefrag; // Don't need to accidentally telefrag players when changing player models. Simple hack.
-// void() SetNewCustomCoopParms;
-// void() RandomCustomCoopParms;
-
 void() NQW_SpawnCharacter = 
 {
 	self.nqwSpeakSpawn = SUB_Null;
@@ -363,15 +253,11 @@ void() NQW_SpawnCharacter =
 		case NQW_DUSKDUDE: NQW_DuskDude(); break;
 		default: NQW_Ranger(); break;
 	}	
-				
-	self.modelindex_nqwplayer = self.modelindex;
-	self.view_ofs = '0 0 22';
-	self.velocity = '0 0 0';	// 1998-07-21 Player moves after respawn, fixed by Xian
-	setsize (self, VEC_HULL_MIN, VEC_HULL_MAX);
-//	self.mask |= pointcontentsmask (self.origin, playermask);
 	
+	setmodel (self, self.nqwMdlChar);			
+	self.modelindex_nqwplayer = self.modelindex;
+	setsize (self, VEC_HULL_MIN, VEC_HULL_MAX);
 	self.nqwCharacter = self.nqwNextCharacter;
-//	W_SetCurrentAmmo ();
 	player_stand1 ();
 	if (!self.spectator && !self.donttelefrag) spawn_tdeath (self.origin, self);
 	
@@ -393,21 +279,21 @@ void() NQW_SpawnCharacter =
 			self.armortype = 0.15;
 			self.max_armorvalue = 50;
 			self.fake_armortype = 0.3;
-			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.
+			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 5; // Wait 6.66 seconds before rotting the excess armor away after a respawn.
 		}
 		else if (self.items & IT_ARMOR2) // Combat Armor
 		{
 			self.armortype = 0.19;
 			self.max_armorvalue = 100;
 			self.fake_armortype = 0.6;
-			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
+			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 5; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
 		}
 		else if (self.items & IT_ARMOR3) // Heavy Armor
 		{
 			self.armortype = 0.245;
 			self.max_armorvalue = 150;
 			self.fake_armortype = 0.8;
-			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 6.66; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
+			if (self.armorvalue > self.max_armorvalue / 2) self.armorrottime = time + 5; // Wait 6.66 seconds before rotting the excess armor away after a respawn.			
 		}
 	}
 	else // Skill 4 and below, and deathmatch is not needed, but it's good to add for consistency.
@@ -630,7 +516,7 @@ void() NQW_RedTeam =
 	self.skin = self.nqwSkin;	
 	
 	bprint (self.netname, " joined Team RED\n");
-	respawn ();
+	PutClientInServer ();
 };
 
 void() NQW_BlueTeam =
@@ -657,5 +543,5 @@ void() NQW_BlueTeam =
 	self.skin = self.nqwSkin;		
 	
 	bprint (self.netname, " joined Team BLUE\n");
-	respawn ();
+	PutClientInServer ();
 };

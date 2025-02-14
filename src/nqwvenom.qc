@@ -13,7 +13,9 @@ void() NQW_VenomPrecache =
 void() NQW_Venom =
 {
 	// Model
-	setmodel (self, "progs/player_venom.mdl");
+	self.nqwMdlChar = "progs/player_venom.mdl";
+	self.view_ofs = '0 0 22';
+//	setmodel (self, "progs/player_venom.mdl");
 	self.nqwCharGib = "progs/h_player.mdl";
 	self.nqwMeleeMdl = "progs/v_axe.mdl";
 	self.nqwHammerMdl = "progs/v_hammer.mdl";

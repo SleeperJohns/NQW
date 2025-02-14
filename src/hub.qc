@@ -18,15 +18,15 @@
 */
 
 
-void hub_trigger_changelevel()
+void() hub_trigger_changelevel =
 {
-    if ((serverflags & SIGIL_ALL) != SIGIL_ALL)
-    {
-        remove(self);
-        return;
-    }
+	if ((serverflags & SIGIL_MG1_ALL) != SIGIL_MG1_ALL)
+	{
+		remove(self);
+		return;
+	}
 
-    trigger_changelevel();
+	trigger_changelevel ();
 };
 
 

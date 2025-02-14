@@ -53,24 +53,75 @@ void() newitems_touch =
 		if (other.expansionitems & DOE_V_SPHERE) return;
 	}
 
-	local float seconds_left = rint (self.delay);
-		
-	if (!self.droppable_item) sprint(other, "You got the ", self.netname, "\n");
-	else
+	self.storetime = 0;
+
+	local float seconds_left = 0;
+	
+	// Do the apropriate action
+	if (self.netname == "Power Shield")
 	{
-		if (coop) sprint (other, "You recovered a fallen ally's decaying ", self.netname, " ");
-		else sprint (other, "You recovered a decaying ", self.netname, " ");
-		if (seconds_left >= 2)
+		other.shield_time = TRUE;
+		
+		if (other.shield_finished > time) self.storetime = other.shield_finished - time;
+		
+		if (horde_ent) other.shield_finished = time + 12;
+		else if (self.droppable_item == TRUE)
+		{ 	
+			// Sleeper: If we picked up a dropped pre-decayed Ring, make sure to add it's delay to the next Ring's pickup. Whether it was dropped, or an untouched Ring.
+			other.shield_finished = time + self.delay + self.storetime;								
+			if (other.shield_finished > time + 30) // Sleeper: Don't overstack the timer.	
+			{
+				seconds_left = 30;
+				other.shield_finished = time + 30;	
+			}		
+			else seconds_left = rint(self.delay + self.storetime);		
+			
+			sprint (other, "You have recovered a decaying ", self.netname);
+			if (seconds_left != 1) sprint (other, " (", ftos(seconds_left), " seconds remaining)");
+			else sprint (other, " (", ftos(seconds_left), " second remaining)");
+		}		
+		else 
 		{
-			sprint (other, "(", ftos(seconds_left), " seconds remaining)");
-			sprint (other, "\n");
-		}
-		else
-		{
-			sprint (other, "(", ftos(seconds_left), " second remaining)");
-			sprint (other, "\n");
+			other.shield_finished = time + 30;
+			sprint (other, "You got the ", self.netname);
 		}
 	}
+	else if (self.netname == "Anti-Grav Belt")
+	{
+		other.antigrav_time = TRUE;
+		
+		if (other.antigrav_finished > time) self.storetime = other.antigrav_finished - time;
+		
+		if (horde_ent) other.antigrav_finished = time + 12;
+		else if (self.droppable_item == TRUE)
+		{ 	
+			// Sleeper: If we picked up a dropped pre-decayed Ring, make sure to add it's delay to the next Ring's pickup. Whether it was dropped, or an untouched Ring.
+			other.antigrav_finished = time + self.delay + self.storetime;								
+			if (other.antigrav_finished > time + 45) // Sleeper: Don't overstack the timer.	
+			{
+				seconds_left = 45;
+				other.antigrav_finished = time + 45;
+			}		
+			else seconds_left = rint(self.delay + self.storetime);	
+			seconds_left = rint(other.antigrav_finished);
+			
+			sprint (other, "You have recovered a decaying ", self.netname);
+			if (seconds_left != 1) sprint (other, " (", ftos(seconds_left), " seconds remaining)");
+			else sprint (other, " (", ftos(seconds_left), " second remaining)");
+		}		
+		else 
+		{
+			other.wetsuit_time = time + 45;
+			sprint (other, "You got the ", self.netname);
+		}
+		
+		other.gravity = 0.25;
+	}
+	else if (self.classname == "item_sphere")
+	{
+		other.expansionitems |= DOE_V_SPHERE;
+		sphere_spawn ();
+	}	
 
 	if (deathmatch)
 	{
@@ -99,52 +150,11 @@ void() newitems_touch =
 	other.items |= self.items;
 	other.expansionitems |= self.expansionitems;
 	self.model = string_null;
-
-	// Do the apropriate action
-	if (self.netname == "Power Shield")
-	{
-		other.shield_time = 1;
-		
-		if (other.shield_finished > time) self.storetime = other.shield_finished - time;
-		
-		if (horde_ent) other.shield_finished = time + 12;
-		else if (self.droppable_item == 1)
-		{
-			if (other.shield_finished > time && self.fresh_powerup == TRUE) other.shield_finished = time + self.delay + self.storetime;
-			else other.shield_finished = time + self.delay;
-			
-			if (other.shield_finished > time + 30) other.shield_finished = time + 30; // Sleeper: Don't overstack the timer.
-		}
-		else other.shield_finished = time + 30;
-	}
-	else if (self.netname == "Anti-Grav Belt")
-	{
-		other.antigrav_time = 1;
-		
-		if (other.antigrav_finished > time) self.storetime = other.antigrav_finished - time;
-		
-		if (horde_ent) other.antigrav_finished = time + 12;
-		else if (self.droppable_item == 1)
-		{
-			if (other.antigrav_finished > time && self.fresh_powerup == TRUE) other.antigrav_finished = time + self.delay + self.storetime;
-			else other.antigrav_finished = time + self.delay;
-			
-			if (other.antigrav_finished > time + 45) other.antigrav_finished = time + 45; // Sleeper: Don't overstack the timer.
-		}
-		else other.antigrav_finished = time + 45;
-		
-		other.gravity = 0.25;
-	}
-	else if (self.classname == "item_sphere")
-	{
-		other.expansionitems |= DOE_V_SPHERE;
-		sphere_spawn();
-	}
 	
 	activator = other;
 	SUB_UseTargets();				// fire all targets / killtargets
 	
-	if (self.droppable_item == 1) remove (self);
+	if (self.droppable_item == TRUE) remove (self);
 };
 
 

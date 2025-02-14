@@ -195,9 +195,12 @@ float TE_EXPLOSION2   = 12;
 float TE_BEAM	= 13;  	
 float CHAN_AUTO;
 float CHAN_WEAPON    = 1;
-float CHAN_VOICE    = 2;
-float CHAN_ITEM    = 3;
-float CHAN_BODY    = 4;
+float CHAN_VOICE     = 2;
+float CHAN_ITEM      = 3;
+float CHAN_BODY      = 4;
+float CHAN_POWERUP   = 5;
+float CHAN_ANNOUNCER = 6;
+float CHAN_OTHER     = 7;
 float ATTN_NONE;
 float ATTN_NORM    = 1;
 float ATTN_IDLE    = 2;
@@ -408,7 +411,7 @@ void(entity e) remove
 	if (e.tick) RemoveFrameTickEntity(e);
 	remove_real(e);
 };
-void (vector v1, vector v2, float nomonsters, entity forent) traceline = #16; 
+void(vector v1, vector v2, float nomonsters, entity forent) traceline = #16; 
 entity () checkclient = #17; 
 entity (entity start, .string fld, string match) find = #18; 
 string (string s) precache_sound = #19; 
@@ -564,11 +567,6 @@ float	cutscene_running;
 
 float() finaleFinished = #0:ex_finaleFinished;
 
-// Plays a sound that only "client" can hear. Useful for announcers...
-// void(entity client, string sample) localsound = #0:qex_localsound;
-// void(string soundname, optional float channel, optional float volume) localsound = #0:ex_localsound;
-void(string sample, optional float channel, optional float volume) localsound = #65;
-
 // Debug rendering functions.
 void draw_point( vector point, float colormap, float lifetime, float depthtest ) = #0:ex_draw_point;
 void draw_line( vector start, vector end, float colormap, float lifetime, float depthtest ) = #0:ex_draw_line;
@@ -590,6 +588,6 @@ void clearprompt( entity client ) = #0:ex_clearprompt;
 
 // .string		type;			// to make find()ing easier, and for tons of useful misc. classification
 // .float		lifetime_finished;
-float   TRACK_RANGE		 = 400;
-float	INACCURACY_RANGE = 400;
-float   INACCURACY_DIST  = 200;
+float TRACK_RANGE      = 400;
+float INACCURACY_RANGE = 400;
+float INACCURACY_DIST  = 200;

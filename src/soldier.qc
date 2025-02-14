@@ -280,6 +280,7 @@ void() army_die =
 void() monster_army =
 {
 	self.netname = "Grunt";
+
 	if (cvar("customcoop"))
 	{
 		precache_model ("progs/soldier.mdl");

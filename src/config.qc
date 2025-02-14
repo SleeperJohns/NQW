@@ -1,24 +1,61 @@
 // What version are we on? (Major, Minor, Patches)
-string NQW_Version = "NQWVer 1.14.2";
+string NQW_Version = "NQWVer 1.15.0";
 
 float Version_To_Startframe_Traffic;
+
+string() GameWorld_Name =
+{
+	if (gameworld == CUSTOM) return "Custom";
+	if (gameworld == ID1) return "ID1";
+	if (gameworld == HIPNOTIC) return "HIPNOTIC";
+	if (gameworld == ROGUE) return "ROGUE";
+	if (gameworld == DOPA) return "DOPA";
+	if (gameworld == MG1) return "MG1";
+	if (gameworld == APOTHEOSIS) return "APOTHEOSIS";
+	
+	return "Unknown";
+};
 
 string() Campaign_Name =
 {
 	if (!cvar("deathmatch"))
 	{
-		if (gameworld == UNKNOWN) return "GameWorld UNKNOWN";
-		if (gameworld == CUSTOM) return "GameWorld Custom";
-		if (gameworld == ID1) return "GameWorld ID1";
-		if (gameworld == HIPNOTIC) return "GameWorld HIPNOTIC";
-		if (gameworld == ROGUE) return "GameWorld ROGUE";
-		if (gameworld == DOPA) return "GameWorld DOPA";
-		if (gameworld == MG1) return "GameWorld MG1";
-		if (gameworld == APOTHEOSIS) return "GameWorld APOTHEOSIS";
+		if (gameworld == CUSTOM) 
+		{
+			if (cvar("horde")) return "";
+			return "Custom Maps";
+		}
+		if (gameworld == ID1) 
+		{
+			if (cvar("horde")) return "";
+			return "Quake: The Offering";
+		}
+		if (gameworld == HIPNOTIC) 
+		{
+			if (cvar("horde")) return "";
+			return "Scourge Of Armagon";
+		}
+		if (gameworld == ROGUE) 
+		{
+			if (cvar("horde")) return "";
+			return "Dissolution Of Eternity";
+		}
+		if (gameworld == DOPA) 
+		{
+			if (cvar("horde")) return "";
+			return "Dimension Of The Past";
+		}
+		if (gameworld == MG1) 
+		{
+			if (cvar("horde")) return "";
+			return "Dimension Of The Machine";
+		}
+		if (gameworld == APOTHEOSIS) return "Apotheosis Abyss";
+		
+		return "Unknown";
 	}
-	if (cvar("deathmatch")) return "GameWorld QuakeWorld";
 	
-	return "GameWorld Unknown";
+	return "N/A";
 };
 
 void() Create_New_Cvars =
@@ -50,6 +87,12 @@ void() Create_New_Cvars =
 	grappling_hook_anchor_timeout = cvar("grappling_hook_anchor_timeout");
 	grappling_hook_enable_damage = cvar("grappling_hook_enable_damage");
 	grappling_hook_damage = cvar("grappling_hook_damage");	
+
+	// Randomize or Next Map
+	random_maps = cvar("random_maps");
+	
+	// Player Collision
+	player_collision_enabled = cvar("player_collision");
 };
 
 void() Change_New_Cvars =
@@ -98,7 +141,10 @@ void() Change_New_Cvars =
 	forceinfokey (world, "instagib", ftos(cvar("instagib")));
 		
 	// Sudden Death
-	forceinfokey (world, "sudden_death", ftos(cvar("sudden_death")));					
+	forceinfokey (world, "sudden_death", ftos(cvar("sudden_death")));
+	
+	// Player Collision
+	forceinfokey (world, "player_collision", ftos(cvar("player_collision")));					
 };
 
 /*
@@ -119,65 +165,65 @@ void() Server_Hostname_Change =
 			if (cvar("coop") == REIGNITED_COOP && !cvar("horde") && !cvar("deathmatch") && !cvar("instagib"))
 			{
 				// iD1 Cooperative
-				if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW Co-Op +cosmetics (Hybrid)");
+				if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: Co-Op (Hybrid: FTE/QSSM ONLY)");
 				// HIPNOTIC Cooperative
-				else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW Co-Op +cosmetics (Hybrid)");
+				else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: Co-Op (Hybrid: FTE/QSSM ONLY)");
 				// ROGUE Cooperative
-				else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW Co-Op +cosmetics (Hybrid)");
+				else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: Co-Op (Hybrid: FTE/QSSM ONLY)");
 				// DOPA Cooperative
-				else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW Co-Op +cosmetics (Hybrid)");
+				else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: Co-Op (Hybrid: FTE/QSSM ONLY)");
 				// MG1 Cooperative
-				else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW Co-Op +cosmetics (Hybrid)");	
+				else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: Co-Op (Hybrid: FTE/QSSM ONLY)");	
 				// Custom Maps Cooperative
-				else cvar_set("hostname", "Custom | NQW Co-Op +cosmetics (Hybrid)");
+				else cvar_set("hostname", "CUSTOM-NQW: Co-Op (Hybrid: FTE/QSSM ONLY)");
 			}
 			// Cooperative Speedrun
 			else if (cvar("coop") == CLASSIC_COOP && !cvar("horde") && !cvar("deathmatch") && !cvar("instagib"))
 			{
 				// iD1 Cooperative Speedrun
-				if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW Co-Op Speedrunning +cosmetics (Hybrid)");
+				if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: Co-Op Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// HIPNOTIC Cooperative Speedrun	
-				else if (gameworld == HIPNOTIC) cvar_set("hostname", "SoA | NQW Co-Op Speedrunning +cosmetics (Hybrid)");
+				else if (gameworld == HIPNOTIC) cvar_set("hostname",  "HIPNOTIC-NQW: Co-Op Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// ROGUE Cooperative Speedrun
-				else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW Co-Op Speedrunning +cosmetics (Hybrid)");
+				else if (gameworld == ROGUE) cvar_set("hostname",  "ROGUE-NQW: Co-Op Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// DOPA Cooperative Speedrun
-				else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW Co-Op Speedrunning +cosmetics (Hybrid)");
+				else if (gameworld == DOPA) cvar_set("hostname",  "DOPA-NQW: Co-Op Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// MG1 Cooperative Speedrun
-				else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW Co-Op Speedrunning +cosmetics (Hybrid)");
+				else if (gameworld == MG1) cvar_set("hostname",  "MG1-NQW: Co-Op Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// Custom Maps Cooperative Speedrun
-				else cvar_set("hostname", "Custom | NQW Co-Op Speedrunning +cosmetics (Hybrid)");
+				else cvar_set("hostname",  "CUSTOM-NQW: Co-Op Speedrun (Hybrid: FTE/QSSM ONLY)");
 			}
 			// Single Player Speedrun
 			else if (!cvar("coop") && !cvar("horde") && !cvar("deathmatch") && !cvar("instagib"))
 			{
 				// iD1 Single Player Speedrun
-				if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW Speedrunning +cosmetics (Hybrid)");
+				if (gameworld == ID1) cvar_set("hostname",  "ID1-NQW: Solo Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// HIPNOTIC Single Player Speedrun
-				else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW Speedrunning +cosmetics (Hybrid)");
+				else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: Solo Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// ROGUE Single Player Speedrun
-				else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW Speedrunning +cosmetics (Hybrid)");
+				else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: Solo Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// DOPA Single Player Speedrun	
-				else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW Speedrunning +cosmetics (Hybrid)");
+				else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: Solo Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// MG1 Single Player Speedrun
-				else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW Speedrunning +cosmetics (Hybrid)");
+				else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: Solo Speedrun (Hybrid: FTE/QSSM ONLY)");
 				// Custom Maps Single Player Speedrun	
-				else cvar_set("hostname", "Custom | NQW Speedrunning +cosmetics (Hybrid)");
+				else cvar_set("hostname", "CUSTOM-NQW: Solo Speedrun (Hybrid: FTE/QSSM ONLY)");
 			}
 			// Duel
 			else if (!cvar("coop") && !cvar("horde") && cvar("deathmatch") == DM_DUEL && !cvar("instagib"))
 			{
 				// iD1 Duel
-				if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW Duel +cosmetics (Hybrid)");
+				if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: Duel (Hybrid: FTE/QSSM ONLY)");
 				// HIPNOTIC Duel
-				else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW Duel +cosmetics (Hybrid)");
+				else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: Duel (Hybrid: FTE/QSSM ONLY)");
 				// ROGUE Duel
-				else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW Duel +cosmetics (Hybrid)");
+				else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: Duel (Hybrid: FTE/QSSM ONLY)");
 				// DOPA Duel	
-				else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW Duel +cosmetics (Hybrid)");
+				else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: Duel (Hybrid: FTE/QSSM ONLY)");
 				// MG1 Duel
-				else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW Duel +cosmetics (Hybrid)");
+				else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: Duel (Hybrid: FTE/QSSM ONLY)");
 				// Custom Maps Duel	
-				else cvar_set("hostname", "Custom | NQW Duel +cosmetics (Hybrid)");
+				else cvar_set("hostname", "CUSTOM-NQW: Duel (Hybrid: FTE/QSSM ONLY)");
 			}
 			// Free For All
 			else if (!cvar("coop") && !cvar("horde") && cvar("deathmatch") == DM_FFA)
@@ -185,47 +231,47 @@ void() Server_Hostname_Change =
 				if (!cvar("instagib"))
 				{
 					// iD1 Free For All
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW FFA +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: FFA (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Free For All	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW FFA +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: FFA (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Free For All
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW FFA +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: FFA (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Free For All	
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW FFA +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: FFA (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Free For All
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW FFA +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: FFA (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Free For All	
-					else cvar_set("hostname", "Custom | NQW FFA +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: FFA (Hybrid: FTE/QSSM ONLY)");
 				}
 				else if (cvar("instagib") == INSTAGIB_ON)
 				{
 					// iD1 Free For All
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW iFFA +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: iFFA (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Free For All	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW iFFA +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: iFFA (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Free For All
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW iFFA +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: iFFA (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Free For All	
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW iFFA +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: iFFA (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Free For All
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW iFFA +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: iFFA (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Free For All	
-					else cvar_set("hostname", "Custom | NQW iFFA +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: iFFA (Hybrid: FTE/QSSM ONLY)");
 				}
 				else if (cvar("instagib") == INSTAGIB_RAILWARZ)
 				{
 					// iD1 Free For All
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW Railwarz FFA +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: Railwarz FFA (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Free For All	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW Railwarz FFA +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: Railwarz FFA (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Free For All
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW Railwarz FFA +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: Railwarz FFA (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Free For All	
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW Railwarz FFA +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: Railwarz FFA (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Free For All
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW Railwarz FFA +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: Railwarz FFA (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Free For All	
-					else cvar_set("hostname", "Custom | NQW Railwarz FFA +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: Railwarz FFA (Hybrid: FTE/QSSM ONLY)");
 				}												
 			}
 			// Team Deathmatch
@@ -234,47 +280,47 @@ void() Server_Hostname_Change =
 				if (!cvar("instagib"))
 				{
 					// iD1 Team Deathmatch
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW TDM +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: TDM (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Team Deathmatch	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW TDM +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: TDM (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Team Deathmatch
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW TDM +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: TDM (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Team Deathmatch
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW TDM +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: TDM (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Team Deathmatch
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW TDM +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: TDM (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Team Deathmatch	
-					else cvar_set("hostname", "Custom | NQW TDM +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: TDM (Hybrid: FTE/QSSM ONLY)");
 				}
 				else if (cvar("instagib") == INSTAGIB_ON)
 				{
 					// iD1 Team Deathmatch
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW iTDM +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: iTDM (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Team Deathmatch	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW iTDM +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: iTDM (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Team Deathmatch
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW iTDM +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: iTDM (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Team Deathmatch
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW iTDM +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: iTDM (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Team Deathmatch
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW iTDM +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: iTDM (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Team Deathmatch	
-					else cvar_set("hostname", "Custom | NQW iTDM +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: iTDM (Hybrid: FTE/QSSM ONLY)");
 				}				
 				else if (cvar("instagib") == INSTAGIB_RAILWARZ)
 				{
 					// iD1 Team Deathmatch
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW Railwarz TDM +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: Railwarz TDM (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Team Deathmatch	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW Railwarz TDM +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: Railwarz TDM (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Team Deathmatch
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW Railwarz TDM +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: Railwarz TDM (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Team Deathmatch
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW Railwarz TDM +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: Railwarz TDM (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Team Deathmatch
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW Railwarz TDM +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: Railwarz TDM (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Team Deathmatch	
-					else cvar_set("hostname", "Custom | NQW Railwarz TDM +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: Railwarz TDM (Hybrid: FTE/QSSM ONLY)");
 				}				
 			}
 			// Capture The Flag
@@ -283,47 +329,47 @@ void() Server_Hostname_Change =
 				if (!cvar("instagib"))
 				{
 					// iD1 Capture The Flag
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW CTF +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: CTF (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Capture The Flag	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW CTF +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: CTF (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Capture The Flag
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW CTF +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: CTF (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Capture The Flag
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW CTF +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: CTF (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Capture The Flag
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW CTF +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: CTF (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Capture The Flag
-					else cvar_set("hostname", "Custom | NQW CTF +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: CTF (Hybrid: FTE/QSSM ONLY)");
 				}
 				else if (cvar("instagib") == INSTAGIB_ON)
 				{
 					// iD1 Capture The Flag
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW iCTF +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: iCTF (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Capture The Flag	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW iCTF +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: iCTF (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Capture The Flag
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW iCTF +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: iCTF (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Capture The Flag
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW iCTF +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: iCTF (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Capture The Flag
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW iCTF +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: iCTF (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Capture The Flag
-					else cvar_set("hostname", "Custom | NQW iCTF +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: iCTF (Hybrid: FTE/QSSM ONLY)");
 				}				
 				else if (cvar("instagib") == INSTAGIB_RAILWARZ)
 				{
 					// iD1 Capture The Flag
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW Railwarz CTF +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC Capture The Flag	
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW Railwarz CTF +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE Capture The Flag
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW Railwarz CTF +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// DOPA Capture The Flag
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW Railwarz CTF +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// MG1 Capture The Flag
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW Railwarz CTF +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps Capture The Flag
-					else cvar_set("hostname", "Custom | NQW Railwarz CTF +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 				}				
 			}				
 			// One Flag CTF
@@ -332,56 +378,56 @@ void() Server_Hostname_Change =
 				if (!cvar("instagib"))
 				{
 					// iD1 One Flag CTF
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW One Flag CTF +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: One Flag CTF (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC One Flag CTF
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW One Flag CTF +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: One Flag CTF (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE One Flag CTF
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW One Flag CTF +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: One Flag CTF (Hybrid: FTE/QSSM ONLY)");
 					// DOPA One Flag CTF
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW One Flag CTF +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: One Flag CTF (Hybrid: FTE/QSSM ONLY)");
 					// MG1 One Flag CTF
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW One Flag CTF +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: One Flag CTF (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps One Flag CTF
-					else cvar_set("hostname", "Custom | NQW One Flag CTF +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: One Flag CTF (Hybrid: FTE/QSSM ONLY)");
 				}
 				else if (cvar("instagib") == INSTAGIB_ON)
 				{
 					// iD1 One Flag CTF
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW One Flag iCTF +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: One Flag iCTF (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC One Flag CTF
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW One Flag iCTF +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: One Flag iCTF (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE One Flag CTF
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW One Flag iCTF +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: One Flag iCTF (Hybrid: FTE/QSSM ONLY)");
 					// DOPA One Flag CTF
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW One Flag iCTF +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: One Flag iCTF (Hybrid: FTE/QSSM ONLY)");
 					// MG1 One Flag CTF
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW One Flag iCTF +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: One Flag iCTF (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps One Flag CTF
-					else cvar_set("hostname", "Custom | NQW One Flag iCTF +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: One Flag iCTF (Hybrid: FTE/QSSM ONLY)");
 				}				
 				else if (cvar("instagib") == INSTAGIB_RAILWARZ)
 				{
 					// iD1 One Flag CTF
-					if (gameworld == ID1) cvar_set("hostname", "iD1 | NQW One Flag iCTF +cosmetics (Hybrid)");
+					if (gameworld == ID1) cvar_set("hostname", "ID1-NQW: One Flag Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// HIPNOTIC One Flag CTF
-					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "SoA | NQW One Flag Railwarz CTF +cosmetics (Hybrid)");
+					else if (gameworld == HIPNOTIC)	cvar_set("hostname", "HIPNOTIC-NQW: One Flag Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// ROGUE One Flag CTF
-					else if (gameworld == ROGUE) cvar_set("hostname", "DoE | NQW One Flag Railwarz CTF +cosmetics (Hybrid)");
+					else if (gameworld == ROGUE) cvar_set("hostname", "ROGUE-NQW: One Flag Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// DOPA One Flag CTF
-					else if (gameworld == DOPA) cvar_set("hostname", "DOPA | NQW One Flag Railwarz CTF +cosmetics (Hybrid)");
+					else if (gameworld == DOPA) cvar_set("hostname", "DOPA-NQW: One Flag Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// MG1 One Flag CTF
-					else if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW One Flag Railwarz CTF +cosmetics (Hybrid)");
+					else if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: One Flag Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 					// Custom Maps One Flag CTF
-					else cvar_set("hostname", "Custom | NQW One Flag Railwarz CTF +cosmetics (Hybrid)");
+					else cvar_set("hostname", "CUSTOM-NQW: One Flag Railwarz CTF (Hybrid: FTE/QSSM ONLY)");
 				}				
 			}				
 			// Horde Mode
 			else if (cvar("coop") <= 4 && cvar("horde") && !cvar("deathmatch") && !cvar("instagib"))
 			{
 				// MG1 Horde Mode
-				if (gameworld == MG1) cvar_set("hostname", "MG1 | NQW Horde +cosmetics (Hybrid)");
+				if (gameworld == MG1) cvar_set("hostname", "MG1-NQW: Horde (Hybrid: FTE/QSSM ONLY)");
 				// Custom Maps Horde Mode	
-				else cvar_set("hostname", "Custom | NQW Horde +cosmetics (Hybrid)");
+				else cvar_set("hostname", "CUSTOM-NQW: Horde (Hybrid: FTE/QSSM ONLY)");
 			}
 		}
 		else cvar_set("hostname", "Unnamed LAN Server (Hybrid)");
@@ -436,6 +482,7 @@ void() Gametype_Duel_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");
 	cvar_set("instagib", "0");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{
@@ -490,6 +537,7 @@ void() Gametype_FFA_Settings =
 	cvar_set("warmup", "0");
 	cvar_set("warmup_countdown_num", "0");
 	cvar_set("instagib", "0");
+	cvar_set("player_collision", "1");
 		
 	if (!cvar("developer"))
 	{		
@@ -520,8 +568,8 @@ void() Gametype_Instagib_FFA_Settings =
 	cvar_set ("offhand_hook_anchor_time", "5");
 	cvar_set ("offhand_hook_enable_damage", "0");
 	cvar_set ("offhand_hook_damage", "0");		
-	cvar_set ("use_grappling_hook", "0");
-	cvar_set ("grappling_skyhook", "0");
+	cvar_set ("use_grappling_hook", "1");
+	cvar_set ("grappling_skyhook", "1");
 	cvar_set ("grappling_hook_speed", "800");
 	cvar_set ("grappling_hook_pullspeed", "1000");	
 	cvar_set ("grappling_hook_anchor_timeout", "1");
@@ -539,6 +587,7 @@ void() Gametype_Instagib_FFA_Settings =
 	cvar_set("warmup", "0");
 	cvar_set("warmup_countdown_num", "0");
 	cvar_set("instagib", "1");
+	cvar_set("player_collision", "1");
 		
 	if (!cvar("developer"))
 	{		
@@ -569,8 +618,8 @@ void() Gametype_Railwarz_FFA_Settings =
 	cvar_set ("offhand_hook_anchor_time", "5");
 	cvar_set ("offhand_hook_enable_damage", "0");
 	cvar_set ("offhand_hook_damage", "0");		
-	cvar_set ("use_grappling_hook", "0");
-	cvar_set ("grappling_skyhook", "0");
+	cvar_set ("use_grappling_hook", "1");
+	cvar_set ("grappling_skyhook", "1");
 	cvar_set ("grappling_hook_speed", "800");
 	cvar_set ("grappling_hook_pullspeed", "1000");	
 	cvar_set ("grappling_hook_anchor_timeout", "1");
@@ -588,6 +637,7 @@ void() Gametype_Railwarz_FFA_Settings =
 	cvar_set("warmup", "0");
 	cvar_set("warmup_countdown_num", "0");
 	cvar_set("instagib", "2");
+	cvar_set("player_collision", "1");
 		
 	if (!cvar("developer"))
 	{		
@@ -642,6 +692,7 @@ void() Gametype_TDM_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "0");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{	
@@ -692,6 +743,7 @@ void() Gametype_Instagib_TDM_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "1");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{	
@@ -743,6 +795,7 @@ void() Gametype_Railwarz_TDM_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "2");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{	
@@ -770,7 +823,7 @@ void() Gametype_CTF_Settings =
 	cvar_set ("fraglimit", "0");
 	cvar_set ("capturelimit", "10");
 	cvar_set ("teamknockback", "0");
-	cvar_set ("falldamage", "1");
+	cvar_set ("falldamage", "0");
 	cvar_set ("use_offhand_hook", "0");
 	cvar_set ("offhand_skyhook", "0");
 	cvar_set ("offhand_hook_speed", "800");
@@ -798,6 +851,7 @@ void() Gametype_CTF_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "0");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{
@@ -848,6 +902,7 @@ void() Gametype_Instagib_CTF_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "1");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{
@@ -879,8 +934,8 @@ void() Gametype_Railwarz_CTF_Settings =
 	cvar_set ("offhand_hook_anchor_time", "5");
 	cvar_set ("offhand_hook_enable_damage", "0");
 	cvar_set ("offhand_hook_damage", "0");		
-	cvar_set ("use_grappling_hook", "0");
-	cvar_set ("grappling_skyhook", "0");
+	cvar_set ("use_grappling_hook", "1");
+	cvar_set ("grappling_skyhook", "1");
 	cvar_set ("grappling_hook_speed", "800");
 	cvar_set ("grappling_hook_pullspeed", "1000");	
 	cvar_set ("grappling_hook_anchor_timeout", "1");
@@ -898,6 +953,7 @@ void() Gametype_Railwarz_CTF_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "2");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{
@@ -933,7 +989,7 @@ void() Gametype_OneFlagCTF_Settings =
 	cvar_set ("offhand_hook_anchor_time", "5");
 	cvar_set ("offhand_hook_enable_damage", "1");
 	cvar_set ("offhand_hook_damage", "5");		
-	cvar_set ("use_grappling_hook", "0");
+	cvar_set ("use_grappling_hook", "1");
 	cvar_set ("grappling_skyhook", "0");
 	cvar_set ("grappling_hook_speed", "800");
 	cvar_set ("grappling_hook_pullspeed", "1000");	
@@ -952,6 +1008,7 @@ void() Gametype_OneFlagCTF_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "0");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{				
@@ -1002,6 +1059,7 @@ void() Gametype_Instagib_OneFlagCTF_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "1");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{				
@@ -1033,8 +1091,8 @@ void() Gametype_Railwarz_OneFlagCTF_Settings =
 	cvar_set ("offhand_hook_anchor_time", "5");
 	cvar_set ("offhand_hook_enable_damage", "0");
 	cvar_set ("offhand_hook_damage", "0");		
-	cvar_set ("use_grappling_hook", "0");
-	cvar_set ("grappling_skyhook", "0");
+	cvar_set ("use_grappling_hook", "1");
+	cvar_set ("grappling_skyhook", "1");
 	cvar_set ("grappling_hook_speed", "800");
 	cvar_set ("grappling_hook_pullspeed", "1000");	
 	cvar_set ("grappling_hook_anchor_timeout", "1");
@@ -1052,6 +1110,7 @@ void() Gametype_Railwarz_OneFlagCTF_Settings =
 	cvar_set("warmup", "1");
 	cvar_set("warmup_countdown_num", "15");	
 	cvar_set("instagib", "2");
+	cvar_set("player_collision", "1");
 	
 	if (!cvar("developer"))
 	{				
@@ -1107,7 +1166,8 @@ void() Gametype_Reignited_Coop_Settings =
 	cvar_set("sudden_death_max_rounds", "0");
 	cvar_set("warmup", "0");
 	cvar_set("warmup_countdown_num", "0");	
-	cvar_set("instagib", "0");	
+	cvar_set("instagib", "0");
+	cvar_set("player_collision", "0");	
 	
 	if (!cvar("developer"))
 	{				
@@ -1163,7 +1223,8 @@ void() Gametype_Classic_Coop_Settings =
 	cvar_set("sudden_death_max_rounds", "0");
 	cvar_set("warmup", "0");
 	cvar_set("warmup_countdown_num", "0");	
-	cvar_set("instagib", "0");	
+	cvar_set("instagib", "0");
+	cvar_set("player_collision", "1");	
 	
 	if (!cvar("developer"))
 	{				
@@ -1219,7 +1280,8 @@ void() Gametype_Enhanced_Coop_Settings =
 	cvar_set("sudden_death_max_rounds", "0");
 	cvar_set("warmup", "0");
 	cvar_set("warmup_countdown_num", "0");	
-	cvar_set("instagib", "0");	
+	cvar_set("instagib", "0");
+	cvar_set("player_collision", "0");	
 	
 	if (!cvar("developer"))
 	{				

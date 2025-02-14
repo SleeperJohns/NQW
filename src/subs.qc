@@ -46,11 +46,40 @@ void() SUB_Null = {};
 
 // MG1 ==========================================================
 const float MESSAGE_ALL_PLAYERS = 2097152;
-float(...) SUB_True = { return TRUE; };
+float(...) SUB_True = {return TRUE;};
 void(entity attacker, float damage) SUB_NullPain = {};
 // ===============================================================
 
 void() SUB_Remove = {remove(self);};
+
+/*
+=============
+SUB_ChangeModel
+
+size changes after a model change, use this to preserve it
+===============
+*/
+void(entity ent, string mdl) SUB_ChangeModel =
+{
+	local vector sz, smin, smax;
+	sz = ent.size;
+	smin = ent.mins;
+	smax = ent.maxs;
+	
+	setmodel (ent, mdl);
+	
+	if (sz == VEC_ORIGIN) setsize (ent, VEC_ORIGIN, VEC_ORIGIN);
+	else setsize (ent, smin, smax);
+};
+
+void(entity ent, void() initialize_call) SUB_CallAsSelf =
+{
+	local entity oldself = self;
+	
+	self = ent;
+	initialize_call ();
+	self = oldself;
+};
 
 /*
 QuakeEd only writes a single float for angles (bad idea), so up and down are
@@ -102,12 +131,12 @@ InitTrigger
 */
 void() InitTrigger =
 {
-// trigger angles are used for one-way touches.  An angle of 0 is assumed
+// Trigger angles are used for one-way touches.  An angle of 0 is assumed
 // to mean no restrictions, so use a yaw of 360 instead.
 	if (RemovedOutsideCoop()) return; // MG1
 	
-	if (self.angles != '0 0 0')
-		SetMovedir ();
+	if (self.angles != '0 0 0') SetMovedir ();
+	
 	self.solid = SOLID_TRIGGER;
 	setmodel (self, self.model);	// set size and link into world
 	self.movetype = MOVETYPE_NONE;
@@ -119,13 +148,13 @@ void() InitTrigger =
 =============
 SUB_CalcMove
 
-calculate self.velocity and self.nextthink to reach dest from
+Calculate self.velocity and self.nextthink to reach dest from
 self.origin traveling at speed
 ===============
 */
 void(entity ent, vector tdest, float tspeed, void() func) SUB_CalcMoveEnt =
 {
-	local entity	stemp;
+	local entity stemp;
 	
 	stemp = self;
 	self = ent;
@@ -152,13 +181,13 @@ void(vector tdest, float tspeed, void() func) SUB_CalcMove =
 		return;
 	}
 		
-// set destdelta to the vector needed to move
+// Set destdelta to the vector needed to move
 	vdestdelta = tdest - self.origin;
 	
-// calculate length of vector
-	len = vlen (vdestdelta);
+// Calculate length of vector
+	len = vlen(vdestdelta);
 	
-// divide by speed to get time to reach dest
+// Divide by speed to get time to reach dest
 	traveltime = len / tspeed;
 
 	if (traveltime < 0.1)
@@ -168,11 +197,11 @@ void(vector tdest, float tspeed, void() func) SUB_CalcMove =
 		return;
 	}
 	
-// set nextthink to trigger a think when dest is reached
+// Set nextthink to trigger a think when dest is reached
 	self.nextthink = self.ltime + traveltime;
 
-// scale the destdelta vector by the time spent traveling to get velocity
-	self.velocity = vdestdelta * (1/traveltime);	// qcc won't take vec/float	
+// Scale the destdelta vector by the time spent traveling to get velocity
+	self.velocity = vdestdelta * (1 / traveltime);	// qcc won't take vec/float	
 };
 
 /*
@@ -182,9 +211,10 @@ After moving, set origin to exact final destination
 */
 void()  SUB_CalcMoveDone =
 {
-	setorigin(self, self.finaldest);
+	setorigin (self, self.finaldest);
 	self.velocity = '0 0 0';
 	self.nextthink = -1;
+	
 	if (self.think1) self.think1();
 };
 
@@ -193,7 +223,7 @@ void()  SUB_CalcMoveDone =
 =============
 SUB_CalcAngleMove
 
-calculate self.avelocity and self.nextthink to reach destangle from
+Calculate self.avelocity and self.nextthink to reach destangle from
 self.angles rotating 
 
 The calling function should make sure self.think is valid
@@ -215,19 +245,19 @@ void(vector destangle, float tspeed, void() func) SUB_CalcAngleMove =
 
 	if (!tspeed) objerror("No speed is defined!");
 		
-	// set destdelta to the vector needed to move
+	// Set destdelta to the vector needed to move
 	destdelta = destangle - self.angles;
 	
-	// calculate length of vector
+	// Calculate length of vector
 	len = vlen (destdelta);
 	
-	// divide by speed to get time to reach dest
+	// Divide by speed to get time to reach dest
 	traveltime = len / tspeed;
 
-	// set nextthink to trigger a think when dest is reached
+	// Set nextthink to trigger a think when dest is reached
 	self.nextthink = self.ltime + traveltime;
 
-	// scale the destdelta vector by the time spent traveling to get velocity
+	// Scale the destdelta vector by the time spent traveling to get velocity
 	self.avelocity = destdelta * (1 / traveltime);
 	
 	self.think1 = func;
@@ -245,9 +275,9 @@ void() SUB_CalcAngleMoveDone =
 	self.angles = self.finalangle;
 	self.avelocity = '0 0 0';
 	self.nextthink = -1;
+	
 	if (self.think1) self.think1 ();
 };
-
 
 //=============================================================================
 
@@ -262,7 +292,7 @@ void() DelayThink =
 ==============================
 SUB_UseTargets
 
-the global "activator" should be set to the entity that initiated the firing.
+The global "activator" should be set to the entity that initiated the firing.
 
 If self.delay is set, a DelayedUse entity will be created that will actually
 do the SUB_UseTargets after that many seconds have passed.
@@ -281,14 +311,13 @@ match (string)self.target and call their .use function
 void() SUB_UseTargets =
 {
 	local entity t, stemp, otemp, act;
-
 //
-// check for a delay
+// Check for a delay
 //
 	if (self.delay)
 	{
-	// create a temp object to fire at a later time
-		t = spawn();
+		// create a temp object to fire at a later time
+		t = spawn ();
 		t.classname = "DelayedUse";
 		t.nextthink = time + self.delay;
 		t.think = DelayThink;
@@ -301,17 +330,16 @@ void() SUB_UseTargets =
 	
 	
 //
-// print the message
+// Print the message
 //
 	if (activator.classname == "player" && self.message != "")
 	{
 		centerprint (activator, self.message);
-		if (!self.noise)
-			sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
+		if (!self.noise) sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
 	}
 
 //
-// kill the killtagets
+// Kill the killtagets
 //
 	if (self.killtarget)
 	{
@@ -319,14 +347,14 @@ void() SUB_UseTargets =
 		do
 		{
 			t = find (t, targetname, self.killtarget);
-			if (!t)
-				return;
+			if (!t) return;
 			remove (t);
-		} while ( 1 );
+		} 
+		while (TRUE);
 	}
 	
 //
-// fire targets
+// Fire targets
 //
 	if (self.target)
 	{
@@ -335,23 +363,20 @@ void() SUB_UseTargets =
 		do
 		{
 			t = find (t, targetname, self.target);
-			if (!t)
-			{
-				return;
-			}
+			if (!t) return;
 			stemp = self;
 			otemp = other;
 			self = t;
 			other = stemp;
 			if (self.use != SUB_Null)
 			{
-				if (self.use)
-					self.use ();
+				if (self.use) self.use ();
 			}
 			self = stemp;
 			other = otemp;
 			activator = act;
-		} while ( 1 );
+		} 
+		while (TRUE);
 	}
 	
 
@@ -369,10 +394,10 @@ void() SUB_UseTargets =
 	if (mapname == "mgend" && self.classname == "weapon_lightning" && self.target == "boss_relay" && self.cnt_trig == 1)
 		return;		
 		
-	// check for a delay
+	// Check for a delay
 	if (self.delay)
 	{
-	// create a temp object to fire at a later time
+		// Create a temp object to fire at a later time
 		t = spawn ();
 		t.classname = "DelayedUse";
 		t.nextthink = time + self.delay;
@@ -390,12 +415,13 @@ void() SUB_UseTargets =
 		// =========================================================
 		return;
 	}
-	// print the message
+	
+	// Print the message
 	if (activator.classname == "player" && self.message != "")
 	{
 // 		id1_centerprint (activator, self.message);
 		// MG1 ===============================================================
-		if (self.spawnflags & MESSAGE_ALL_PLAYERS) centerprint_all (self.message); // In-game message, localized
+		if (self.spawnflags & MESSAGE_ALL_PLAYERS) centerprint_all (other, self.message, self.message); // In-game message, localized
 		else id1_centerprint (activator, self.message); // In-game message, localized
 		// ====================================================================
 		if (!self.noise) sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);	
@@ -405,7 +431,8 @@ void() SUB_UseTargets =
 			else sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);					
 		}					
 	}
-	// kill the killtargets
+	
+	// Kill the killtargets
 	if (self.killtarget)
 	{
 		t = find (world, targetname, self.killtarget);		
@@ -415,7 +442,8 @@ void() SUB_UseTargets =
 			t = find (t, targetname, self.killtarget);
 		}
 	}
-	// fire targets
+
+	// Fire targets
 	if (self.target)
 	{
 		act = activator;
@@ -452,39 +480,33 @@ some monsters refire twice automatically
 /*
 void(float normal, float nightmare, float ignore_invis) SUB_AttackFinished =
 {
-	if (cvar("skill") == 3)
-		self.attack_finished = time + nightmare;
-	else
-		self.attack_finished = time + normal;
+	if (cvar("skill") == 3) self.attack_finished = time + nightmare;
+	else self.attack_finished = time + normal;
 	
 	if (!ignore_invis && self.attack_finished < time + 3)
 	{
-		if (HasInvisible(self.enemy))
-			self.attack_finished = time + 3;
+		if (HasInvisible(self.enemy)) self.attack_finished = time + 3;
 	}
 };
 
 void(float normal, float nightmare) SUB_PainFinished =
 {
-	if (cvar("skill") == 3)
-		self.pain_finished = time + nightmare;
-	else
-		self.pain_finished = time + normal;
+	if (cvar("skill") == 3) self.pain_finished = time + nightmare;
+	else self.pain_finished = time + normal;
 };
 
 float (entity targ, float ignore_water) visible;
 
-void (void() thinkst) SUB_CheckRefire =
+void(void() thinkst) SUB_CheckRefire =
 {
-	if (cvar("skill") != 3 && cvar("skill") != 5 || self.cnt >= 1 || self.enemy.health <= 0)
+	if (c(cvar("skill") != 3 && cvar("skill") != 5) || (self.cnt >= 1) || (self.enemy.health <= 0))
 	{
 		self.cnt = 0;
 		return;
 	}
 	
 	local float novis = HasInvisible(self.enemy);
-	if (!novis)
-		novis |= !visible(self.enemy, FALSE);
+	if (!novis) novis |= !visible(self.enemy, FALSE);
 	if (novis)
 	{
 		self.cnt = 0;
@@ -515,6 +537,12 @@ float(entity targ) visible;
 
 void(void() thinkst) SUB_CheckRefire =
 {
+	if ((self.cnt >= 1 || self.enemy.health <= 0) && cvar("skill") == 5)
+	{
+		self.cnt = 0;
+		return;
+	}
+
 	if (cvar("skill") != 3 && cvar("skill") != 5) return;
 	if (self.cnt == 1) return;
 	
@@ -543,14 +571,13 @@ void(void() thinkst) SUB_CheckRefire =
 SUB_SwitchTargets
 ================
 */
-
 void(.string field, string oldtarget, string newtarget) SUB_SwitchTargets =
 {
-	local entity e = find(world, targetname, oldtarget);
-	while(e)
+	local entity e = find (world, targetname, oldtarget);
+	while (e)
 	{
 		e.field = newtarget;
-		e = find(e, targetname, oldtarget);
+		e = find (e, targetname, oldtarget);
 	}
 };
 
@@ -559,14 +586,11 @@ void(.string field, string oldtarget, string newtarget) SUB_SwitchTargets =
 SUB_FindWithPredicate
 ================
 */
-
 entity SUB_FindWithPredicate(entity start, .string field, string search, float(entity e) predicate = (float(entity e))SUB_True)
 {
-	local entity t = find(start, field, search);
-	while(t && !predicate(t))
-	{
-		t = find(t, field, search);
-	}
+	local entity t = find (start, field, search);
+	
+	while (t && !predicate(t)) t = find (t, field, search);
 	
 	return t;
 };
@@ -576,15 +600,15 @@ entity SUB_FindWithPredicate(entity start, .string field, string search, float(e
 SUB_CountTargets
 ================
 */
-
 float(entity e, float(entity e) predicate = (float(entity e))SUB_True) SUB_CountTargets =
 {
 	local float cnt = 0;
-	local entity t = SUB_FindWithPredicate(world, targetname, e.target, predicate);
-	while(t)
+	local entity t = SUB_FindWithPredicate (world, targetname, e.target, predicate);
+	
+	while (t)
 	{
 		cnt++;
-		t = SUB_FindWithPredicate(t, targetname, e.target, predicate);
+		t = SUB_FindWithPredicate (t, targetname, e.target, predicate);
 	}
 	
 	return cnt;
@@ -595,16 +619,18 @@ float(entity e, float(entity e) predicate = (float(entity e))SUB_True) SUB_Count
 SUB_RandomTarget
 ================
 */
-
 entity(entity e, float(entity e) predicate = (float(entity e))SUB_True) SUB_RandomTarget =
 {
-	local float cnt = SUB_CountTargets(e, predicate);
+	local float cnt = SUB_CountTargets (e, predicate);
+	
 	if (cnt == 0) return world;
+	
 	cnt = floor(cnt * random());
-	local entity t = SUB_FindWithPredicate(world, targetname, e.target, predicate);
-	while(cnt--)
+	
+	local entity t = SUB_FindWithPredicate (world, targetname, e.target, predicate);
+	while (cnt--)
 	{
-		t = SUB_FindWithPredicate(t, targetname, e.target, predicate);
+		t = SUB_FindWithPredicate (t, targetname, e.target, predicate);
 	}
 	
 	return t;
@@ -615,8 +641,7 @@ entity(entity e, float(entity e) predicate = (float(entity e))SUB_True) SUB_Rand
 SUB_SetWorldType
 ================
 */
-
-void() SUB_SetWorldtype
+void() SUB_SetWorldtype =
 {
 	if (self.worldtype) self.worldtype--;
 	else self.worldtype = world.worldtype;

@@ -50,36 +50,33 @@ $frame attacka9 attacka10 attacka11 attacka12 attacka13 attacka14 attacka15
 
 void() monster_spikemine =
 {
-   if (deathmatch)
+	if (deathmatch)
 	{
-		remove(self);
+		remove (self);
 		return;
 	}
-   precache_model ("progs/demon.mdl");
-   precache_model ("progs/h_demon.mdl");
-
-   precache_sound ("demon/ddeath.wav");
-   precache_sound ("demon/dhit2.wav");
-   precache_sound ("demon/djump.wav");
-   precache_sound ("demon/dpain1.wav");
-   precache_sound ("demon/idle1.wav");
-   precache_sound ("demon/sight2.wav");
-
-   self.solid = SOLID_SLIDEBOX;
+	
+	precache_model ("progs/demon.mdl");
+	precache_model ("progs/h_demon.mdl");
+	precache_sound ("demon/ddeath.wav");
+	precache_sound ("demon/dhit2.wav");
+	precache_sound ("demon/djump.wav");
+	precache_sound ("demon/dpain1.wav");
+	precache_sound ("demon/idle1.wav");
+	precache_sound ("demon/sight2.wav");
+	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
-
-   setmodel (self, "progs/demon.mdl");
-
-   setsize (self, VEC_HULL2_MIN, VEC_HULL2_MAX);
+	setmodel (self, "progs/demon.mdl");
+	setsize (self, VEC_HULL2_MIN, VEC_HULL2_MAX);
 
 /*
-   self.th_stand = gremlin_stand1;
-   self.th_walk = gremlin_walk1;
-   self.th_run = gremlin_run1;
-   self.th_die = gremlin_die;
-   self.th_melee = Gremlin_MeleeAttack;     // one of two attacks
-   self.th_missile = Gremlin_MissileAttack; // check for random jump or firing of weapon
-   self.th_pain = gremlin_pain;
-   walkmonster_start();
+	self.th_stand = gremlin_stand1;
+	self.th_walk = gremlin_walk1;
+	self.th_run = gremlin_run1;
+	self.th_die = gremlin_die;
+	self.th_melee = Gremlin_MeleeAttack;     // One of two attacks
+	self.th_missile = Gremlin_MissileAttack; // Check for random jump or firing of weapon
+	self.th_pain = gremlin_pain;
+	walkmonster_start ();
 */
 };

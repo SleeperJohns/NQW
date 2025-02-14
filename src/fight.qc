@@ -137,7 +137,7 @@ float() CheckAttack =
 	else
 		chance = 0;
 
-	if (random () < chance)
+	if (random() < chance)
 	{
 		self.th_missile ();
 		SUB_AttackFinished (2*random());

@@ -46,40 +46,29 @@ void() multi_wait =
 };
 
 
-// the trigger was just touched/killed/used
+// The trigger was just touched/killed/used
 // self.enemy should be set to the activator so it can be held through a delay
 // so wait for the delay time before firing
 void() multi_trigger =
 {
-	if (self.nextthink > time)
-	{
-		return;		// allready been triggered
-	}
+	if (self.nextthink > time) return; // Already been triggered
 
 	if (self.classname == "trigger_secret")
 	{
-		if (self.enemy.classname != "player")
-			return;
-		found_secrets = found_secrets + 1;
-		WriteByte (MSG_ALL, SVC_FOUNDSECRET);
+		if (self.enemy.classname != "player") return;
 		
+		found_secrets += 1;
+		WriteByte (MSG_ALL, SVC_FOUNDSECRET);	
 		msg_entity = self.enemy;
 	}
 
-	if (self.enemy.classname == "player" && world.model == "maps/hip3m1.bsp" && self.message == "YOU'RE NOT SUPPOSE TO BE HERE!")
-	{
-		msg_entity = self.enemy;
-	}
+	if (self.enemy.classname == "player" && world.model == "maps/hip3m1.bsp" && self.message == "YOU'RE NOT SUPPOSE TO BE HERE!") msg_entity = self.enemy;
+	if (self.noise) sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 
-	if (self.noise)
-		sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
-
-// don't trigger again until reset
+	// Don't trigger again until reset
 	self.takedamage = DAMAGE_NO;
-
 	activator = self.enemy;
-
-	SUB_UseTargets();
+	SUB_UseTargets ();
 
 	if (self.wait > 0)
 	{
@@ -87,48 +76,46 @@ void() multi_trigger =
 		self.nextthink = time + self.wait;
 	}
 	else
-	{	// we can't just remove (self) here, because this is a touch function
+	{	// We can't just remove (self) here, because this is a touch function
 		// called wheil C code is looping through area links...
 		self.touch = SUB_Null;
 		self.nextthink = time + 0.1;
 		self.think = SUB_Remove;
 	}
-//MED 12/01/96 added cnt stuff
-   if (self.cnt > 0)
-      {
-      self.cnt = self.cnt - 1;
-      if (self.cnt == 0)
-         {
-         self.touch = SUB_Null;
-         self.nextthink = time + 0.1;
-         self.think = SUB_Remove;
-         }
-      }
+	// MED 12/01/96 added cnt stuff
+	if (self.cnt > 0)
+	{
+		self.cnt -= 1;
+		if (self.cnt == 0)
+		{
+			self.touch = SUB_Null;
+			self.nextthink = time + 0.1;
+			self.think = SUB_Remove;
+		}
+	}
 };
 
 void() multi_killed =
 {
 	self.enemy = damage_attacker;
-	multi_trigger();
+	multi_trigger ();
 };
 
 void() multi_use =
 {
 	self.enemy = activator;
-	multi_trigger();
+	multi_trigger ();
 };
 
 void() multi_touch =
 {
-	if (other.classname != "player")
-		return;
+	if (other.classname != "player") return;
 
-// if the trigger has an angles field, check player's facing direction
+	// If the trigger has an angles field, check player's facing direction
 	if (self.movedir != '0 0 0')
 	{
 		makevectors (other.angles);
-		if (v_forward * self.movedir < 0)
-			return;		// not facing the right way
+		if (v_forward * self.movedir < 0) return; // Not facing the right way
 	}
 
 	self.enemy = other;
@@ -178,16 +165,15 @@ void() trigger_multiple =
 	}
 	// ----------------------------------------------	
 
-	if (!self.wait)
-		self.wait = 0.2;
+	if (!self.wait) self.wait = 0.2;
 	self.use = multi_use;
 
 	InitTrigger ();
 
 	if (self.health)
 	{
-		if (self.spawnflags & SPAWNFLAG_NOTOUCH)
-			objerror ("health and notouch don't make sense\n");
+		if (self.spawnflags & SPAWNFLAG_NOTOUCH) objerror ("health and notouch don't make sense\n");
+		
 		self.max_health = self.health;
 		self.th_die = multi_killed;
 		self.takedamage = DAMAGE_YES;
@@ -196,8 +182,7 @@ void() trigger_multiple =
 	}
 	else
 	{
-		if (!(self.spawnflags & SPAWNFLAG_NOTOUCH))
-			self.touch = multi_touch;
+		if (!(self.spawnflags & SPAWNFLAG_NOTOUCH)) self.touch = multi_touch;
 	}
 	
 	//MED 12/01/96 added cnt stuff
@@ -255,10 +240,8 @@ void() trigger_secret =
 	total_secrets += 1;
 	self.wait = -1;
 		
-	if (!self.message)
-		self.message = "You found a secret area!";	
-	if (!self.sounds)
-		self.sounds = 1;
+	if (!self.message) self.message = "You found a secret area!";	
+	if (!self.sounds) self.sounds = 1;
 	if (self.sounds == 1)
 	{
 		precache_sound ("misc/secret.wav");
@@ -278,30 +261,23 @@ void() trigger_secret =
 
 void() counter_use =
 {
-	self.count = self.count - 1;
-	if (self.count < 0)
-		return;
+	self.count -= 1;
+	if (self.count < 0) return;
 
 	if (self.count != 0)
 	{
-		if (activator.classname == "player"
-		&& (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0)
+		if (activator.classname == "player" && (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0)
 		{
-			if (self.count >= 4)
-				id1_centerprint (activator, "There are more to go...");
-			else if (self.count == 3)
-				id1_centerprint (activator, "Only 3 more to go...");
-			else if (self.count == 2)
-				id1_centerprint (activator, "Only 2 more to go...");
-			else
-				id1_centerprint (activator, "Only 1 more to go...");
+			if (self.count >= 4) id1_centerprint (activator, "There are more to go...");
+			else if (self.count == 3) id1_centerprint (activator, "Only 3 more to go...");
+			else if (self.count == 2) id1_centerprint (activator, "Only 2 more to go...");
+			else id1_centerprint (activator, "Only 1 more to go...");
 		}
 		return;
 	}
 
-	if (activator.classname == "player"
-	&& (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0)
-		id1_centerprint(activator, "Sequence completed!");
+	if (activator.classname == "player" && (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0) id1_centerprint (activator, "Sequence completed!");
+
 	self.enemy = activator;
 	multi_trigger ();
 };
@@ -318,30 +294,24 @@ void() trigger_counter =
 	INHIBIT_COOP						// MG1
 	if (RemovedOutsideCoop()) return;
 	
-	//self.wait = -1;
+	// self.wait = -1;
 
-	if (!self.count)
-		self.count = 2;
+	if (!self.count) self.count = 2;
 
 	// MG1: Yoder Sept24, 2021 Horde Merge
 	// .count is decremented each use and fires its targets on 0
 	// .wait stores the original .count and restores to this if COUNTER_LOOPS	
-	if (!self.wait)
-		self.wait = self.count;
+	if (!self.wait) self.wait = self.count;
 
 	self.use = counter_use;
 };
 
-void() counter_timed_think =
-{
-	self.count = self.cnt;
-}
+void() counter_timed_think = {self.count = self.cnt;};
 
 void() counter_timed_use =
 {
 	self.count = self.count - 1;
-	if (self.count < 0)
-	return;
+	if (self.count < 0) return;
 	
 	self.nextthink = time + self.delay;
 
@@ -349,20 +319,16 @@ void() counter_timed_use =
 	{
 		if (activator.classname == "player" && (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0)
 		{
-			if (self.count >= 4)
-				centerprint_all ("There are more to go...\n");
-			else if (self.count == 3)
-				centerprint_all ("Only 3 more to go...\n");
-			else if (self.count == 2)
-				centerprint_all ("Only 2 more to go...\n");
-			else
-				centerprint_all ("Only 1 more to go...\n");
+			if (self.count >= 4) centerprint_all (other, "There are more to go...\n", "There are more to go...\n");
+			else if (self.count == 3) centerprint_all (other, "Only 3 more to go...\n", "Only 3 more to go...\n");
+			else if (self.count == 2) centerprint_all (other, "Only 2 more to go...\n", "Only 2 more to go...\n");
+			else centerprint_all (other, "Only 1 more to go...\n", "Only 1 more to go...\n");
 		}
 		return;
 	}
 	
-	if (activator.classname == "player" && (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0)
-		centerprint_all("Sequence Completed!\n");
+	if (activator.classname == "player" && (self.spawnflags & SPAWNFLAG_NOMESSAGE) == 0) centerprint_all(other, "Sequence Completed!\n", "Sequence Completed!\n");
+	
 	self.enemy = activator;
 	self.delay = 0;
 	self.nextthink = -1;
@@ -384,14 +350,11 @@ void() trigger_counter_timed =
 	if (RemovedOutsideCoop()) return;
 
 	self.wait = -1;
-	if (!self.count)
-		self.count = 2;
+	if (!self.count) self.count = 2;
 
-	if (!self.delay)
-		self.delay = 2;
+	if (!self.delay) self.delay = 2;
 	
 	self.cnt = self.count;
-
 	self.use = counter_timed_use;
 	self.think = counter_timed_think;
 };
@@ -410,20 +373,14 @@ float	IGNORE_TARGETNAME = 4;
 
 void() play_teleport =
 {
-	local	float v;
-	local	string tmpstr;
-
-	v = random() * 5;
-	if (v < 1)
-		tmpstr = "misc/r_tele1.wav";
-	else if (v < 2)
-		tmpstr = "misc/r_tele2.wav";
-	else if (v < 3)
-		tmpstr = "misc/r_tele3.wav";
-	else if (v < 4)
-		tmpstr = "misc/r_tele4.wav";
-	else
-		tmpstr = "misc/r_tele5.wav";
+	local string tmpstr;
+	local float v = random() * 5;
+	
+	if (v < 1) tmpstr = "misc/r_tele1.wav";
+	else if (v < 2) tmpstr = "misc/r_tele2.wav";
+	else if (v < 3) tmpstr = "misc/r_tele3.wav";
+	else if (v < 4) tmpstr = "misc/r_tele4.wav";
+	else tmpstr = "misc/r_tele5.wav";
 
 	sound (self, CHAN_VOICE, tmpstr, 1, ATTN_NORM);
 	remove (self);
@@ -431,7 +388,8 @@ void() play_teleport =
 
 void(vector org) spawn_tfog =
 {
-	entity s = spawn ();
+	local entity s = spawn ();
+	
 	s.origin = org;
 	s.nextthink = time + 0.2;
 	s.think = play_teleport;
@@ -454,12 +412,13 @@ void(vector org) spawn_tfog_silent =
 
 void() tdeath_touch =
 {
-	if (other == self.owner)
-		return;
+	if (other == self.owner) return;
 
 	// Frag anyone who teleports in on top of an invincible player
 	if (other.classname == "player")
 	{
+		if (cvar("player_collision") == FALSE && cvar("coop") && self.owner.classname == "player") return; // Sleeper: Don't when player collision is off.
+	
 		// QIP Pentagram telefrag fix Zoid/Maddes
 		if (self.owner.classname != "player")
 		{	
@@ -476,7 +435,7 @@ void() tdeath_touch =
 				// teleported player has active pentagram too can happen often in deathmatch 4 and levels with more than one pentagram
 				self.classname = "teledeath3";
 				other.invincible_finished = 0;
-				T_Damage (other, self, self, 50000);	// kill player on spot
+				T_Damage (other, self, self, 50000);	// Kill player on spot
 				sound (self.owner, CHAN_VOICE, "items/protect3.wav", 1, ATTN_NORM);
 				/* QIP telefrag player on spot by Maddes */
 			}
@@ -501,9 +460,8 @@ void() tdeath_touch =
 // a faster version of tdeath to minimize telefragging 
 void(vector org, entity death_owner) spawn_tdeath_fast =
 {
-local entity	death;
-
-	death = spawn();
+	local entity death = spawn();
+	
 	death.classname = "teledeath";
 	death.movetype = MOVETYPE_NONE;
 	death.solid = SOLID_TRIGGER;
@@ -513,16 +471,14 @@ local entity	death;
 	death.touch = tdeath_touch;
 	death.nextthink = time + 0.01;
 	death.think = SUB_Remove;
-	death.owner = death_owner;
-	
+	death.owner = death_owner;	
 	force_retouch = 2;		// make sure even still objects get hit
 };
 
 void(vector org, entity death_owner) spawn_tdeath =
 {
-	local entity	death;
-
-	death = spawn();
+	local entity death = spawn();
+	
 	death.classname = "teledeath";
 	death.movetype = MOVETYPE_NONE;
 	death.solid = SOLID_TRIGGER;
@@ -533,39 +489,32 @@ void(vector org, entity death_owner) spawn_tdeath =
 	death.nextthink = time + 0.2;
 	death.think = SUB_Remove;
 	death.owner = death_owner;
-
 	force_retouch = 2;		// make sure even still objects get hit
 };
 
 void() teleport_touch =
 {
-local entity	t;
-local vector	org;
+	local entity t;
+	local vector org;
 
 /*
 	if (self.targetname)
 	{
-		if (self.nextthink < time)
-		{
-			return;		// not fired yet
-		}
+		if (self.nextthink < time) return; // Not fired yet
 	}
 */
 	if (self.targetname != string_null && (self.spawnflags & IGNORE_TARGETNAME) == 0) // MG1
 	{
-		if (self.nextthink < time)
-			return;		// not fired yet
+		if (self.nextthink < time) return;		// not fired yet
 	}
 
 	if (self.spawnflags & PLAYER_ONLY)
 	{
-		if (other.classname != "player")
-			return;
+		if (other.classname != "player") return;
 	}
 
 // only teleport living creatures
-	if (other.health <= 0 || other.solid != SOLID_SLIDEBOX)
-		return;
+	if (other.health <= 0 || other.solid != SOLID_SLIDEBOX) return;
 
 	SUB_UseTargets ();
 
@@ -573,8 +522,7 @@ local vector	org;
 	spawn_tfog (other.origin);
 
 	t = find (world, targetname, self.target);
-	if (!t)
-		objerror ("couldn't find target");
+	if (!t) objerror ("couldn't find target");
 
 // spawn a tfog flash in front of the destination
 	makevectors (t.mangle);
@@ -597,18 +545,15 @@ local vector	org;
 	{
 		other.fixangle = 1;		// turn this way immediately
 		other.teleport_time = time + 0.7;
-		if (other.flags & FL_ONGROUND)
-			other.flags = other.flags - FL_ONGROUND;
+		
+		if (other.flags & FL_ONGROUND) other.flags -= FL_ONGROUND;
 		// Sleeper: Even though trenchbroom shows the teleport destination to access the pentagram secret is pointing down in HIP3M1,
 		// it would throw you away from getting the pentagram from that secret area. 
 		// This is a quick and dirty fix to keep things aligned with vanilla, because I don't want to break anything else in trenchbroom.
-		if (world.model == "maps/hip3m1.bsp")
-			other.velocity = v_forward = 0;
-		else
-			other.velocity = v_forward * 300;
+		if (world.model == "maps/hip3m1.bsp") other.velocity = 0;
+		else other.velocity = v_forward * 300;
 		// MG1 ---------------------------------
-		if(!coop && !deathmatch)
-			FogPushSettingsFrom(other, t, 0);
+		if(!coop && !deathmatch) FogPushSettingsFrom(other, t, 0);
 		// -------------------------------------	
 	}
 	other.flags -= other.flags & (FL_ONGROUND);
@@ -624,9 +569,9 @@ void() info_teleport_destination =
 	self.mangle = self.angles;
 	self.angles = '0 0 0';
 	self.model = "";
-	self.origin = self.origin + '0 0 27';
-	if (!self.targetname)
-		objerror ("no targetname");
+	self.origin += '0 0 27';
+	
+	if (!self.targetname) objerror ("no targetname");
 };
 
 void() teleport_use =
@@ -647,16 +592,16 @@ void() trigger_teleport =
 
 	InitTrigger ();
 	self.touch = teleport_touch;
-	// find the destination
-	if (!self.target)
-		objerror ("no target");
+	
+	// Find the destination
+	if (!self.target) objerror ("no target");
 	self.use = teleport_use;
 
 	if (!(self.spawnflags & SILENT))
 	{
 		precache_sound ("ambience/hum1.wav");
-		o = (self.mins + self.maxs)*0.5;
-		ambientsound (o, "ambience/hum1.wav",0.5 , ATTN_STATIC);
+		o = (self.mins + self.maxs) * 0.5;
+		ambientsound (o, "ambience/hum1.wav", 0.5, ATTN_STATIC);
 	}
 };
 
@@ -742,10 +687,8 @@ ONLY REGISTERED TRIGGERS
 
 void() trigger_onlyregistered_touch =
 {
-	if (other.classname != "player")
-		return;
-	if (self.attack_finished > time)
-		return;
+	if (other.classname != "player") return;
+	if (self.attack_finished > time) return;
 
 	self.attack_finished = time + 2;
 	if (cvar("registered"))
@@ -780,15 +723,14 @@ void() trigger_onlyregistered =
 void(entity ent, float amount) hurt_setdamage =
 {
 	ent.dmg = amount;
+	
 	if (!amount) ent.solid = SOLID_NOT;
 	else ent.solid = SOLID_TRIGGER;
+	
 	ent.nextthink = -1;
 };
    
-void hurt_use() // MG1
-{
-	self.state = 1 - self.state;
-}   
+void() hurt_use = {self.state = 1 - self.state;}; // MG1
 
 void() hurt_on =
 {
@@ -800,10 +742,11 @@ void() hurt_touch =
 {
 	if (other.takedamage)
 	{
+		if (gameworld == APOTHEOSIS && other.flags & FL_MONSTER) return;
+		
 		// MG1: Yoder Sept24 2021 Horde merge
 		// allows for monster-only hurt volumes
-		if ((self.spawnflags & MONSTER_ONLY) && !(other.flags & FL_MONSTER))
-			return;
+		if ((self.spawnflags & MONSTER_ONLY) && !(other.flags & FL_MONSTER)) return;
 				
 		self.solid = SOLID_NOT;
 		T_Damage (other, self, self, self.dmg);
@@ -812,7 +755,7 @@ void() hurt_touch =
 		//MED 12/01/96 added count stuff
 		if (self.cnt > 0)
 		{
-			self.cnt = self.cnt - 1;
+			self.cnt -= 1;
 			if (self.cnt == 0)
 			{
 				self.touch = SUB_Null;
@@ -821,6 +764,7 @@ void() hurt_touch =
 			}
 		}
 	}
+	
 	return;
 };
 
@@ -861,17 +805,14 @@ void() trigger_push_touch =
 	// yoder Sept 24 2021 horde merge	
 	if (horde_ent)
 	{
-		if (other.spawnflags & PUSH_START_OFF) // ignore this spawnflag in horde mode
-			other.spawnflags -= PUSH_START_OFF;
+		if (other.spawnflags & PUSH_START_OFF) other.spawnflags -= PUSH_START_OFF; // ignore this spawnflag in horde mode
 		
 		if ((other.classname != "player"))
 		{
 			if ((other.classname == "item_artifact_invulnerability") || (other.classname == "item_artifact_super_damage"))
 			{
-				if (self.spawnflags & ADDITIVE_PUSH)
-					other.velocity = other.velocity + (self.speed * self.movedir * 10 * frametime); 
-				else
-					other.velocity = self.speed * self.movedir * 10;
+				if (self.spawnflags & ADDITIVE_PUSH) other.velocity += (self.speed * self.movedir * 10 * frametime); 
+				else other.velocity = self.speed * self.movedir * 10;
 			}
 			return;
 		}
@@ -879,12 +820,10 @@ void() trigger_push_touch =
 
 	if (other.health > 0 || other.classname == "grenade")
 	{
-		if(other.flags & FL_INSHELTER) return;
+		if (other.flags & FL_INSHELTER) return;
 
-		if (self.spawnflags & ADDITIVE_PUSH) // yoder add, Jan 28 2021
-			other.velocity = other.velocity + self.speed * self.movedir * 10 * frametime;
-		else
-			other.velocity = self.speed * self.movedir * 10;
+		if (self.spawnflags & ADDITIVE_PUSH) other.velocity += self.speed * self.movedir * 10 * frametime; // yoder add, Jan 28 2021
+		else other.velocity = self.speed * self.movedir * 10;
 		if (other.classname == "player")
 		{
 			if (other.fly_sound < time)
@@ -893,12 +832,11 @@ void() trigger_push_touch =
 				sound (other, CHAN_AUTO, "ambience/windfly.wav", 1, ATTN_NORM);
 			}
 		}
-		if(other.flags & FL_MONSTER) other.flags (-) FL_ONGROUND; //If a monster walks inside a trigger_push, make it fly
+		if (other.flags & FL_MONSTER) other.flags (-) FL_ONGROUND; // If a monster walks inside a trigger_push, make it fly
 	}
 	// =======================================================================
 	/*
-	if (other.classname == "grenade")
-		other.velocity = self.speed * self.movedir * 10;
+	if (other.classname == "grenade") other.velocity = self.speed * self.movedir * 10;
 	else if (other.health > 0)
 	{
 		other.velocity = self.speed * self.movedir * 10;
@@ -912,8 +850,7 @@ void() trigger_push_touch =
 		}
 	}
 	*/
-	if (self.spawnflags & PUSH_ONCE)
-		remove(self);
+	if (self.spawnflags & PUSH_ONCE) remove(self);
 };
 
 // MG1 ============================================
@@ -943,10 +880,9 @@ void() trigger_push =
 	self.touch = trigger_push_touch;
 	
 	self.use = trigger_push_use; // MG1
-	if(self.spawnflags & PUSH_START_OFF) self.solid = SOLID_NOT; // MG1	
+	if (self.spawnflags & PUSH_START_OFF) self.solid = SOLID_NOT; // MG1	
 	
-	if (!self.speed)
-		self.speed = 1000;
+	if (!self.speed) self.speed = 1000;
 };
 
 const float SHELTER_FLIPPED = 1;
@@ -955,16 +891,11 @@ void() trigger_shelter_portal_touch =
 {
 	if (other.health > 0 || other.classname == "grenade")
 	{
-		vector offs = other.origin - self.pos1;
-		float dot = offs * self.pos2;
-		if(dot >= 0)
-		{
-			other.flags (+) FL_INSHELTER;
-		}
-		else
-		{
-			other.flags (-) FL_INSHELTER;
-		}
+		local vector offs = other.origin - self.pos1;
+		local float dot = offs * self.pos2;
+		
+		if (dot >= 0) other.flags (+) FL_INSHELTER;
+		else other.flags (-) FL_INSHELTER;
 	}
 }
 
@@ -976,30 +907,26 @@ void() trigger_shelter_portal =
 	InitTrigger ();
 	self.touch = trigger_shelter_portal_touch;
 	self.pos1 = self.mins + (self.size * 0.5);
-	if(self.size_x < self.size_y)
+	
+	if (self.size_x < self.size_y)
 	{
-		if(self.size_x < self.size_z)
-			self.pos2 = '1 0 0';
-		else
-			self.pos2 = '0 0 1';
+		if (self.size_x < self.size_z) self.pos2 = '1 0 0';
+		else self.pos2 = '0 0 1';
 	}
 	else
 	{
-		if(self.size_y < self.size_z)
-			self.pos2 = '0 1 0';
-		else
-			self.pos2 = '0 0 1';
+		if (self.size_y < self.size_z) self.pos2 = '0 1 0';
+		else self.pos2 = '0 0 1';
 	}
 
-	if(self.spawnflags & SHELTER_FLIPPED) self.pos2 *= -1;
+	if (self.spawnflags & SHELTER_FLIPPED) self.pos2 *= -1;
 };
 
 //============================================================================
 
 void() trigger_monsterjump_touch =
 {
-	if (other.flags & (FL_MONSTER | FL_FLY | FL_SWIM) != FL_MONSTER)
-		return;
+	if (other.flags & (FL_MONSTER | FL_FLY | FL_SWIM) != FL_MONSTER) return;
 		
 	// MG1: yoder add, July 10th 2020
 	// making it so trigger_monsterjump's with spawnflag 8 only affect mosnters with spawnflag 8
@@ -1007,7 +934,7 @@ void() trigger_monsterjump_touch =
 	{
 		if (!(other.spawnflags & 64))
 		{
-			dprint("monster didn't have spawnflag 8!\n");
+			dprint ("monster didn't have spawnflag 8!\n");
 			return;
 		}
 	}		
@@ -1016,16 +943,15 @@ void() trigger_monsterjump_touch =
 	other.velocity_x = self.movedir_x * self.speed;
 	other.velocity_y = self.movedir_y * self.speed;
 
-	if (!(other.flags & FL_ONGROUND))
-		return;
+	if (!(other.flags & FL_ONGROUND)) return;
 
-	other.flags = other.flags - FL_ONGROUND;
+	other.flags -= FL_ONGROUND;
 
 	other.velocity_z = self.height;
 	//MED 12/01/96 added count stuff
 	if (self.cnt > 0)
 	{
-		self.cnt = self.cnt - 1;
+		self.cnt -= 1;
 		if (self.cnt == 0)
 		{
 			self.touch = SUB_Null;
@@ -1044,15 +970,12 @@ Walking monsters that touch this will jump in the direction of the trigger's ang
 */
 void() trigger_monsterjump =
 {
-	if (!self.speed)
-		self.speed = 200;
-	if (!self.height)
-		self.height = 200;
-	if (self.angles == '0 0 0')
-		self.angles = '0 360 0';
-//MED 12/01/96 added count stuff
-   if (self.cnt == 0)
-      self.cnt = -1;
+	if (!self.speed) self.speed = 200;
+	if (!self.height) self.height = 200;
+	if (self.angles == '0 0 0') self.angles = '0 360 0';
+	// MED 12/01/96 added count stuff
+	if (self.cnt == 0) self.cnt = -1;
+	
 	InitTrigger ();
 	self.touch = trigger_monsterjump_touch;
 };
@@ -1078,12 +1001,12 @@ void() trigger_explosion_activate =
 
 void() trigger_explosion_use =
 {
-	if(self.delay > 0)
+	if (self.delay > 0)
 	{
 		self.think = trigger_explosion_activate;
 		self.nextthink = time + self.delay;
 	}
-	else trigger_explosion_activate();
+	else trigger_explosion_activate ();
 }
 
 void() trigEx_die;
@@ -1143,10 +1066,8 @@ void() trigger_repeater =
 	INHIBIT_COOP
 	if (RemovedOutsideCoop()) return;
 
-	if (!self.wait)
-	{
-		self.wait = 1;
-	}
+	if (!self.wait) self.wait = 1;
+	
 	self.use = repeater_use;
 	if (self.spawnflags & REPEATER_ON)
 	{
@@ -1171,37 +1092,34 @@ float IGNORE_EMPTIED = 32;
 
 void() trigger_multitouch_think =
 {
-    bprint("untouched\n"); 
-    self.wait = 0;
-    if (!(self.spawnflags & IGNORE_EMPTIED))
-        SUB_UseTargets();
+	bprint ("untouched\n"); 
+	self.wait = 0;
+	
+	if (!(self.spawnflags & IGNORE_EMPTIED)) SUB_UseTargets();
 };
 
 void() trigger_multitouch_touch =
 {
-    if (other.classname != "player")
-        return;
-	if (other.health <= 0)
-		return;
+	if (other.classname != "player") return;
+	if (other.health <= 0) return;
     
-    if (self.wait == 0) // first touch?
-    {
-        self.wait = 1;
-        bprint(" first touch\n");
-        if (!(self.spawnflags & IGNORE_FIRST_TOUCH))
-            SUB_UseTargets();
-    }
+	if (self.wait == 0) // first touch?
+	{
+		self.wait = 1;
+		bprint (" first touch\n");
+		if (!(self.spawnflags & IGNORE_FIRST_TOUCH)) SUB_UseTargets();
+	}
     
-    // think
-    self.think = trigger_multitouch_think;
-    self.nextthink = time + 0.2;
+	// think
+	self.think = trigger_multitouch_think;
+	self.nextthink = time + 0.2;
 };
 
 void() trigger_multitouch =
 {
-    InitTrigger ();
-    self.touch = trigger_multitouch_touch;
-    self.wait = 0; // 0 is empty, 1 is touched
+	InitTrigger ();
+	self.touch = trigger_multitouch_touch;
+	self.wait = 0; // 0 is empty, 1 is touched
 };
 
 // MG1 END ===============================================================================

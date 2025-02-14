@@ -717,10 +717,11 @@ void(string cmd) SV_ParseClientCommand =
  	else if (command == "hordemode") sprint (self, "Invalid Command.\n");	
  	else if (command == "hordemap") sprint (self, "Invalid Command.\n");
  	else if (command == "gametype") sprint (self, "Invalid Command.\n");	
- 		
+ 	
+ 	// Offhand Grappling Hook Use	
 	else if (command == "hook") 
 	{
-		if (warmup_countdown >= 0 && warmup_countdown <= 6 && warmup_engaged || self.offhand_fire_hook || gameover || self.deadflag) return; // Sleeper: Prevent usage during the end of warmups, an don't send out multiple hooks if already firing one.
+		if (warmup_countdown >= 0 && warmup_countdown <= 6 && warmup_engaged || self.offhand_fire_hook || gameover || self.deadflag || self.client_tags & CLIENT_SPECTATOR_JOINED) return; // Sleeper: Don't throw out the hook during weird times.
 		
 		if (cvar("use_offhand_hook")) OffHand_W_FireGrapple ();
 		else sprint (self, "Offhand-Hook must be enabled first!\n");

@@ -24,9 +24,17 @@
 float ITEM_RUNE1 = 1;	// Rune of Earth Magic:  Resistance
 float ITEM_RUNE2 = 2;	// Rune of Black Magic:  Strength
 float ITEM_RUNE3 = 4;	// Rune of Hell  Magic:  Haste
-float ITEM_RUNE4 = 8;	// Rune of Edler Magic:  Regeneration
+float ITEM_RUNE4 = 8;	// Rune of Elder Magic:  Regeneration
+/*
+float ITEM_RUNE5  = 16;
+float ITEM_RUNE6  = 32;
+float ITEM_RUNE7  = 64;
+float ITEM_RUNE8  = 128;
+float ITEM_RUNE9  = 256;
+float ITEM_RUNE10 = 512;
+*/
 
-.entity runetaker;
+.entity runetaker;	// who's rune is this?
 .float rune;		// what rune does this guy have?
 .float runetime;	// last time we told him he's already got a rune
 
@@ -199,7 +207,7 @@ void() RuneTouch =
 	
 	if (other.team != self.team) return; // Sleeper: Don't let the opposite team take a support rune that isn't part of their team.
 	
-	if (other.rune) 
+	if (other.rune && deathmatch) 
 	{
 		if (other.runetime < time) id1_centerprint (other, "You already have a rune...\n");
 		other.runetime = time + 5;
@@ -221,14 +229,15 @@ void() RuneTouch =
 	}
 	
 	other.rune |= self.rune;
-	other.runetaker = self; // Sleeper: This support rune's respawn is controlled by this player's death.
 	sound (other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
 	
-	// Sleeper: Make support runes respawnable.
-	self.solid = SOLID_NOT;
-	self.model = string_null;
-		
-//	remove (self);
+	if (deathmatch) // Sleeper: Make support runes respawnable.
+	{
+		other.runetaker = self; // Sleeper: This support rune's respawn is controlled by this player's death.
+		self.solid = SOLID_NOT;
+		self.model = string_null;
+	}
+	else remove (self);
 };
 
 // Sleeper: Respawn support runes after a player's death.
@@ -414,11 +423,11 @@ float(float tvalue, entity who) RuneApplyHell =
 		}
 		return (tvalue * 2) / 3;
 	}
+	
 	return tvalue;
 };
 
 .float guard;
-
 void(entity who) RuneApplyElder =
 {
 	if (cvar("gamecfg") == GAMECFG_ORIGINAL_RUNES)

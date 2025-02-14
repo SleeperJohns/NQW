@@ -135,6 +135,40 @@ void() player_stand1 = [$axstnd1, player_stand1]
 	self.walkframe += 1;
 };
 
+// Sleeper: Courtesy of Alkaline.
+.float steplast;
+void(entity ent, float vol_multiplier) player_footstep =
+{
+	local string footstepwav;
+	local float footvol;
+	
+	if (!footsteps) return;
+	if (ent.movetype == MOVETYPE_NOCLIP) return;
+	if (ent.waterlevel > 0) return;
+	
+	if (gameworld == HIPNOTIC) footvol = 0.5; // Sleeper: Hipnotic is pretty loud.
+	else footvol = 0.15 + random() * 0.1 * vol_multiplier;
+
+	if (ent.steplast < 1) ent.steplast = rint(1 + random() * 6);
+
+	local float footstepnext = rint(ent.steplast + random() + random() + random());
+
+	if (footstepnext > 7) footstepnext -= 7;
+
+	// Alkaline: Update last footstep index
+	ent.steplast = footstepnext;	
+
+	if (footstepnext < 2) footstepwav = "misc/foot1.wav";
+	else if (footstepnext < 3) footstepwav = "misc/foot2.wav";
+	else if (footstepnext < 4) footstepwav = "misc/foot3.wav";
+	else if (footstepnext < 5) footstepwav = "misc/foot4.wav";
+	else if (footstepnext < 6) footstepwav = "misc/foot5.wav";
+	else if (footstepnext < 7) footstepwav = "misc/foot6.wav";
+	else footstepwav = "misc/foot7.wav";
+
+	sound (ent, 5, footstepwav, footvol, ATTN_IDLE);
+};
+
 void() player_run = [$rockrun1, player_run]
 {
 	self.weaponframe = 0;
@@ -160,6 +194,7 @@ void() player_run = [$rockrun1, player_run]
 		if (self.walkframe == 6) self.walkframe = 0;
 		self.frame += self.walkframe;
 	}
+	/*
 	if (footsteps == 1)
 	{
 		self.spawnsilent += vlen(self.origin - self.old_velocity);
@@ -183,7 +218,16 @@ void() player_run = [$rockrun1, player_run]
 			}
 		}
 	}
+	*/	
 	self.walkframe += 1;
+	
+	// Sleeper: Replaces how Hipnotic did their footstep sounds. Imo, much more polished.
+	if ((self.walkframe == 1 || self.walkframe == 4) && self.flags & FL_ONGROUND && !intermission_running) 
+	{
+		// Alkaline: Need to be moving before feet sounds
+		local float spd = vlen([self.velocity_x, self.velocity_y, 0]);
+		if (spd > 280) player_footstep (self, clamp(spd, 0, 320) / 320); // Sleeper: Quake II never made footstep sounds when walking.
+	}
 };
 
 
@@ -192,6 +236,7 @@ void() player_shot1 = [$shotatt1, player_shot2]
 	self.weaponframe = 1;
 	self.effects |= EF_MUZZLEFLASH;
 };
+
 void()	player_shot2 =	[$shotatt2, player_shot3	] {self.weaponframe=2;};
 void()	player_shot3 =	[$shotatt3, player_shot4	] {self.weaponframe=3;};
 void()	player_shot4 =	[$shotatt4, player_shot5	] {self.weaponframe=4;};
@@ -300,8 +345,8 @@ void() player_nail1   =[$nailatt1, player_nail2  ]
 	if (self.weaponframe == 9) self.weaponframe = 1;
 	SuperDamageSound ();
 	W_FireSpikes (4);
-//	self.attack_finished = time + 0.2;
 	self.attack_finished = time + RuneApplyHell(0.2, self);
+//	self.attack_finished = time + 0.2;
 };
 void() player_nail2   =[$nailatt2, player_nail1  ]
 {
@@ -312,8 +357,8 @@ void() player_nail2   =[$nailatt2, player_nail1  ]
 	if (self.weaponframe == 9) self.weaponframe = 1;
 	SuperDamageSound ();
 	W_FireSpikes (-4);
-//	self.attack_finished = time + 0.2;
 	self.attack_finished = time + RuneApplyHell(0.2, self);
+//	self.attack_finished = time + 0.2;
 };
 
 //============================================================================
@@ -330,7 +375,6 @@ void() player_lava_nail1   =[$nailatt1, player_lava_nail2  ]
 	SuperDamageSound ();
 	W_FireLavaSpikes (4);
 //	self.attack_finished = time + 0.2;
-	self.attack_finished = time + RuneApplyHell(0.2, self);
 };
 void() player_lava_nail2   =[$nailatt2, player_lava_nail1  ]
 {
@@ -341,8 +385,8 @@ void() player_lava_nail2   =[$nailatt2, player_lava_nail1  ]
 	if (self.weaponframe == 9) self.weaponframe = 1;
 	SuperDamageSound ();
 	W_FireLavaSpikes (-4);
-//	self.attack_finished = time + 0.2;
 	self.attack_finished = time + RuneApplyHell(0.2, self);
+//	self.attack_finished = time + 0.2;
 };
 
 //============================================================================
@@ -433,7 +477,7 @@ void() PainSound =
 
 	if (damage_attacker.classname == "teledeath")
 	{
-		sound (self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE);
+		sound (self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NORM);
 		return;
 	}
 
@@ -580,6 +624,7 @@ void() DeathBubblesSpawn =
 	self.nextthink = time + 0.1;
 	self.think = DeathBubblesSpawn;
 	self.air_finished = self.air_finished + 1;
+	
 	if (self.air_finished >= self.bubble_count) remove (self);
 };
 
@@ -605,18 +650,18 @@ void() DeathSound =
 	if (self.waterlevel == 3)
 	{
 		DeathBubbles(20);
-		sound (self, CHAN_VOICE, self.nqwSndH2oDeath, 1, ATTN_NONE);
+		sound (self, CHAN_VOICE, self.nqwSndH2oDeath, 1, ATTN_NORM);
 		return;
 	}
 
-	local float rs = rint ((random() * 4) + 1);
+	local float rs = rint((random() * 4) + 1);
 	if (rs == 1) self.noise = self.nqwSndDeath1;
 	if (rs == 2) self.noise = self.nqwSndDeath2;
 	if (rs == 3) self.noise = self.nqwSndDeath3;
 	if (rs == 4) self.noise = self.nqwSndDeath4;
 	if (rs == 5) self.noise = self.nqwSndDeath5;
 
-	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NONE);
+	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	return;
 };
 
@@ -686,16 +731,13 @@ void(string gibname, float dm) ThrowGib =
 void() HeadThink =
 {
 	// Sleeper Make fly sounds only if the Game World is Hipnotic and isn't Deathmatch (Fly sounds in Deathmatch could be annoying)
-	if (deathmatch) return;
+	if (deathmatch || gameworld != HIPNOTIC) return;
 	
 	self.nextthink = -1;
 	if (world.worldtype != 2)
 	{
-		if (gameworld == HIPNOTIC)
-		{     
-			if (random() < 0.1)
-			sound (self, 6, "misc/flys.wav", 0.7, ATTN_STATIC);
-		}	 
+		if (random() < 0.1)
+		sound (self, 6, "misc/flys.wav", 0.7, ATTN_STATIC); 
 	}
 };
 
@@ -746,18 +788,18 @@ void() GibPlayer =
 
 	if (damage_attacker.classname == "teledeath")
 	{
-		sound (self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE);
+		sound (self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NORM);
 		return;
 	}
 
 	if (damage_attacker.classname == "teledeath2")
 	{
-		sound (self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE);
+		sound (self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NORM);
 		return;
 	}
 
-	if (random() < 0.5) sound (self, CHAN_VOICE, "player/gib.wav", 1, ATTN_NONE);
-	else sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NONE);
+	if (random() < 0.5) sound (self, CHAN_VOICE, "player/gib.wav", 1, ATTN_NORM);
+	else sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
 };
 
 void() hip_powerup_touch;
@@ -765,7 +807,7 @@ void() newitems_touch;
 void(float powerup) Powerup_Drop = 
 {
 	local entity new = spawn ();
-		
+	
 	if (powerup == IT_INVULNERABILITY && self.invincible_finished > time) 
 	{
 		new.netname = "Pentagram of Protection";
@@ -847,8 +889,8 @@ void(float powerup) Powerup_Drop =
 		new.classname = "item_powerup_belt";
 		new.delay = self.antigrav_finished - time;
 		new.touch = newitems_touch;
-	}			
-    
+	}
+  
 	new.droppable_item = TRUE;
 	setsize (new, '-16 -16 -24', '16 16 32');
 	setorigin (new, self.origin + '0 0 16');
@@ -865,11 +907,15 @@ void() PlayerDie =
 	// Drop powerups
 	if ((coop == REIGNITED_COOP) || (coop == ENHANCED_COOP) || (deathmatch >= DM_FFA && deathmatch <= DM_OneFlagCTF))
 	{
-//		if (self.items & IT_INVULNERABILITY) Powerup_Drop (IT_INVULNERABILITY); // Sleeper: Yeeeeeah, I don't think so... Battle Suit has a better chance of being droppable.
+		if (cvar("developer"))
+		{
+			if (self.items & IT_INVULNERABILITY) Powerup_Drop (IT_INVULNERABILITY);
+			if (self.items & IT_SUIT) Powerup_Drop (IT_SUIT);
+			if (self.expansionitems & HIP_IT_WETSUIT) Powerup_Drop (HIP_IT_WETSUIT);
+		}
+		
 		if (self.items & IT_QUAD) Powerup_Drop (IT_QUAD);
 		if (self.items & IT_INVISIBILITY) Powerup_Drop (IT_INVISIBILITY);
-//		if (self.items & IT_SUIT) Powerup_Drop (IT_SUIT); // Sleeper: Never needed since this a minor item, you can still keep grabbing the same one over and over again.
-//		if (self.items & HIP_IT_WETSUIT) Powerup_Drop (HIP_IT_WETSUIT); // Sleeper: Never needed since this a minor item, you can still keep grabbing the same one over and over again.
 		if (self.expansionitems & HIP_IT_EMPATHY_SHIELDS) Powerup_Drop (HIP_IT_EMPATHY_SHIELDS);
 		if (self.expansionitems & DOE_SHIELD) Powerup_Drop (DOE_SHIELD);
 		if (self.expansionitems & DOE_ANTIGRAV) Powerup_Drop (DOE_ANTIGRAV);
@@ -882,7 +928,7 @@ void() PlayerDie =
 	self.super_damage_finished    = 0;
 	self.radsuit_finished         = 0;
         self.effects                  = 0; // 1998-07-23 Glowing corpse of players which had quad/pentagram until respawn fix by Maddes
-        self.modelindex 	      = modelindex_nqwplayer;   // Don't use eyes
+        self.modelindex 	      = self.modelindex_nqwplayer;   // Don't use eyes
         self.invincible_time          = 0;
         self.super_time               = 0;
         self.invisible_time           = 0;
@@ -901,16 +947,16 @@ void() PlayerDie =
 	// disconnecting player. In case a new player joins, they can obtain all available weapons and ammo up to the current map from an pre-existing player. And since we're
 	// saving inventory and weapons instead, players don't have to go around the map again for the ammo and all the weapons if they die. However, if they're the only player
 	// in the server joining, they will need to go around the map to obtain the weapons and ammo.
-	local float start_maps = (world.model == "maps/start.bsp" || world.model == "maps/hipstart.bsp" || world.model == "maps/rstart.bsp" || world.model == "maps/e5start.bsp" || world.model == "maps/mgstart.bsp" || world.model == "maps/hub.bsp" || world.worldtype == WORLDTYPE_HUB);
 	if (deathmatch && !coop)
 	{
 //		DropBackpack (); // Sleeper: Not needed for players anymore.
 		TossWeapon ();
 		TeamDropFlagOfPlayer (self);
+		if (self.rune) RuneRespawn (); // Sleeper: Support runes will now respawn at a dedicated spot when the player occupying that rune dies.
 //		DropRune ();	
 	}
-	if (coop == CLASSIC_COOP && !deathmatch && world.model != Start_Maplist[StartMaps()]) DropBackpack (); // Sleeper: Because vanilla experience, remember? Also, not needed in start maps.
-	if (self.rune) RuneRespawn (); // Sleeper: Support runes will now respawn at a dedicated spot when the player occupying that rune dies.
+	
+	if (coop == CLASSIC_COOP && !deathmatch && world.model != Start_Maplist_World[StartMaps_Finder()]) DropBackpack (); // Sleeper: Because vanilla experience, remember? Also, not needed in start maps.
 	
 	if (self.ctf_killed == 2) self.ctf_killed = 0;
 	else self.ctf_killed = 1;
@@ -957,20 +1003,19 @@ void() PlayerDie =
 	else if (i == 3) player_diec1 ();
 	else if (i == 4) player_died1 ();
 	else player_diee1 ();
-
 };
 
 void() set_suicide_frame =
 {	
 	// Used by kill command and diconnect command
-	if (self.model != self.nqwCharGib) return; // allready gibbed
+	if (self.model != self.nqwMdlChar) return; // allready gibbed
 	
 	self.frame = $CORPSEFRAME_PLAYER_2;
 	self.solid = SOLID_NOT;
 	self.movetype = MOVETYPE_TOSS;
 	self.deadflag = DEAD_DEAD;
 	self.nextthink = -1;
-	self.modelindex = modelindex_nqwplayer;
+	self.modelindex = self.modelindex_nqwplayer;
 };
 
 void()	player_die_ax1	=	[	$axdeth1,	player_die_ax2	] {};
@@ -1124,3 +1169,12 @@ void() player_touch =
 		}
 	}	
 };
+
+/*
+float() player_customizeentityforclient =
+{
+	player_collision ();
+	
+	return TRUE;
+};
+*/

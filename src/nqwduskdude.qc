@@ -15,7 +15,8 @@ void() NQW_DuskDude =
 	sound(self, CHAN_VOICE, "silence.wav", 1, ATTN_NORM);
 	sound(self, CHAN_VOICE, "dusk/sicklestart.wav", 1, ATTN_NORM);
 	// Model
-	setmodel (self, "progs/player_dusk.mdl");
+	self.nqwMdlChar = "progs/player_dusk.mdl";
+	self.view_ofs = '0 0 22';
 	self.nqwCharGib = "progs/h_player_dusk.mdl";
 	self.nqwMeleeMdl = "progs/v_sickles.mdl";
 	self.nqwHammerMdl = "progs/v_hammer.mdl";

@@ -24,11 +24,12 @@ void(entity ent) RegisterFrameTickEntity =
 {
 	if (!ent.tick)
 	{
-		entity oself = self;
+		local entity oself = self;
 		self = ent;
 		objerror ("Registered frame tick entity doesn't have tick function.\n");
 		self = oself;
 	}
+	
 	ent.frametick_next = frametick_head;
 	frametick_head = ent;
 };
@@ -44,7 +45,7 @@ void(entity rem) RemoveFrameTickEntity =
 		return;
 	}
 
-	entity ent = frametick_head;
+	local entity ent = frametick_head;
 	while (ent)
 	{
 		if (ent.frametick_next == rem)
@@ -53,19 +54,22 @@ void(entity rem) RemoveFrameTickEntity =
 			rem.frametick_next = world;
 			return;
 		}
+		
 		ent = ent.frametick_next;
 	}
 };
 
 void(float deltaTime) RunFrameTickEntities =
 {
-	entity oself = self;
-	entity ent = frametick_head;
+	local entity oself = self;
+	local entity ent = frametick_head;
+	
 	while (ent)
 	{
 		self = ent;
 		ent = self.frametick_next;
 		self.tick (deltaTime);
 	}
+	
 	self = oself;
 };

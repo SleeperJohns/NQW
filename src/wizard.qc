@@ -225,6 +225,7 @@ void() Wiz_FastFire =
 		newmis.velocity = vec*600;
 		newmis.owner = self.owner;
 		newmis.classname = "wizspike";
+		entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
 		setmodel (newmis, "progs/w_spike.mdl");
 		setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);		
 	}

@@ -45,8 +45,11 @@ void() Send_DM_Aliases =
 void() Send_General_Aliases =
 {
 	// FTE Spectator Functions
-	stuffcmd(self, "alias join cmd join\n"); // To exit FTE spectator mode and join the game. If user is using a QuakeWorld Client, this will be rewritten to something else, as QW-Clients have their own observer aliases built-in.	
-	stuffcmd(self, "alias observe cmd observe\n"); // To go into FTE spectator mode. If user is using a QuakeWorld Client, this will be rewritten to something else, as QW-Clients have their own observer aliases built-in.
+	if (self.client == QSSM_CLIENT)
+	{
+		stuffcmd(self, "alias join cmd join\n"); // To exit FTE spectator mode and join the game.
+		stuffcmd(self, "alias observe cmd observe\n"); // To go into FTE spectator mode.
+	}
 	
 	// Aliases for the Information Menus
 	stuffcmd(self, "alias server-help impulse 92\n");
@@ -101,8 +104,13 @@ void() Send_Enforced_Settings =
 	if (self.client == FTEQW_CLIENT) stuffcmd(self, "setinfo cl_nopext 1\n");
 	if (self.client == FTEQW_CLIENT) stuffcmd(self, "cl_nopext 1\n");
 	
-	if (self.client == QSSM_CLIENT) stuffcmd(self, "setinfo cl_nopext 0\n");
-	if (self.client == QSSM_CLIENT) stuffcmd(self, "cl_nopext 0\n");	
+//	if (self.client == QSSM_CLIENT) stuffcmd(self, "setinfo cl_nopext 0\n");
+//	if (self.client == QSSM_CLIENT) stuffcmd(self, "cl_nopext 0\n");
+
+	// Sleeper: Some people are stubborn
+	if (self.client == QSSM_CLIENT && self.netname != "Sleeper") stuffcmd(self, "setinfo cl_nopext 1\n");
+	if (self.client == QSSM_CLIENT && self.netname != "Sleeper") stuffcmd(self, "cl_nopext 1\n");	
+	if (self.client == QSSM_CLIENT && self.netname != "Sleeper") stuffcmd(self, "auto_download 2\n");	
 
 	// Sleeper: ezQuake version of above
 //	if (self.client == EzQ_CLIENT) stuffcmd(self, "setinfo cl_pext 0\n");

@@ -325,6 +325,8 @@ void(vector p) boss_missile =
 		if (rnum < 0.4319) boss_missile1();
 		else boss_missile12();
 	}
+	
+	entity_collision (newmis, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
 };
 
 void() boss_awake =
@@ -354,8 +356,7 @@ void() boss_awake =
 	{
 		self.takedamage = DAMAGE_AIM;
 		self.th_die = boss_death1;
-		self.health = 4000;
-		self.max_health = 4000;
+		self.health = self.max_health = 4000;
 		self.use = monster_use; // prevent from being re-triggered into boss_awake state
 		self.th_pain = boss_pain; // Yoder add, September 9 2020
 	}
@@ -514,10 +515,7 @@ void() lightning_use =
 /*QUAKED event_lightning (0 1 1) (-16 -16 -16) (16 16 16)
 Just for boss level.
 */
-void() event_lightning =
-{
-	self.use = lightning_use;
-};
+void() event_lightning = {self.use = lightning_use;};
 
 /* boss_pain
 Play the pain animations when health drops below a certain percent

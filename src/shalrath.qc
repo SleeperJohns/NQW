@@ -186,6 +186,8 @@ void() ShalMissile =
 	missile.think = ShalHome;
 	missile.enemy = self.enemy;
 	missile.touch = ShalMissileTouch;
+	
+	entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);	
 };
 
 void() ShalHome =

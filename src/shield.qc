@@ -97,7 +97,8 @@ float(entity targ, entity inflictor, entity attacker, float damage) shield_hit =
 
 	if (targ.shieldSoundTime < time)
 	{
-		sound (targ, CHAN_ITEM, "shield/hit.wav", 1, ATTN_NORM);
+		if (targ.classname == "monster_super_wrath") sound (targ, CHAN_ITEM, "shield/hit.wav", 1, ATTN_IDLE);
+		else sound (targ, CHAN_ITEM, "shield/hit.wav", 1, ATTN_NORM);
 		targ.shieldSoundTime = time + 0.5;
 	}
 

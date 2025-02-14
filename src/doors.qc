@@ -418,7 +418,7 @@ entity(vector fmins, vector fmaxs) spawn_field =
 };
 
 
-float (entity e1, entity e2) EntitiesTouching =
+float(entity e1, entity e2) EntitiesTouching =
 {
 	if (e1.mins_x > e2.maxs_x) return FALSE;
 	if (e1.mins_y > e2.maxs_y) return FALSE;
@@ -426,6 +426,7 @@ float (entity e1, entity e2) EntitiesTouching =
 	if (e1.maxs_x < e2.mins_x) return FALSE;
 	if (e1.maxs_y < e2.mins_y) return FALSE;
 	if (e1.maxs_z < e2.mins_z) return FALSE;
+	
 	return TRUE;
 };
 
@@ -501,7 +502,7 @@ void() LinkDoors =
 			if (t.maxs_z > cmaxs_z) cmaxs_z = t.maxs_z;
 		}
 	} 
-	while (1);
+	while (TRUE);
 };
 
 
@@ -845,7 +846,7 @@ If a secret door has a targetname, it will only be opened by it's botton or trig
 3) base
 */
 
-void () func_door_secret =
+void() func_door_secret =
 {
 	if (self.sounds == 0) self.sounds = 3;
 

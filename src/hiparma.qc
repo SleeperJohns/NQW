@@ -116,6 +116,8 @@ void(float ofs, float turn) armagon_launch_missile =
 	setmodel (missile, "progs/missile.mdl");
 	setsize (missile, '0 0 0', '0 0 0');
    setorigin (missile, src);
+   
+   entity_collision (missile, PROJECTILE, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, PVE_BOTH_ENTITY_MASKS, EMPTYMASK, 0);
    };
 
 void(float ofs) armagon_launch_laser =
